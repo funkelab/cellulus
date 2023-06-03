@@ -8,8 +8,7 @@ from glob import glob
 
 class TwoDimensionalDataset(Dataset):
     """
-    A class used to create a PyTorch Dataset for handling 2D image crops
-    Note that the crops have been generated separately already.
+    A class used to create a PyTorch Dataset for handling 2D images.
 
     Attributes:
     ----------¬
@@ -42,7 +41,7 @@ class TwoDimensionalDataset(Dataset):
 
         # get image list
         image_list = sorted(glob(os.path.join(data_dir, 'images', '*.tif')))
-        print('Number of images in `{}` directory is {}'.format(data_dir, len(image_list)))
+        print('Number of images in the `{}` directory is {}'.format(data_dir, len(image_list)))
         self.image_list = image_list
 
         self.size = size
@@ -58,7 +57,8 @@ class TwoDimensionalDataset(Dataset):
         index = index if self.size is None else random.randint(0, self.real_size - 1)
         sample = {}
 
-        # load image
+        # load image (currently configured for `tiff` images)
+
         image = tifffile.imread(self.image_list[index])  # YX
 
         # add an additional channel
