@@ -13,7 +13,7 @@ Segmentation in Microscopy Images</h2>
 
 
 ### Introduction
-This repository hosts the version of the code used for the **[publication]()** **Unsupervised Learning of Object-Centric Embeddings for Cell Instance
+This repository hosts the version of the code used for the **[preprint]()** **Unsupervised Learning of Object-Centric Embeddings for Cell Instance
 Segmentation in Microscopy Images**. 
 
 We refer to the techniques elaborated in the publication, here as **Cellulus**. `Cellulus` is a method to perform instance-segmentation of objects in microscopy images in an unsupervised fashion i.e. requiring no ground truth labels during training. 
