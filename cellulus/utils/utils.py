@@ -1,5 +1,11 @@
 import numpy as np
+import os
+import urllib
+from io import BytesIO
+from urllib.request import urlopen
+from zipfile import ZipFile
 
+            
 def normalize_min_max_percentile(x, pmin=3, pmax=99.8, axis=None, clip=False, eps=1e-20, dtype=np.float32):
     """
         Percentile-based image normalization.
@@ -33,3 +39,26 @@ def normalize_mi_ma(x, mi, ma, clip=False, eps=1e-20, dtype=np.float32):
     return x
 
 
+def extract_data(zarr_url, data_dir):
+    """
+        Extracts data from `zip_url` to the location identified by `data_dir` parameters.
+
+        Parameters
+        ----------
+        zarr_url: string
+            Indicates the external url from where the data is downloaded
+        data_dir: string
+            Indicates the path to the directory where the data should be saved.
+        Returns
+        -------
+
+    """
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir)
+        print("Created new directory {}".format(data_dir))
+    
+    with urlopen(zarr_url) as zipresp:
+        with ZipFile(BytesIO(zipresp.read())) as zfile:
+            zfile.extractall(data_dir)
+    print("Unzipped and downloaded data to the location {}".format(data_dir))
+    
