@@ -21,11 +21,11 @@ We refer to the techniques elaborated in the publication, here as **Cellulus**. 
 With `Cellulus`, we obtain state-of-the-art results on multiple real-world microscopy datasets. 
 
 ### Dependencies 
-We have tested this implementation using `cudatoolkit` version 11.8 on a `linux` OS machine. 
+We have tested this implementation using `cudatoolkit` version 11.7 on a `linux` OS machine. 
 One could execute these lines of code to run this branch:
 
 ```
-conda create -n cellulus-env python==3.9
+conda create -n cellulus-env python=3.9
 conda activate cellulus-env
 pip3 install torch torchvision
 git clone https://github.com/funkelab/cellulus.git
@@ -35,17 +35,17 @@ pip install -e .
 
 ### Getting Started
 
-Look in the `examples` directory,  and try out the `Immune-TissueNet` notebook for 2D images or `Simulated-3d-CTC` notebooks for volumetric (3D) images. 
+Look in the `examples` directory,  and try out the `Immune` notebook for 2D images or `Simulated-3D` notebooks for volumetric (3D) images. 
 
 ### Training and Inference on your data
    
 `train.zarr`, `val.zarr` (optional) and `test.zarr` type files should be present.
-These should contain `raw` (raw image files) and `gt` (optional) (ground truth label masks, which are used for evaluation).
+These should contain `raw` (raw image files) and `groundtruth` (optional) (ground truth instance label masks, which are used for evaluation).
 
 ```mermaid
 graph LR
 A[*.zarr] --> B[raw];
-A --> C[gt];
+A --> C[groundtruth];
 ```
 
 ### Issues
