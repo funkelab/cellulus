@@ -31,6 +31,7 @@ pip3 install torch torchvision
 git clone https://github.com/funkelab/cellulus.git
 cd cellulus
 pip install -e .
+pip install git+https://github.com/funkelab/funlib.learn.torch
 ```
 
 ### Getting Started

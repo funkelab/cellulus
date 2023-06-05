@@ -40,6 +40,6 @@ setup(
           "scikit-image",
           "pytest",
           "imagecodecs",
-          "zarr"
+          "zarr",
         ]
 )
