@@ -68,7 +68,6 @@ class UNet2D(nn.Module):
                              fmap_inc_factor=fmap_inc_factor,
                              downsample_factors=d_factors,
                              activation='ReLU',
-                             batch_norm=False,
                              padding='valid',
                              num_fmaps_out=self.features_in_last_layer,
                              kernel_size_down=[[(3, 3), (1, 1), (1, 1), (3, 3)]] * (depth + 1),
