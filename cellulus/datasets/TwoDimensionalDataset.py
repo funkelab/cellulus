@@ -4,6 +4,7 @@ import random
 from cellulus.utils.utils import normalize_min_max_percentile
 from glob import glob
 import zarr
+from torch.utils.data import Dataset
 
 class TwoDimensionalDataset(Dataset):
     """
@@ -33,11 +34,11 @@ class TwoDimensionalDataset(Dataset):
     """
 
     def __init__(self, data_dir, type='train', norm='min-max-percentile', crop_size = 252, transform=None):
-        print('2D data loader created! Accessing data from {}/'.format(data_dir))
+        print('2D data loader created! Accessing data from {}/'.format(data_dir+'/'+type+'.zarr'))
 
         # get image list
         raw = zarr.open(os.path.join(data_dir, type+'.zarr'))['raw']
-        print('Number of images in the `{}` directory is {}'.format(data_dir, raw.shape[0]))
+        print('Number of images in the `{}` directory is {}'.format(data_dir+'/'+type+'.zarr', raw.shape[0]))
         self.type= type
         self.real_size = raw.shape[0]
         self.transform = transform
