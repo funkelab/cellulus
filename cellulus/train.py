@@ -3,11 +3,9 @@ import shutil
 import torch
 from matplotlib import pyplot as plt
 from tqdm import tqdm
-
 from cellulus.criterions import get_loss
 from cellulus.datasets import get_dataset
 from cellulus.models import get_model
-# from cellulus.utils.utils import TODO
 torch.backends.cudnn.benchmark = True
 import numpy as np
 
@@ -29,9 +27,6 @@ def train(args):
     for i, sample in enumerate(tqdm(train_dataset_it)):
 
         im = sample['image']
-        instances = sample['instance'].squeeze(1)  # 1YX (not one-hot) or 1DYX (one-hot)
-        class_labels = sample['label'].squeeze(1)  # 1YX
-        center_images = sample['center_image'].squeeze(1)  # 1YX
         output = model(im)  # B 5 Y X
         loss = criterion(output, instances, class_labels, center_images, **args)
         loss = loss.mean()
@@ -42,44 +37,6 @@ def train(args):
 
     return loss_meter.avg
 
-
-
-def train_3d(args):
-    """
-    TODO
-    Parameters
-    ----------
-    TODO
-
-    Returns
-    -------
-    TODO
-    Average loss
-    """
-    # define meters
-    loss_meter = AverageMeter()
-    # put model into training mode
-    model.train()
-
-    for param_group in optimizer.param_groups:
-        print('learning rate: {}'.format(param_group['lr']))
-
-    for i, sample in enumerate(tqdm(train_dataset_it)):
-
-        im = sample['image']  # BCZYX
-        instances = sample['instance'].squeeze(1)  # BZYX
-        class_labels = sample['label'].squeeze(1)  # BZYX
-        center_images = sample['center_image'].squeeze(1)  # BZYX
-        output = model(im)  # B 7 Z Y X
-        loss = criterion(output, instances, class_labels, center_images, **args)
-        loss = loss.mean()
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-        loss_meter.update(loss.item())
-
-
-    return loss_meter.avg
 
 def val(args):
     """
@@ -101,44 +58,14 @@ def val(args):
     with torch.no_grad():
         for i, sample in enumerate(tqdm(val_dataset_it)):
             im = sample['image']
-            instances = sample['instance'].squeeze(1)
-            class_labels = sample['label'].squeeze(1)
-            center_images = sample['center_image'].squeeze(1)
             output = model(im)
-            loss = criterion(output, instances, class_labels, center_images, **args, iou=True, iou_meter=iou_meter)
+            loss = criterion(output, instances, class_labels, center_images, **args,
+                             iou=True, iou_meter=iou_meter)
             loss = loss.mean()
             loss_meter.update(loss.item())
 
     return loss_meter.avg, iou_meter.avg
 
-
-def val_3d(args):
-    """
-    TODO
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
-    # define meters
-    loss_meter, iou_meter = AverageMeter(), AverageMeter()
-    # put model into eval mode
-    model.eval()
-    with torch.no_grad():
-        for i, sample in enumerate(tqdm(val_dataset_it)):
-            im = sample['image']  # BCZYX
-            instances = sample['instance'].squeeze(1)  # BZYX
-            class_labels = sample['label'].squeeze(1)  # BZYX
-            center_images = sample['center_image'].squeeze(1)  # BZYX
-            output = model(im)
-            loss = criterion(output, instances, class_labels, center_images, **args, iou=True, iou_meter=iou_meter)
-            loss = loss.mean()
-            loss_meter.update(loss.item())
-
-    return loss_meter.avg, iou_meter.avg
 
 
 def save_checkpoint(state, is_best, epoch, save_dir, save_checkpoint_frequency, name='checkpoint.pth'):
@@ -198,17 +125,11 @@ def begin_training(train_dataset_dict, val_dataset_dict, model_dict, loss_dict, 
         if not os.path.exists(configs['save_dir']):
             os.makedirs(configs['save_dir'])
 
-    if configs['display']:
-        plt.ion()
-    else:
-        plt.ioff()
-        plt.switch_backend("agg")
-
     # set device
     device = torch.device("cuda:0" if configs['cuda'] else "cpu")
 
     # define global variables
-    global train_dataset_it, val_dataset_it, model, criterion, optimizer, visualizer, cluster
+    global train_dataset_it, val_dataset_it, model, criterion, optimizer
 
     # train dataloader
 
@@ -226,13 +147,10 @@ def begin_training(train_dataset_dict, val_dataset_dict, model_dict, loss_dict, 
 
     # set model
     model = get_model(model_dict['name'], model_dict['kwargs'])
-    model.init_output(loss_dict['lossOpts']['n_sigma'])
+    #model.init_output()
     model = torch.nn.DataParallel(model).to(device)
 
-    if (configs['volume'] is False):
-        criterion = get_loss(loss_opts=loss_dict['lossOpts']) # TODO
-    else : # 3d, volume setting
-        criterion = get_loss(loss_dict['lossOpts']) # TODO
+    criterion = get_loss(loss_opts=loss_dict['lossOpts']) # TODO
     criterion = torch.nn.DataParallel(criterion).to(device)
 
     # set optimizer
@@ -241,14 +159,7 @@ def begin_training(train_dataset_dict, val_dataset_dict, model_dict, loss_dict, 
     def lambda_(epoch):
         return pow((1 - ((epoch) / 200)), 0.9)
 
-    if (configs['volume'] is False):
-        # clustering
-        cluster = Cluster() # TODO
-    else:
-        # clustering
-        cluster = Cluster_3d() # TODO
-
-    # Logger
+   # Logger
     logger = Logger(('train', 'val', 'iou'), 'loss')
 
     # resume

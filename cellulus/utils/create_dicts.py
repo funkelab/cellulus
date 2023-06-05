@@ -2,9 +2,12 @@ import os
 import torch
 import cellulus.utils.transforms as my_transforms
 
+
 def create_dataset_dict(data_dir,
                         project_name,
                         type,
+                        crop_size,
+                        norm='min-max-percentile',
                         name='2D',
                         batch_size=16,
                         workers=8,
@@ -43,29 +46,14 @@ def create_dataset_dict(data_dir,
                 }
             },
         ])
-    elif name == '3D':
-        set_transforms = my_transforms.get_transform([
-            {
-                'name': 'RandomRotationsAndFlips_3d',
-                'opts': {
-                    'keys': ('image'),
-                    'degrees': 90,
-                }
-            },
-            {
-                'name': 'ToTensorFromNumpy',
-                'opts': {
-                    'keys': ('image'),
-                    'type': (torch.FloatTensor),
-                }
-            },
-        ])
     dataset_dict = {
         'name': name,
         'kwargs': {
             'data_dir': os.path.join(data_dir, project_name),
             'type': type,
             'transform': set_transforms,
+            'crop_size': crop_size,
+            'norm': norm
         },
         'batch_size': batch_size,
         'workers': workers,
@@ -74,7 +62,8 @@ def create_dataset_dict(data_dir,
     print("`{}_dataset_dict` dictionary successfully created with: \n "
           "-- {} images accessed from {}, "
           "\n -- batch size set at {}, "
-          .format(type, type, os.path.join(data_dir, project_name, type+'.zarr'), batch_size))
+          "\n -- crop size set at {}"
+          .format(type, type, os.path.join(data_dir, project_name, type+'.zarr'), batch_size, crop_size))
     return dataset_dict
 
 def create_model_dict(num_input_channels, num_output_channels=2, name='2D'):
@@ -91,8 +80,8 @@ def create_model_dict(num_input_channels, num_output_channels=2, name='2D'):
     model_dict = {
         'name': 'UNet2D' if name == '2D' else 'UNet3D',
         'kwargs': {
-            'num_output_channels': num_output_channels,
-            'num_input_channels': num_input_channels,
+            'out_channels': num_output_channels,
+            'in_channels': num_input_channels,
         }
     }
     print(
@@ -105,19 +94,26 @@ def create_model_dict(num_input_channels, num_output_channels=2, name='2D'):
             model_dict['name']))
     return model_dict
 
-def create_loss_dict(regularization_weight = 1.0):
+def create_loss_dict(temperature=10.0, regularization_weight = 1.0):
     """
         Creates `loss_dict` dictionary from parameters.
         Parameters
         ----------
+        temperature: float
+
         regularization_weight: float
 
+
     """
-    loss_dict = {'regularization_weight': regularization_weight
+    loss_dict = {'lossOpts':
+                    {
+                        'temperature': temperature,
+                        'regularization_weight': regularization_weight,
+                    }
                  }
-    print(
-        "`loss_dict` dictionary successfully created with: \n -- regularization weight equal to {:.3f}".format(
-            regularization_weight))
+    print("`loss_dict` dictionary successfully created with: "
+        "\n -- regularization weight equal to {:.3f} and temperature equal to {:.3f}".format(
+            regularization_weight, temperature))
     return loss_dict
 
 def create_configs(save_dir,
