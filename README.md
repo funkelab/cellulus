@@ -27,7 +27,7 @@ One could execute these lines of code to run this branch:
 ```
 conda create -n cellulus-env python=3.9
 conda activate cellulus-env
-pip3 install torch torchvision
+conda install pytorch torchvision pytorch-cuda=11.7 -c pytorch -c nvidia
 git clone https://github.com/funkelab/cellulus.git
 cd cellulus
 pip install -e .
