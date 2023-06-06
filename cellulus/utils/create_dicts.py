@@ -34,14 +34,14 @@ def create_dataset_dict(data_dir,
             {
                 'name': 'RandomRotationsAndFlips',
                 'opts': {
-                    'keys': ('image'),
+                    'keys': ('image',),
                     'degrees': 90,
                 }
             },
             {
                 'name': 'ToTensorFromNumpy',
                 'opts': {
-                    'keys': ('image'),
+                    'keys': ('image',),
                     'type': (torch.FloatTensor),
                 }
             },
@@ -66,7 +66,7 @@ def create_dataset_dict(data_dir,
           .format(type, type, os.path.join(data_dir, project_name, type+'.zarr'), batch_size, crop_size))
     return dataset_dict
 
-def create_model_dict(num_input_channels, num_output_channels=2, name='2D'):
+def create_model_dict(num_input_channels, num_output_channels=2, name='2D', num_fmaps=256):
     """
         Creates `model_dict` dictionary from parameters.
         Parameters
@@ -82,6 +82,7 @@ def create_model_dict(num_input_channels, num_output_channels=2, name='2D'):
         'kwargs': {
             'out_channels': num_output_channels,
             'in_channels': num_input_channels,
+            'num_fmaps':num_fmaps
         }
     }
     print(
@@ -156,5 +157,6 @@ def create_configs(save_dir,
         "`configs` dictionary successfully created with: "
         "\n -- n_epochs equal to {}, "
         "\n -- save_dir equal to {}, "
-        .format(n_epochs, save_dir))
+        "\n -- cuda set to {}"
+        .format(n_epochs, save_dir, cuda))
     return configs
