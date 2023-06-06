@@ -1,15 +1,17 @@
+import numpy as np
 import os
 import shutil
 import torch
 from matplotlib import pyplot as plt
 from tqdm import tqdm
+
 from cellulus.criterions import get_loss
 from cellulus.datasets import get_dataset
 from cellulus.models import get_model
-torch.backends.cudnn.benchmark = True
-import numpy as np
+from cellulus.utils.utils import AverageMeter, Logger
 
-def train(args):
+torch.backends.cudnn.benchmark = True
+def train():
     """
     TODO
 
@@ -26,8 +28,9 @@ def train(args):
         print('learning rate: {}'.format(param_group['lr']))
     for i, sample in enumerate(tqdm(train_dataset_it)):
 
-        im = sample['image']
-        output = model(im)  # B 5 Y X
+        im = sample['image'] # B 2 252 252
+        output = model(im) # B 2 236 236 (if depth=1)
+        print(output.shape)
         loss = criterion(output, instances, class_labels, center_images, **args)
         loss = loss.mean()
         optimizer.zero_grad()
@@ -178,12 +181,8 @@ def begin_training(train_dataset_dict, val_dataset_dict, model_dict, loss_dict, 
         scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_, last_epoch=epoch - 1)
         print('Starting epoch {}'.format(epoch))
 
-        if (configs['volume'] is False):
-            train_loss = train(args=loss_dict['lossW'])
-            val_loss, val_iou = val_vanilla(args=loss_dict['lossW'])
-        else:
-            train_loss = train_3d(args=loss_dict['lossW'], )
-            val_loss, val_iou = val_vanilla_3d(args=loss_dict['lossW'])
+        train_loss = train()
+        val_loss, val_iou = val()
 
         scheduler.step()
         print('===> train loss: {:.2f}'.format(train_loss))
