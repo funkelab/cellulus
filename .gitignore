@@ -1,2 +1,5 @@
-# zarr files
 *.zarr
+*.pyc
+*.xml
+cellulus.egg-info/*
+.idea/*
