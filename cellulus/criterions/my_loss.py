@@ -8,11 +8,13 @@ class OCELoss(nn.Module):
         super().__init__()
         self.temperature = temperature
         self.regularization_weight = regularization_weight
+        print("=" * 20)
         print(
             "Created OCE Loss-object with temperature={} and regularization={}".format(
                 temperature, regularization_weight
             )
         )
+        print("=" * 20)
 
     def distance_function(self, e0, e1):
         diff = e0 - e1
