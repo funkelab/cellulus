@@ -13,7 +13,7 @@ from cellulus.utils.utils import AverageMeter, Logger
 torch.backends.cudnn.benchmark = True
 
 
-def train():
+def train_epoch(train_dataset_it, model, criterion, optimizer):
     """
     TODO
 
@@ -31,7 +31,6 @@ def train():
     for i, sample in enumerate(tqdm(train_dataset_it)):
         im = sample["image"]  # B 2 252 252
         output = model(im)  # B 2 236 236 (if depth=1)
-        print(output.shape)
         loss = criterion(output, instances, class_labels, center_images, **args)
         loss = loss.mean()
         optimizer.zero_grad()
@@ -42,7 +41,7 @@ def train():
     return loss_meter.avg
 
 
-def val(args):
+def val_epoch(val_dataset_it, model, criterion):
     """
     TODO
 
@@ -141,9 +140,6 @@ def begin_training(
     # set device
     device = torch.device("cuda:0" if configs["cuda"] else "cpu")
 
-    # define global variables
-    global train_dataset_it, val_dataset_it, model, criterion, optimizer
-
     # train dataloader
 
     train_dataset = get_dataset(
@@ -206,8 +202,8 @@ def begin_training(
         )
         print("Starting epoch {}".format(epoch))
 
-        train_loss = train()
-        val_loss, val_iou = val()
+        train_loss = train_epoch(train_dataset_it, model, criterion, optimizer)
+        val_loss, val_iou = val_epoch(val_dataset_it, model, criterion)
 
         scheduler.step()
         print("===> train loss: {:.2f}".format(train_loss))
