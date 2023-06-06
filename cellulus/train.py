@@ -69,8 +69,9 @@ def begin_training(
 
     # set model
     model = get_model(model_dict["name"], model_dict["kwargs"])
+    model = model.to(device)
     # model.init_output()
-    model = torch.nn.DataParallel(model).to(device)
+    # model = torch.nn.DataParallel(model).to(device)
 
     criterion = get_loss(loss_opts=loss_dict["lossOpts"])  # TODO
     criterion = torch.nn.DataParallel(criterion).to(device)
@@ -153,8 +154,14 @@ def train_epoch(train_dataset_it, model, criterion, optimizer):
         print("learning rate: {}".format(param_group["lr"]))
     for i, sample in enumerate(tqdm(train_dataset_it)):
         im = sample["image"]  # B 2 252 252
+        anchor_coordinates = sample["anchor_coordinates"]
+        reference_coordinates = sample["reference_coordinates"]
         output = model(im)  # B 2 236 236 (if depth=1)
-        loss = criterion(output, instances, class_labels, center_images, **args)
+        anchor_embeddings = model.select_and_add_coordinates(output, anchor_coordinates)
+        reference_embeddings = model.select_and_add_coordinates(
+            output, reference_coordinates
+        )
+        loss = criterion(anchor_embeddings, reference_embeddings)
         loss = loss.mean()
         optimizer.zero_grad()
         loss.backward()

@@ -4,48 +4,10 @@ from funlib.learn.torch.models import UNet
 
 
 class UNet2D(nn.Module):
-    """
-    A class used to create a PyTorch U-Net 2D Model.
-    Attributes:
-    _____________
-    in_channels: int
-                Number of channels in the input images (crops).
-                Set to `1` for gray-scale images (e.g. images from cel tracking challenge)
-                >1 for multi-channel images (e.g. set to `2` for images from the Tissue-Net dataset)
-    out_channels: int
-                Number of channels predicted epr pixel.
-                Set to `2` by default.
-                Setting to >3 would produce high-dimensional (non-spatial) embeddings
-    aux_channels: int
-                TODO
-    num_fmaps: int
-                TODO
-    fmap_inc_factor: int
-                TODO
-    features_in_last_layer: int
-                TODO
-    head_type:  str
-                TODO
-    depth:      int
-                Depth of the U-Net 2D model i.e. the number of rounds of down-sampling.
-                Default = 3
-
-    Methods
-    _____________
-    __init__:
-                TODO
-    head_forward:
-                TODO
-    get_absolute_embeddings:
-                TODO
-    forward:
-                TODO
-    """
-
     def __init__(
         self,
         in_channels,
-        out_channels=2,
+        out_channels,
         aux_channels=0,
         num_fmaps=64,
         fmap_inc_factor=3,
@@ -134,46 +96,18 @@ class UNet2D(nn.Module):
             return out_aux, out
 
     @staticmethod
-    def get_absolute_embeddings(predicted_embeddings, coordinates):
-        """
-        A method used to add the predicted, relative embeddings (for e.g. the spatial offsets or OCEs) to the
-        absolute locations of the pixel (voxel) coordinates.
+    def select_and_add_coordinates(output, coordinates):
+        selection = []
+        # output.shape = (b, c, h, w)
+        for o, c in zip(output, coordinates):
+            sel = o[:, c[:, 1], c[:, 0]]
+            sel = sel.transpose(1, 0)
+            sel += c
+            selection.append(sel)
 
-        Attributes
-        _____________
-        predicted_embeddings: shape is B, 2, H, W
-        TODO
-        coordinates: shape is B, N, 2
-        TODO
-        Returns
-        _____________
-        TODO
-        """
+        # selection.shape = (b, c, p) where p is the number of selected positions
+        return torch.stack(selection, dim=0)
 
-        absolute_embeddings = []
-        for predicted_embedding, coordinate in zip(predicted_embeddings, coordinates):
-            absolute_embedding = predicted_embedding[
-                :, coordinate[:, 1], coordinate[:, 0]
-            ]
-            absolute_embedding = absolute_embedding.transpose(1, 0)
-            absolute_embedding += coordinate
-            absolute_embeddings.append(absolute_embedding)
-
-        return torch.stack(absolute_embeddings, dim=0)
-
-    def forward(self, raw_images):
-        """
-        A method used to feed in the batch of raw image patches.
-
-        Attributes
-        _____________
-        raw_images: shape is B, C, H, W
-                    where C is the number of channels in the raw images
-                    (for example, C = 1 for gray-scale images)
-
-        Returns
-        _____________
-        TODO
-        """
-        h = self.backbone(raw_images)
+    def forward(self, raw):
+        h = self.backbone(raw)
         return self.head_forward(h)

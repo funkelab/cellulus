@@ -9,8 +9,10 @@ def create_dataset_dict(
     type,
     crop_size,
     norm="min-max-percentile",
+    density=0.1,  # TODO: in paper, we say `0.2`
+    radius=32,  # TODO: in paper, we say `10` pixels
     name="2D",
-    batch_size=16,
+    batch_size=8,
     workers=8,
 ):
     """
@@ -33,13 +35,16 @@ def create_dataset_dict(
     if name == "2D":
         set_transforms = my_transforms.get_transform(
             [
-                {
-                    "name": "RandomRotationsAndFlips",
-                    "opts": {
-                        "keys": ("image",),
-                        "degrees": 90,
-                    },
-                },
+                # TODO --> include rotations and flips
+                # But what happens to the sampled coordinates?
+                # They should be rotated accordingly ...
+                # {
+                #     "name": "RandomRotationsAndFlips",
+                #     "opts": {
+                #         "keys": ("image",),
+                #         "degrees": 90,
+                #     },
+                # },
                 {
                     "name": "ToTensorFromNumpy",
                     "opts": {
@@ -57,6 +62,8 @@ def create_dataset_dict(
             "transform": set_transforms,
             "crop_size": crop_size,
             "norm": norm,
+            "density": density,
+            "radius": radius,
         },
         "batch_size": batch_size,
         "workers": workers,
@@ -108,7 +115,7 @@ def create_model_dict(
     return model_dict
 
 
-def create_loss_dict(temperature=10.0, regularization_weight=1.0):
+def create_loss_dict(temperature=10.0, regularization_weight=1e-5):
     """
     Creates `loss_dict` dictionary from parameters.
     Parameters
