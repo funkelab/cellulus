@@ -3,9 +3,7 @@ import os
 import random
 import zarr
 from glob import glob
-from imgaug import augmenters as iaa
 from torch.utils.data import Dataset
-
 from cellulus.utils.utils import normalize_min_max_percentile
 
 
