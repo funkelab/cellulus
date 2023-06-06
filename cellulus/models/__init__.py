@@ -1,4 +1,4 @@
-from cellulus.models.UNet2D import UNet2D
+from cellulus.models.unet_2D import UNet2D
 
 
 def get_model(name, model_opts):
