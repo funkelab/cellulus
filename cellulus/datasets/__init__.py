@@ -1,8 +1,8 @@
-from cellulus.datasets.TwoDimensionalDataset import TwoDimensionalDataset
+from cellulus.datasets.dataset_2D import Dataset2D
 
 
 def get_dataset(name, dataset_opts):
     if name == "2D":
-        return TwoDimensionalDataset(**dataset_opts)
+        return Dataset2D(**dataset_opts)
     else:
         raise RuntimeError("Dataset {} not available".format(name))
