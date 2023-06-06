@@ -13,104 +13,6 @@ from cellulus.utils.utils import AverageMeter, Logger
 torch.backends.cudnn.benchmark = True
 
 
-def train_epoch(train_dataset_it, model, criterion, optimizer):
-    """
-    TODO
-
-    Returns
-    -------
-    TODO
-    """
-    # define meters
-    loss_meter = AverageMeter()
-    # put model into training mode
-    model.train()
-
-    for param_group in optimizer.param_groups:
-        print("learning rate: {}".format(param_group["lr"]))
-    for i, sample in enumerate(tqdm(train_dataset_it)):
-        im = sample["image"]  # B 2 252 252
-        output = model(im)  # B 2 236 236 (if depth=1)
-        loss = criterion(output, instances, class_labels, center_images, **args)
-        loss = loss.mean()
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-        loss_meter.update(loss.item())
-
-    return loss_meter.avg
-
-
-def val_epoch(val_dataset_it, model, criterion):
-    """
-    TODO
-
-    Parameters
-    ----------
-    TODO
-
-    Returns
-    -------
-    TODO
-    """
-
-    # define meters
-    loss_meter, iou_meter = AverageMeter(), AverageMeter()
-    # put model into eval mode
-    model.eval()
-    with torch.no_grad():
-        for i, sample in enumerate(tqdm(val_dataset_it)):
-            im = sample["image"]
-            output = model(im)
-            loss = criterion(
-                output,
-                instances,
-                class_labels,
-                center_images,
-                **args,
-                iou=True,
-                iou_meter=iou_meter
-            )
-            loss = loss.mean()
-            loss_meter.update(loss.item())
-
-    return loss_meter.avg, iou_meter.avg
-
-
-def save_checkpoint(
-    state, is_best, epoch, save_dir, save_checkpoint_frequency, name="checkpoint.pth"
-):
-    """
-    TODO
-    Parameters
-
-    ----------
-    state : dictionary
-        The state of the model weights
-    is_best : bool
-        In case the validation IoU is higher at the end of a certain epoch than previously recorded, `is_best` is set equal to True
-    epoch: int
-        The current epoch
-    save_checkpoint_frequency: int
-        The model weights are saved every `save_checkpoint_frequency` epochs
-    name: str, optional
-        The model weights are saved under the name `name`
-
-    Returns
-    -------
-
-    """
-    print("=> saving checkpoint")
-    file_name = os.path.join(save_dir, name)
-    torch.save(state, file_name)
-    if save_checkpoint_frequency is not None:
-        if epoch % int(save_checkpoint_frequency) == 0:
-            file_name_frequent = os.path.join(save_dir, str(epoch) + "_" + name)
-            torch.save(state, file_name_frequent)
-    if is_best:
-        shutil.copyfile(file_name, os.path.join(save_dir, "best_iou_model.pth"))
-
-
 def begin_training(
     train_dataset_dict, val_dataset_dict, model_dict, loss_dict, configs
 ):
@@ -232,3 +134,101 @@ def begin_training(
             save_dir=configs["save_dir"],
             save_checkpoint_frequency=configs["save_checkpoint_frequency"],
         )
+
+
+def train_epoch(train_dataset_it, model, criterion, optimizer):
+    """
+    TODO
+
+    Returns
+    -------
+    TODO
+    """
+    # define meters
+    loss_meter = AverageMeter()
+    # put model into training mode
+    model.train()
+
+    for param_group in optimizer.param_groups:
+        print("learning rate: {}".format(param_group["lr"]))
+    for i, sample in enumerate(tqdm(train_dataset_it)):
+        im = sample["image"]  # B 2 252 252
+        output = model(im)  # B 2 236 236 (if depth=1)
+        loss = criterion(output, instances, class_labels, center_images, **args)
+        loss = loss.mean()
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        loss_meter.update(loss.item())
+
+    return loss_meter.avg
+
+
+def val_epoch(val_dataset_it, model, criterion):
+    """
+    TODO
+
+    Parameters
+    ----------
+    TODO
+
+    Returns
+    -------
+    TODO
+    """
+
+    # define meters
+    loss_meter, iou_meter = AverageMeter(), AverageMeter()
+    # put model into eval mode
+    model.eval()
+    with torch.no_grad():
+        for i, sample in enumerate(tqdm(val_dataset_it)):
+            im = sample["image"]
+            output = model(im)
+            loss = criterion(
+                output,
+                instances,
+                class_labels,
+                center_images,
+                **args,
+                iou=True,
+                iou_meter=iou_meter
+            )
+            loss = loss.mean()
+            loss_meter.update(loss.item())
+
+    return loss_meter.avg, iou_meter.avg
+
+
+def save_checkpoint(
+    state, is_best, epoch, save_dir, save_checkpoint_frequency, name="checkpoint.pth"
+):
+    """
+    TODO
+    Parameters
+
+    ----------
+    state : dictionary
+        The state of the model weights
+    is_best : bool
+        In case the validation IoU is higher at the end of a certain epoch than previously recorded, `is_best` is set equal to True
+    epoch: int
+        The current epoch
+    save_checkpoint_frequency: int
+        The model weights are saved every `save_checkpoint_frequency` epochs
+    name: str, optional
+        The model weights are saved under the name `name`
+
+    Returns
+    -------
+
+    """
+    print("=> saving checkpoint")
+    file_name = os.path.join(save_dir, name)
+    torch.save(state, file_name)
+    if save_checkpoint_frequency is not None:
+        if epoch % int(save_checkpoint_frequency) == 0:
+            file_name_frequent = os.path.join(save_dir, str(epoch) + "_" + name)
+            torch.save(state, file_name_frequent)
+    if is_best:
+        shutil.copyfile(file_name, os.path.join(save_dir, "best_iou_model.pth"))
