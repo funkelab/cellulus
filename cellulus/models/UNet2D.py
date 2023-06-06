@@ -52,7 +52,7 @@ class UNet2D(nn.Module):
             fmap_inc_factor=3,
             features_in_last_layer=64,
             head_type="single",
-            depth=3):
+            depth=1):
 
         super().__init__()
 
