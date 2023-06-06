@@ -36,13 +36,28 @@ class TwoDimensionalDataset(Dataset):
     __getitem__: Returns `sample` (dictionary) which has `image` and `im_name` as keys
     """
 
-    def __init__(self, data_dir, type='train', norm='min-max-percentile', crop_size = 252, transform=None):
-        print('2D data loader created! Accessing data from {}/'.format(data_dir+'/'+type+'.zarr'))
+    def __init__(
+        self,
+        data_dir,
+        type="train",
+        norm="min-max-percentile",
+        crop_size=252,
+        transform=None,
+    ):
+        print(
+            "2D data loader created! Accessing data from {}/".format(
+                data_dir + "/" + type + ".zarr"
+            )
+        )
 
         # get image list
-        self.raw = zarr.open(os.path.join(data_dir, type+'.zarr'))['raw']
-        print('Number of images in the `{}` directory is {}'.format(data_dir+'/'+type+'.zarr', self.raw.shape[0]))
-        self.type= type
+        self.raw = zarr.open(os.path.join(data_dir, type + ".zarr"))["raw"]
+        print(
+            "Number of images in the `{}` directory is {}".format(
+                data_dir + "/" + type + ".zarr", self.raw.shape[0]
+            )
+        )
+        self.type = type
         self.real_size = self.raw.shape[0]
         self.transform = transform
         self.norm = norm
@@ -57,11 +72,15 @@ class TwoDimensionalDataset(Dataset):
 
         # load image
         image = self.raw[index]  # YXC
-        if self.norm == 'min-max-percentile':
-            image = normalize_min_max_percentile(image, 1, 99.8, axis=(0, 1)) # TODO (is this correctly done?)
+        if self.norm == "min-max-percentile":
+            image = normalize_min_max_percentile(
+                image, 1, 99.8, axis=(0, 1)
+            )  # TODO (is this correctly done?)
         # add an additional channel
         image = np.transpose(image, (2, 0, 1))  # CYX , where C = 2
-        sample['image'] = image[:, :self.crop_size, :self.crop_size] # TODO (cropping is not randomly done at the moment)
+        sample["image"] = image[
+            :, : self.crop_size, : self.crop_size
+        ]  # TODO (cropping is not randomly done at the moment)
 
         # transform
         if self.transform is not None:
