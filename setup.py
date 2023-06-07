@@ -42,5 +42,6 @@ setup(
         "pytest",
         "imagecodecs",
         "zarr",
+	"pandas"
     ],
 )
