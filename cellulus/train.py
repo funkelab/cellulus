@@ -1,5 +1,6 @@
 import os
 import shutil
+
 import torch
 from tqdm import tqdm
 
@@ -105,14 +106,14 @@ def begin_training(
         scheduler = torch.optim.lr_scheduler.LambdaLR(
             optimizer, lr_lambda=lambda_, last_epoch=epoch - 1
         )
-        print("Starting epoch {}".format(epoch))
+        print(f"Starting epoch {epoch}")
 
         train_loss = train_epoch(train_dataset_it, model, criterion, optimizer)
         val_loss, val_iou = val_epoch(val_dataset_it, model, criterion)
 
         scheduler.step()
-        print("===> train loss: {:.2f}".format(train_loss))
-        print("===> val loss: {:.2f}, val iou: {:.2f}".format(val_loss, val_iou))
+        print(f"===> train loss: {train_loss:.2f}")
+        print(f"===> val loss: {val_loss:.2f}, val iou: {val_iou:.2f}")
 
         logger.add("train", train_loss)
         logger.add("val", val_loss)
@@ -196,8 +197,9 @@ def val_epoch(val_dataset_it, model, criterion):
             anchor_coordinates = sample["anchor_coordinates"]
             reference_coordinates = sample["reference_coordinates"]
             output = model(im)  # B 2 236 236 (if depth=1)
-            anchor_embeddings = model.select_and_add_coordinates(output,
-                                                                 anchor_coordinates)
+            anchor_embeddings = model.select_and_add_coordinates(
+                output, anchor_coordinates
+            )
             reference_embeddings = model.select_and_add_coordinates(
                 output, reference_coordinates
             )

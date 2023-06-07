@@ -1,4 +1,5 @@
 import collections
+
 import numpy as np
 import torch
 from torchvision.transforms import transforms as T
@@ -25,7 +26,7 @@ class RandomRotationsAndFlips(T.RandomRotation):
         return sample
 
 
-class ToTensorFromNumpy(object):
+class ToTensorFromNumpy:
     """
     A class used to convert numpy arrays to PyTorch tensors
 

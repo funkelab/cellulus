@@ -1,5 +1,7 @@
 import os
+
 import torch
+
 import cellulus.utils.transforms as my_transforms
 
 
@@ -135,9 +137,7 @@ def create_loss_dict(temperature=10.0, regularization_weight=1e-5):
     print(
         "`loss_dict` dictionary successfully created with: "
         "\n -- regularization weight equal to {:.3f} and "
-        "temperature equal to {:.3f}".format(
-            regularization_weight, temperature
-        )
+        "temperature equal to {:.3f}".format(regularization_weight, temperature)
     )
     return loss_dict
 

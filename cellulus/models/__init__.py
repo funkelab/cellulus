@@ -5,4 +5,4 @@ def get_model(name, model_opts):
     if name == "UNet2D":
         return UNet2D(**model_opts)
     else:
-        raise RuntimeError("Model {} not available".format(name))
+        raise RuntimeError(f"Model {name} not available")

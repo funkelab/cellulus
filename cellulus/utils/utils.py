@@ -1,17 +1,18 @@
-import matplotlib.gridspec as gridspec
-import matplotlib
-import matplotlib.pyplot as plt
-import numpy as np
 import os
-import zarr
+import threading
 from io import BytesIO
 from urllib.request import urlopen
 from zipfile import ZipFile
-import threading
+
+import matplotlib
+import matplotlib.gridspec as gridspec
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+import zarr
 
 
-class AverageMeter(object):
+class AverageMeter:
     def __init__(self, num_classes=1):
         self.num_classes = num_classes
         self.reset()
@@ -39,7 +40,7 @@ class Logger:
         self.title = title
         self.win = None
 
-        print("Created logger with keys:  {}".format(keys))
+        print(f"Created logger with keys:  {keys}")
 
     def plot(self, save=False, save_dir=""):
         if self.win is None:
@@ -127,12 +128,12 @@ def extract_data(zarr_url, data_dir, project_name):
     """
     if not os.path.exists(os.path.join(data_dir, project_name)):
         os.makedirs(data_dir)
-        print("Created new directory {}".format(data_dir))
+        print(f"Created new directory {data_dir}")
 
         with urlopen(zarr_url) as zipresp:
             with ZipFile(BytesIO(zipresp.read())) as zfile:
                 zfile.extractall(data_dir)
-        print("Downloaded and unzipped data to the location {}".format(data_dir))
+        print(f"Downloaded and unzipped data to the location {data_dir}")
     else:
         print(
             "Directory already exists at the location {}".format(
@@ -191,21 +192,19 @@ def visualize(data_dir, train_val_dir="val", n_images=5, new_cmp="magma"):
     plt.tight_layout(pad=0, h_pad=0)
     plt.show()
 
+
 class Visualizer:
-
     def __init__(self, keys, cmap):
-
         self.fig, (self.ax1, self.ax2) = plt.subplots(2, 2, figsize=(10, 10))
 
-        self.ax1[1].axis('off')
-        self.ax2[0].axis('off')
-        self.ax2[1].axis('off')
+        self.ax1[1].axis("off")
+        self.ax2[0].axis("off")
+        self.ax2[1].axis("off")
         self.cmap = cmap
-
 
     @staticmethod
     def mypause(interval):
-        backend = plt.rcParams['backend']
+        backend = plt.rcParams["backend"]
         if backend in matplotlib.rcsetup.interactive_bk:
             figManager = matplotlib._pylab_helpers.Gcf.get_active()
             if figManager is not None:

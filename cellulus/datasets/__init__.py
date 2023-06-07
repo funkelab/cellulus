@@ -5,4 +5,4 @@ def get_dataset(name, dataset_opts):
     if name == "2D":
         return Dataset2D(**dataset_opts)
     else:
-        raise RuntimeError("Dataset {} not available".format(name))
+        raise RuntimeError(f"Dataset {name} not available")
