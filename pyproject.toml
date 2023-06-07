@@ -1,0 +1,69 @@
+# https://peps.python.org/pep-0517/
+# https://hatch.pypa.io/latest/config/build/
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# https://peps.python.org/pep-0621/
+[project]
+name = "cellulus"
+description = "Unsupervised Segmentation of Cells in Microscopy Images"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+    { name = "Steffen Wolf", email = "" },
+    { name = "Manan Lalit", email = "lalitm@janelia.hhmi.org" },
+    { name = "Henry Westmacott", email = "henryjw@mrc-lmb.cam.ac.uk" },
+    { name = "Jan Funke", email = "funkej@janelia.hhmi.org" },
+]
+dynamic = ["version"]
+dependencies = ["torch", "zarr", "scikit-image", "tqdm", "gunpowder"]
+
+[project.optional-dependencies]
+dev = ["pre-commit", "pytest", "pytest-cov", "ruff", "twine", "build"]
+test = ["pytest", "pytest-cov", "plotly"]
+examples = ["jupyter", "matplotlib"]
+docs = [
+    "sphinx",
+    "sphinx_rtd_theme",
+    "sphinx_togglebutton",
+    "tomli",
+    "jupyter_sphinx",
+    "plotly",
+]
+
+[project.urls]
+homepage = "https://funkelab.github.io/cellulus"
+
+# https://hatch.pypa.io/latest/version/
+[tool.hatch.version]
+path = "cellulus/__init__.py"
+
+# https://beta.ruff.rs/docs
+[tool.ruff]
+target-version = "py38"
+src = ["cellulus"]
+select = [
+    "F",   # pyflakes
+    "E",   # pycodestyle
+    "I",   # isort
+    "UP",  # pyupgrade
+    "RUF", # ruff specific rules
+]
+
+# https://coverage.readthedocs.io/en/6.4/config.html
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "pragma: ${PY_MAJOR_VERSION} no cover",
+    "if TYPE_CHECKING:",
+    "\\.\\.\\.",
+]
+
+[tool.mypy]
+files = "cellulus"
+strict = true
+allow_untyped_defs = true
+allow_untyped_calls = true
+disallow_any_generics = false
+ignore_missing_imports = true
