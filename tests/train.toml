@@ -1,0 +1,20 @@
+experiment_name = "Train test"
+object_size = 10.0
+
+[model_config]
+
+num_fmaps = 12
+fmap_inc_factor = 2
+
+[train_config]
+
+batch_size = 32
+
+[train_config.train_data_config]
+
+container_path = "test_data.zarr"
+dataset_name = "train"
+
+[train_config.validate_data_config]
+container_path = "test_data.zarr"
+dataset_name = "validate"
