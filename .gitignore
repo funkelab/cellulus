@@ -4,3 +4,4 @@
 cellulus.egg-info/*
 .idea/*
 .coverage
+*.sw[pmno]
