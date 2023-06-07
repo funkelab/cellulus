@@ -17,7 +17,14 @@ authors = [
     { name = "Jan Funke", email = "funkej@janelia.hhmi.org" },
 ]
 dynamic = ["version"]
-dependencies = ["torch", "zarr", "scikit-image", "tqdm", "gunpowder"]
+dependencies = [
+  "torch",
+  "zarr",
+  "scikit-image",
+  "tqdm",
+  "gunpowder",
+  "funlib.learn.torch @ git+https://github.com/funkelab/funlib.learn.torch@f36decaf95e2b6d1b74a45b31660d29f8e57e5c4"
+]
 
 [project.optional-dependencies]
 dev = ["pre-commit", "pytest", "pytest-cov", "ruff", "twine", "build"]
@@ -38,6 +45,9 @@ homepage = "https://funkelab.github.io/cellulus"
 # https://hatch.pypa.io/latest/version/
 [tool.hatch.version]
 path = "cellulus/__init__.py"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 # https://beta.ruff.rs/docs
 [tool.ruff]
