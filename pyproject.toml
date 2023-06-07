@@ -18,6 +18,9 @@ authors = [
 ]
 dynamic = ["version"]
 dependencies = [
+  "attrs",
+  "click",
+  "tomli",
   "torch",
   "zarr",
   "scikit-image",
@@ -38,6 +41,10 @@ docs = [
 
 [project.urls]
 homepage = "https://funkelab.github.io/cellulus"
+
+[project.scripts]
+train = "cellulus.cli:train"
+predict = "cellulus.cli:predict"
 
 # https://hatch.pypa.io/latest/version/
 [tool.hatch.version]
