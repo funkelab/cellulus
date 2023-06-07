@@ -3,3 +3,4 @@
 *.xml
 cellulus.egg-info/*
 .idea/*
+.coverage
