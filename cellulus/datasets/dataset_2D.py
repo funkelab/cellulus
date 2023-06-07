@@ -2,7 +2,6 @@ import numpy as np
 import os
 import random
 import zarr
-from glob import glob
 from torch.utils.data import Dataset
 
 from cellulus.utils.utils import normalize_min_max_percentile

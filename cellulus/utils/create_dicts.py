@@ -134,7 +134,8 @@ def create_loss_dict(temperature=10.0, regularization_weight=1e-5):
     }
     print(
         "`loss_dict` dictionary successfully created with: "
-        "\n -- regularization weight equal to {:.3f} and temperature equal to {:.3f}".format(
+        "\n -- regularization weight equal to {:.3f} and "
+        "temperature equal to {:.3f}".format(
             regularization_weight, temperature
         )
     )

@@ -10,7 +10,8 @@ setup(
     version="0.0.1",
     author="TODO",
     author_email="TODO",
-    description="cellulus provides unsupervised segmentation of objects in microscopy images",
+    description="cellulus provides unsupervised segmentation of objects "
+                "in microscopy images",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/funkelab/cellulus/",

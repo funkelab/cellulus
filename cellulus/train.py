@@ -1,8 +1,6 @@
-import numpy as np
 import os
 import shutil
 import torch
-from matplotlib import pyplot as plt
 from tqdm import tqdm
 
 from cellulus.criterions import get_loss
@@ -21,15 +19,19 @@ def begin_training(
     Parameters
     ----------
     train_dataset_dict : dictionary
-        Dictionary containing training data loader-specific parameters (for e.g. train_batch_size etc)
+        Dictionary containing training data loader-specific parameters
+        (for e.g. train_batch_size etc)
     val_dataset_dict : dictionary
-        Dictionary containing validation data loader-specific parameters (for e.g. val_batch_size etc)
+        Dictionary containing validation data loader-specific parameters
+        (for e.g. val_batch_size etc)
     model_dict: dictionary
-        Dictionary containing model specific parameters (for e.g. number of outputs)
+        Dictionary containing model specific parameters
+        (for e.g. number of outputs)
     loss_dict: dictionary
-        Dictionary containing loss specific parameters (for e.g. convex weights of different loss terms - w_iou, w_var etc)
+        Dictionary containing loss specific parameters
     configs: dictionary
-        Dictionary containing general training parameters (for e.g. num_epochs, learning_rate etc)
+        Dictionary containing general training parameters
+        (for e.g. num_epochs, learning_rate etc)
 
     Returns
     -------
@@ -191,16 +193,15 @@ def val_epoch(val_dataset_it, model, criterion):
     with torch.no_grad():
         for i, sample in enumerate(tqdm(val_dataset_it)):
             im = sample["image"]
-            output = model(im)
-            loss = criterion(
-                output,
-                instances,
-                class_labels,
-                center_images,
-                **args,
-                iou=True,
-                iou_meter=iou_meter
+            anchor_coordinates = sample["anchor_coordinates"]
+            reference_coordinates = sample["reference_coordinates"]
+            output = model(im)  # B 2 236 236 (if depth=1)
+            anchor_embeddings = model.select_and_add_coordinates(output,
+                                                                 anchor_coordinates)
+            reference_embeddings = model.select_and_add_coordinates(
+                output, reference_coordinates
             )
+            loss = criterion(anchor_embeddings, reference_embeddings)
             loss = loss.mean()
             loss_meter.update(loss.item())
 
@@ -218,7 +219,8 @@ def save_checkpoint(
     state : dictionary
         The state of the model weights
     is_best : bool
-        In case the validation IoU is higher at the end of a certain epoch than previously recorded, `is_best` is set equal to True
+        In case the validation IoU is higher at the end of a
+        certain epoch than previously recorded, `is_best` is set equal to True
     epoch: int
         The current epoch
     save_checkpoint_frequency: int

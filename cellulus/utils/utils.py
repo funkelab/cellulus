@@ -1,13 +1,14 @@
 import matplotlib.gridspec as gridspec
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-import urllib
 import zarr
 from io import BytesIO
 from urllib.request import urlopen
 from zipfile import ZipFile
 import threading
+import pandas as pd
 
 
 class AverageMeter(object):
@@ -189,3 +190,27 @@ def visualize(data_dir, train_val_dir="val", n_images=5, new_cmp="magma"):
             ax1.set_ylabel("IM-1", fontdict=font)
     plt.tight_layout(pad=0, h_pad=0)
     plt.show()
+
+class Visualizer:
+
+    def __init__(self, keys, cmap):
+
+        self.fig, (self.ax1, self.ax2) = plt.subplots(2, 2, figsize=(10, 10))
+
+        self.ax1[1].axis('off')
+        self.ax2[0].axis('off')
+        self.ax2[1].axis('off')
+        self.cmap = cmap
+
+
+    @staticmethod
+    def mypause(interval):
+        backend = plt.rcParams['backend']
+        if backend in matplotlib.rcsetup.interactive_bk:
+            figManager = matplotlib._pylab_helpers.Gcf.get_active()
+            if figManager is not None:
+                canvas = figManager.canvas
+                if canvas.figure.stale:
+                    canvas.draw()
+                canvas.start_event_loop(interval)
+                return
