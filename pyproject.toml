@@ -28,15 +28,12 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pre-commit", "pytest", "pytest-cov", "ruff", "twine", "build"]
-test = ["pytest", "pytest-cov", "plotly"]
 examples = ["jupyter", "matplotlib"]
 docs = [
     "sphinx",
     "sphinx_rtd_theme",
     "sphinx_togglebutton",
-    "tomli",
     "jupyter_sphinx",
-    "plotly",
 ]
 
 [project.urls]
