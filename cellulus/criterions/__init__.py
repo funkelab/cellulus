@@ -1,5 +1,5 @@
-from cellulus.criterions.my_loss import OCELoss
+from cellulus.criterions.oce_loss import OCELoss
 
 
-def get_loss(loss_opts):
-    return OCELoss(**loss_opts)
+def get_loss(temperature, regularizer_weight):
+    return OCELoss(temperature, regularizer_weight)
