@@ -1,8 +1,8 @@
-from cellulus.datasets.dataset_2D import Dataset2D
+from pathlib import Path
+from typing import Tuple
+
+from cellulus.datasets.zarr_dataset import ZarrDataset
 
 
-def get_dataset(name, dataset_opts):
-    if name == "2D":
-        return Dataset2D(**dataset_opts)
-    else:
-        raise RuntimeError(f"Dataset {name} not available")
+def get_dataset(path: Path, crop_size: Tuple[int]) -> ZarrDataset:
+    return ZarrDataset(path=path, crop_size=crop_size)

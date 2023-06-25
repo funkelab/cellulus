@@ -22,6 +22,8 @@ class ZarrDataset(IterableDataset):  # type: ignore
                 should have an `"axis_names"` attribute that contains the names
                 of the used axes, e.g., `["s", "c", "y", "x"]` for a 2D
                 dataset.
+
+
         """
 
         self.path = path
@@ -73,7 +75,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
         )
 
     def __yield_sample(self):
-        """An infinte generator of crops."""
+        """An infinite generator of crops."""
 
         with gp.build(self.pipeline):
             while True:
@@ -145,3 +147,6 @@ class ZarrDataset(IterableDataset):  # type: ignore
                 'axes, e.g., ["s", "c", "y", "x"] for a 2D dataset.'
             )
         )
+
+    def get_num_channels(self):
+        return self.num_channels
