@@ -1,245 +1,117 @@
-import os
-import shutil
-
 import torch
 from tqdm import tqdm
 
 from cellulus.criterions import get_loss
 from cellulus.datasets import get_dataset
 from cellulus.models import get_model
-from cellulus.utils.utils import AverageMeter, Logger
 
 torch.backends.cudnn.benchmark = True
 
 
-def begin_training(
-    train_dataset_dict, val_dataset_dict, model_dict, loss_dict, configs
-):
-    """Entry function for beginning the model training procedure.
+def train(experiment_config):
+    print(experiment_config)
 
-    Parameters
-    ----------
-    train_dataset_dict : dictionary
-        Dictionary containing training data loader-specific parameters
-        (for e.g. train_batch_size etc)
-    val_dataset_dict : dictionary
-        Dictionary containing validation data loader-specific parameters
-        (for e.g. val_batch_size etc)
-    model_dict: dictionary
-        Dictionary containing model specific parameters
-        (for e.g. number of outputs)
-    loss_dict: dictionary
-        Dictionary containing loss specific parameters
-    configs: dictionary
-        Dictionary containing general training parameters
-        (for e.g. num_epochs, learning_rate etc)
-
-    Returns
-    -------
-    """
-
-    if configs["save"]:
-        if not os.path.exists(configs["save_dir"]):
-            os.makedirs(configs["save_dir"])
-
-    # set device
-    device = torch.device("cuda:0" if configs["cuda"] else "cpu")
-
-    # train dataloader
-
+    # create train dataset
     train_dataset = get_dataset(
-        train_dataset_dict["name"], train_dataset_dict["kwargs"]
-    )
-    train_dataset_it = torch.utils.data.DataLoader(
-        train_dataset,
-        batch_size=train_dataset_dict["batch_size"],
-        shuffle=True,
-        drop_last=True,
-        num_workers=train_dataset_dict["workers"],
-        pin_memory=True if configs["cuda"] else False,
+        path=experiment_config.train_config.train_data_config.container_path,
+        crop_size=experiment_config.train_config.crop_size,
     )
 
-    # val dataloader
-    val_dataset = get_dataset(val_dataset_dict["name"], val_dataset_dict["kwargs"])
-    val_dataset_it = torch.utils.data.DataLoader(
-        val_dataset,
-        batch_size=val_dataset_dict["batch_size"],
-        shuffle=True,
-        drop_last=False,
-        num_workers=val_dataset_dict["workers"],
-        pin_memory=True if configs["cuda"] else False,
+    # create train dataloader
+    train_dataloader = torch.utils.data.DataLoader(
+        dataset=train_dataset,
+        batch_size=experiment_config.train_config.batch_size,
+        drop_last=True,
+        num_workers=experiment_config.train_config.num_workers,
+        pin_memory=True,
     )
 
     # set model
-    model = get_model(model_dict["name"], model_dict["kwargs"])
-    model = model.to(device)
-    # model.init_output()
-    # model = torch.nn.DataParallel(model).to(device)
+    model = get_model(
+        in_channels=train_dataset.get_num_channels(),
+        out_channels=train_dataset.get_num_channels(),
+        num_fmaps=experiment_config.model_config.num_fmaps,
+        fmap_inc_factor=experiment_config.model_config.fmap_inc_factor,
+        features_in_last_layer=experiment_config.model_config.features_in_last_layer,
+        downsampling_factors=experiment_config.model_config.downsampling_factors,
+    )
 
-    criterion = get_loss(loss_opts=loss_dict["lossOpts"])  # TODO
-    criterion = torch.nn.DataParallel(criterion).to(device)
+    # set loss
+    criterion = get_loss(
+        regularizer_weight=experiment_config.train_config.regularizer_weight,
+        temperature=experiment_config.train_config.temperature,
+    )
 
     # set optimizer
     optimizer = torch.optim.Adam(
-        model.parameters(), lr=configs["train_lr"], weight_decay=1e-4
+        model.parameters(),
+        lr=experiment_config.train_config.initial_learning_rate,
+        weight_decay=experiment_config.train_config.weight_decay,
     )
 
-    def lambda_(epoch):
-        return pow((1 - ((epoch) / 200)), 0.9)
+    def lambda_(iteration):
+        return pow(
+            (1 - ((iteration) / experiment_config.train_config.max_iterations)), 0.9
+        )
 
-    # Logger
-    logger = Logger(("train", "val", "iou"), "loss")
-
-    # resume
-    start_epoch = 0
-    best_iou = 0
-    if configs["resume_path"] is not None and os.path.exists(configs["resume_path"]):
-        print("Resuming model from {}".format(configs["resume_path"]))
-        state = torch.load(configs["resume_path"])
-        start_epoch = state["epoch"] + 1
-        best_iou = state["best_iou"]
+    # resume training
+    start_iteration = 0
+    if experiment_config.model_config.checkpoint is None:
+        pass
+    else:
+        print(f"Resuming model from {experiment_config.checkpoint}")
+        state = torch.load(experiment_config.model_config.checkpoint)
+        start_iteration = state["iteration"] + 1
         model.load_state_dict(state["model_state_dict"], strict=True)
         optimizer.load_state_dict(state["optim_state_dict"])
-        logger.data = state["logger_data"]
 
-    for epoch in range(start_epoch, configs["n_epochs"]):
+    # call `train_iteration`
+    for iteration in tqdm(
+        range(start_iteration, experiment_config.train_config.max_iterations)
+    ):
         scheduler = torch.optim.lr_scheduler.LambdaLR(
-            optimizer, lr_lambda=lambda_, last_epoch=epoch - 1
+            optimizer, lr_lambda=lambda_, last_epoch=iteration - 1
         )
-        print(f"Starting epoch {epoch}")
-
-        train_loss = train_epoch(train_dataset_it, model, criterion, optimizer)
-        val_loss, val_iou = val_epoch(val_dataset_it, model, criterion)
-
+        print(f"Starting iteration {iteration}")
+        train_loss = train_iteration(
+            train_dataloader=train_dataloader,
+            model=model,
+            criterion=criterion,
+            optimizer=optimizer,
+        )
         scheduler.step()
         print(f"===> train loss: {train_loss:.2f}")
-        print(f"===> val loss: {val_loss:.2f}, val iou: {val_iou:.2f}")
 
-        logger.add("train", train_loss)
-        logger.add("val", val_loss)
-        logger.add("iou", val_iou)
-        logger.plot(save=configs["save"], save_dir=configs["save_dir"])  # TODO
-
-        is_best = val_iou > best_iou
-        best_iou = max(val_iou, best_iou)
-
-        if configs["save"]:
-            state = {
-                "epoch": epoch,
-                "best_iou": best_iou,
-                "model_state_dict": model.state_dict(),
-                "optim_state_dict": optimizer.state_dict(),
-                "logger_data": logger.data,
-            }
-        save_checkpoint(
-            state,
-            is_best,
-            epoch,
-            save_dir=configs["save_dir"],
-            save_checkpoint_frequency=configs["save_checkpoint_frequency"],
-        )
+        state = {
+            "iteration": iteration,
+            "model_state_dict": model.state_dict(),
+            "optim_state_dict": optimizer.state_dict(),
+        }
+        if iteration % experiment_config.train_config.save_model_every:
+            save_model(
+                state,
+                iteration,
+            )
+        if iteration % experiment_config.train_config.save_snapshot_every:
+            save_snapshot(
+                state,
+                iteration,
+            )
 
 
-def train_epoch(train_dataset_it, model, criterion, optimizer):
-    """
-    TODO
-
-    Returns
-    -------
-    TODO
-    """
-    # define meters
-    loss_meter = AverageMeter()
-    # put model into training mode
+def train_iteration(train_dataloader, model, criterion, optimizer):
     model.train()
-
     for param_group in optimizer.param_groups:
         print("learning rate: {}".format(param_group["lr"]))
-    for i, sample in enumerate(tqdm(train_dataset_it)):
-        im = sample["image"]  # B 2 252 252
-        anchor_coordinates = sample["anchor_coordinates"]
-        reference_coordinates = sample["reference_coordinates"]
-        output = model(im)  # B 2 236 236 (if depth=1)
-        anchor_embeddings = model.select_and_add_coordinates(output, anchor_coordinates)
-        reference_embeddings = model.select_and_add_coordinates(
-            output, reference_coordinates
-        )
-        loss = criterion(anchor_embeddings, reference_embeddings)
-        loss = loss.mean()
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-        loss_meter.update(loss.item())
-
-    return loss_meter.avg
+    for i, samples in enumerate(train_dataloader):
+        model(samples)
+        # loss = criterion(output)
+        return None
 
 
-def val_epoch(val_dataset_it, model, criterion):
-    """
-    TODO
-
-    Parameters
-    ----------
-    TODO
-
-    Returns
-    -------
-    TODO
-    """
-
-    # define meters
-    loss_meter, iou_meter = AverageMeter(), AverageMeter()
-    # put model into eval mode
-    model.eval()
-    with torch.no_grad():
-        for i, sample in enumerate(tqdm(val_dataset_it)):
-            im = sample["image"]
-            anchor_coordinates = sample["anchor_coordinates"]
-            reference_coordinates = sample["reference_coordinates"]
-            output = model(im)  # B 2 236 236 (if depth=1)
-            anchor_embeddings = model.select_and_add_coordinates(
-                output, anchor_coordinates
-            )
-            reference_embeddings = model.select_and_add_coordinates(
-                output, reference_coordinates
-            )
-            loss = criterion(anchor_embeddings, reference_embeddings)
-            loss = loss.mean()
-            loss_meter.update(loss.item())
-
-    return loss_meter.avg, iou_meter.avg
+def save_model(state, iteration):
+    pass
 
 
-def save_checkpoint(
-    state, is_best, epoch, save_dir, save_checkpoint_frequency, name="checkpoint.pth"
-):
-    """
-    TODO
-    Parameters
-
-    ----------
-    state : dictionary
-        The state of the model weights
-    is_best : bool
-        In case the validation IoU is higher at the end of a
-        certain epoch than previously recorded, `is_best` is set equal to True
-    epoch: int
-        The current epoch
-    save_checkpoint_frequency: int
-        The model weights are saved every `save_checkpoint_frequency` epochs
-    name: str, optional
-        The model weights are saved under the name `name`
-
-    Returns
-    -------
-
-    """
-    print("=> saving checkpoint")
-    file_name = os.path.join(save_dir, name)
-    torch.save(state, file_name)
-    if save_checkpoint_frequency is not None:
-        if epoch % int(save_checkpoint_frequency) == 0:
-            file_name_frequent = os.path.join(save_dir, str(epoch) + "_" + name)
-            torch.save(state, file_name_frequent)
-    if is_best:
-        shutil.copyfile(file_name, os.path.join(save_dir, "best_iou_model.pth"))
+def save_snapshot(state, iteration):
+    pass
