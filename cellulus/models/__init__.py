@@ -1,8 +1,21 @@
-from cellulus.models.unet_2D import UNet2D
+from typing import List, Tuple
+
+from cellulus.models.unet import UNetModel
 
 
-def get_model(name, model_opts):
-    if name == "UNet2D":
-        return UNet2D(**model_opts)
-    else:
-        raise RuntimeError(f"Model {name} not available")
+def get_model(
+    in_channels: int,
+    out_channels: int,
+    num_fmaps: int,
+    fmap_inc_factor: int,
+    features_in_last_layer: int,
+    downsampling_factors: List[Tuple[int, int]],
+) -> UNetModel:
+    return UNetModel(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        num_fmaps=num_fmaps,
+        fmap_inc_factor=fmap_inc_factor,
+        features_in_last_layer=features_in_last_layer,
+        downsampling_factors=downsampling_factors,
+    )
