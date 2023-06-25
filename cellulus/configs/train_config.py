@@ -30,7 +30,7 @@ class TrainConfig:
 
             Initial learning rate of the optimizer.
 
-        damping_factor (default = 10):
+        temperature (default = 10):
 
             Factor used to scale the gaussian function and control the rate of damping.
 
@@ -71,7 +71,7 @@ class TrainConfig:
     )
     weight_decay: float = attrs.field(default=1e-4, validator=instance_of(float))
 
-    damping_factor: float = attrs.field(default=10.0, validator=instance_of(float))
+    temperature: float = attrs.field(default=10.0, validator=instance_of(float))
     regularizer_weight: float = attrs.field(default=1e-5, validator=instance_of(float))
     save_model_every: int = attrs.field(default=1_000, validator=instance_of(int))
     save_snapshot_every: int = attrs.field(default=1_000, validator=instance_of(int))
