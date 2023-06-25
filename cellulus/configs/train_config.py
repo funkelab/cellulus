@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import attrs
 from attrs.validators import instance_of
 
@@ -10,6 +12,11 @@ class TrainConfig:
     """Train configuration.
 
     Parameters:
+
+        crop_size:
+
+            The size of the crops - specified as a tuple of pixels -
+            extracted from the raw images, used during training.
 
         batch_size:
 
@@ -31,13 +38,17 @@ class TrainConfig:
 
             The weight of the L2 regularizer on the object-centric embeddings.
 
-        save_model_every:
+        save_model_every (default = 1e3):
 
             The model weights are saved every few iterations.
 
-        save_snapshot_every:
+        save_snapshot_every (default = 1e3):
 
             The zarr snapshot is saved every few iterations.
+
+        num_workers (default = 8):
+
+            The number of sub-processes to use for data-loading.
 
         train_data_config:
 
@@ -52,13 +63,16 @@ class TrainConfig:
     validate_data_config: DatasetConfig = attrs.field(
         converter=to_config(DatasetConfig)
     )
-
+    crop_size: Tuple = attrs.field(default=(252, 252), validator=instance_of(Tuple))
     batch_size: int = attrs.field(default=8, validator=instance_of(int))
     max_iterations: int = attrs.field(default=100_000, validator=instance_of(int))
     initial_learning_rate: float = attrs.field(
-        default=4e-5, validator=instance_of(float)
+        default=4e-4, validator=instance_of(float)
     )
+    weight_decay: float = attrs.field(default=1e-4, validator=instance_of(float))
+
     damping_factor: float = attrs.field(default=10.0, validator=instance_of(float))
     regularizer_weight: float = attrs.field(default=1e-5, validator=instance_of(float))
     save_model_every: int = attrs.field(default=1_000, validator=instance_of(int))
     save_snapshot_every: int = attrs.field(default=1_000, validator=instance_of(int))
+    num_workers: int = attrs.field(default=8, validator=instance_of(int))

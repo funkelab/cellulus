@@ -14,6 +14,7 @@ def train(config_file):
         config = tomli.load(f)
 
     experiment_config = ExperimentConfig(**config)
+    print(experiment_config)
     train_experiment(experiment_config)
 
 
