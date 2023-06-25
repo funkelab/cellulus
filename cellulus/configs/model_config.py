@@ -22,6 +22,10 @@ class ModelConfig:
             The factor by which to increase the number of feature maps between
             levels of the U-Net.
 
+        features_in_last_layer (optional, default = 64):
+
+            The number of feature channels in the last layer of the U-Net
+
         downsampling_factors:
 
             A list of downsampling factors, each given per dimension (e.g.,
@@ -35,9 +39,12 @@ class ModelConfig:
             that are used for prediction. If set during training, the
             checkpoint will be used to resume training, otherwise the network
             will be trained from scratch.
+
+
     """
 
     num_fmaps: int = attrs.field(validator=instance_of(int))
     fmap_inc_factor: int = attrs.field(validator=instance_of(int))
+    features_in_last_layer: int = attrs.field(default=64)
     downsampling_factors: List[List[int]] = attrs.field(default=[[2, 2]])
     checkpoint: Path = attrs.field(default=None, converter=to_path)
