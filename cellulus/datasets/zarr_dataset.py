@@ -28,7 +28,6 @@ class ZarrDataset(IterableDataset):  # type: ignore
 
         self.path = path
         self.crop_size = crop_size
-
         self.__open_zarr()
 
         assert len(crop_size) == self.num_spatial_dims, (
@@ -84,7 +83,6 @@ class ZarrDataset(IterableDataset):  # type: ignore
 
     def __open_zarr(self):
         container = zarr.open(self.path, "r")
-
         try:
             self.data = container["raw"]
         except KeyError:
@@ -150,3 +148,6 @@ class ZarrDataset(IterableDataset):  # type: ignore
 
     def get_num_channels(self):
         return self.num_channels
+
+    def get_num_spatial_dims(self):
+        return self.num_spatial_dims
