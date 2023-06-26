@@ -10,6 +10,7 @@ def get_model(
     fmap_inc_factor: int,
     features_in_last_layer: int,
     downsampling_factors: List[Tuple[int, int]],
+    num_spatial_dims: int,
 ) -> UNetModel:
     return UNetModel(
         in_channels=in_channels,
@@ -18,4 +19,5 @@ def get_model(
         fmap_inc_factor=fmap_inc_factor,
         features_in_last_layer=features_in_last_layer,
         downsampling_factors=downsampling_factors,
+        num_spatial_dims=num_spatial_dims,
     )
