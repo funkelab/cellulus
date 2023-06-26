@@ -1,20 +1,24 @@
+from typing import List, Tuple
+
 import torch
 import torch.nn as nn
 from funlib.learn.torch.models import UNet
-from typing import List, Tuple
 
-class UNetModel(nn.Module): # type: ignore
+
+class UNetModel(nn.Module):  # type: ignore
     def __init__(
         self,
-        in_channels: int ,
+        in_channels: int,
         out_channels: int,
         num_fmaps: int = 64,
         fmap_inc_factor: int = 3,
         features_in_last_layer: int = 64,
-        downsampling_factors: List[Tuple[int, int]] = [(2, 2),]
+        downsampling_factors: List[Tuple[int, int]] = [
+            (2, 2),
+        ],
+        num_spatial_dims: int = 2,
     ):
         super().__init__()
-        print(downsampling_factors)
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.features_in_last_layer = features_in_last_layer
@@ -26,20 +30,42 @@ class UNetModel(nn.Module): # type: ignore
             activation="ReLU",
             padding="valid",
             num_fmaps_out=self.features_in_last_layer,
-            kernel_size_down=[[(3, 3), (1, 1), (1, 1), (3, 3)]] * (len(downsampling_factors) + 1),
-            kernel_size_up=[[(3, 3), (1, 1), (1, 1), (3, 3)]] * len(downsampling_factors),
+            kernel_size_down=[
+                [
+                    (3,) * num_spatial_dims,
+                    (1,) * num_spatial_dims,
+                    (1,) * num_spatial_dims,
+                    (3,) * num_spatial_dims,
+                ]
+            ]
+            * (len(downsampling_factors) + 1),
+            kernel_size_up=[
+                [
+                    (3,) * num_spatial_dims,
+                    (1,) * num_spatial_dims,
+                    (1,) * num_spatial_dims,
+                    (3,) * num_spatial_dims,
+                ]
+            ]
+            * len(downsampling_factors),
             constant_upsample=True,
         )
-        self.head = torch.nn.Sequential(
+        if num_spatial_dims == 2:
+            self.head = torch.nn.Sequential(
                 nn.Conv2d(self.features_in_last_layer, self.features_in_last_layer, 1),
                 nn.ReLU(),
                 nn.Conv2d(self.features_in_last_layer, out_channels, 1),
             )
+        elif num_spatial_dims == 3:
+            self.head = torch.nn.Sequential(
+                nn.Conv3d(self.features_in_last_layer, self.features_in_last_layer, 1),
+                nn.ReLU(),
+                nn.Conv3d(self.features_in_last_layer, out_channels, 1),
+            )
 
     def head_forward(self, last_layer_output):
-
-            out_cat = self.head(last_layer_output)
-            return out_cat
+        out_cat = self.head(last_layer_output)
+        return out_cat
 
     @staticmethod
     def select_and_add_coordinates(output, coordinates):
