@@ -9,8 +9,6 @@ torch.backends.cudnn.benchmark = True
 
 
 def train(experiment_config):
-    print(experiment_config)
-
     # create train dataset
     train_dataset = get_dataset(
         path=experiment_config.train_config.train_data_config.container_path,
@@ -34,6 +32,7 @@ def train(experiment_config):
         fmap_inc_factor=experiment_config.model_config.fmap_inc_factor,
         features_in_last_layer=experiment_config.model_config.features_in_last_layer,
         downsampling_factors=experiment_config.model_config.downsampling_factors,
+        num_spatial_dims=train_dataset.get_num_spatial_dims(),
     )
 
     # set loss
@@ -65,6 +64,10 @@ def train(experiment_config):
         model.load_state_dict(state["model_state_dict"], strict=True)
         optimizer.load_state_dict(state["optim_state_dict"])
 
+    anchor_coordinates, reference_coordinates = get_anchors_references(
+        experiment_config.train_config.crop_size
+    )
+
     # call `train_iteration`
     for iteration in tqdm(
         range(start_iteration, experiment_config.train_config.max_iterations)
@@ -78,6 +81,8 @@ def train(experiment_config):
             model=model,
             criterion=criterion,
             optimizer=optimizer,
+            anchor_coordinates=anchor_coordinates,
+            reference_coordinates=reference_coordinates,
         )
         scheduler.step()
         print(f"===> train loss: {train_loss:.2f}")
@@ -99,14 +104,30 @@ def train(experiment_config):
             )
 
 
-def train_iteration(train_dataloader, model, criterion, optimizer):
+def train_iteration(
+    train_dataloader,
+    model,
+    criterion,
+    optimizer,
+    anchor_coordinates,
+    reference_coordinates,
+):
     model.train()
     for param_group in optimizer.param_groups:
         print("learning rate: {}".format(param_group["lr"]))
     for i, samples in enumerate(train_dataloader):
-        model(samples)
-        # loss = criterion(output)
-        return None
+        prediction = model(samples)
+        anchor_embeddings = model.select_and_add_coordinates(
+            prediction, anchor_coordinates
+        )
+        reference_embeddings = model.select_and_add_coordinates(
+            prediction, reference_coordinates
+        )
+        loss = criterion(anchor_embeddings, reference_embeddings)
+        loss = loss.mean()
+        optimizer.zero_grad()
+        optimizer.step()
+    return loss.item()
 
 
 def save_model(state, iteration):
@@ -114,4 +135,8 @@ def save_model(state, iteration):
 
 
 def save_snapshot(state, iteration):
+    pass
+
+
+def get_anchors_references(crop_size):
     pass
