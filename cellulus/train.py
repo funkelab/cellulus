@@ -1,4 +1,5 @@
 import torch
+import zarr
 from tqdm import tqdm
 
 from cellulus.criterions import get_loss
@@ -72,7 +73,7 @@ def train(experiment_config):
             train_dataloader,
         )
     ):
-        train_loss = train_iteration(
+        train_loss, prediction = train_iteration(
             batch,
             model=model,
             criterion=criterion,
@@ -85,14 +86,15 @@ def train(experiment_config):
             "model_state_dict": model.state_dict(),
             "optim_state_dict": optimizer.state_dict(),
         }
-        if iteration % experiment_config.train_config.save_model_every:
+        if iteration % experiment_config.train_config.save_model_every == 0:
             save_model(
                 state,
                 iteration,
             )
-        if iteration % experiment_config.train_config.save_snapshot_every:
+        if iteration % experiment_config.train_config.save_snapshot_every == 0:
             save_snapshot(
-                state,
+                batch,
+                prediction,
                 iteration,
             )
 
@@ -110,12 +112,28 @@ def train_iteration(
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
-    return loss.item()
+    return loss.item(), prediction
 
 
 def save_model(state, iteration):
     pass
 
 
-def save_snapshot(state, iteration):
-    pass
+def save_snapshot(batch, prediction, iteration):
+    num_spatial_dims = len(batch.shape) - 2
+
+    axis_names = ["s", "c"] + ["t", "z", "y", "x"][-num_spatial_dims:]
+    prediction_offset = tuple(
+        (a - b) / 2
+        for a, b in zip(
+            batch.shape[-num_spatial_dims:], prediction.shape[-num_spatial_dims:]
+        )
+    )
+    f = zarr.open("snapshots.zarr", "a")
+    f[f"{iteration}/raw"] = batch.detach().cpu().numpy()
+    f[f"{iteration}/raw"].attrs["axis_names"] = axis_names
+    f[f"{iteration}/prediction"] = prediction.detach().cpu().numpy()
+    f[f"{iteration}/prediction"].attrs["axis_names"] = axis_names
+    f[f"{iteration}/prediction"].attrs["offset"] = prediction_offset
+
+    print(f"Snapshot saved at iteration {iteration}")
