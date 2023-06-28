@@ -1,5 +1,4 @@
 import torch
-from tqdm import tqdm
 
 from cellulus.criterions import get_loss
 from cellulus.datasets import get_dataset
@@ -14,7 +13,7 @@ def train(experiment_config):
         path=experiment_config.train_config.train_data_config.container_path,
         crop_size=experiment_config.train_config.crop_size,
     )
-    
+
     # create train dataloader
     train_dataloader = torch.utils.data.DataLoader(
         dataset=train_dataset,
@@ -34,7 +33,7 @@ def train(experiment_config):
         downsampling_factors=experiment_config.model_config.downsampling_factors,
         num_spatial_dims=train_dataset.get_num_spatial_dims(),
     )
-    
+
     model = model.cuda()
 
     # set loss
@@ -43,7 +42,7 @@ def train(experiment_config):
         temperature=experiment_config.train_config.temperature,
         kappa=experiment_config.train_config.kappa,
         density=experiment_config.train_config.density,
-        num_spatial_dims = train_dataset.get_num_spatial_dims()
+        num_spatial_dims=train_dataset.get_num_spatial_dims(),
     )
 
     # set optimizer
@@ -52,9 +51,7 @@ def train(experiment_config):
         lr=experiment_config.train_config.initial_learning_rate,
     )
 
-
     # set scheduler:
-
 
     # resume training
     start_iteration = 0
@@ -68,9 +65,12 @@ def train(experiment_config):
         optimizer.load_state_dict(state["optim_state_dict"])
 
     # call `train_iteration`
-    for iteration in range(start_iteration, experiment_config.train_config.max_iterations):
+    for iteration, batch in zip(
+        range(start_iteration, experiment_config.train_config.max_iterations),
+        train_dataloader,
+    ):
         train_loss = train_iteration(
-            train_dataloader=train_dataloader,
+            batch,
             model=model,
             criterion=criterion,
             optimizer=optimizer,
@@ -95,15 +95,13 @@ def train(experiment_config):
 
 
 def train_iteration(
-    train_dataloader,
+    batch,
     model,
     criterion,
     optimizer,
 ):
     model.train()
-    samples = next(iter(train_dataloader))
-    samples = samples.cuda()
-    prediction = model(samples)
+    prediction = model(batch.cuda())
     loss = criterion(prediction)
     loss = loss.mean()
     optimizer.zero_grad()
