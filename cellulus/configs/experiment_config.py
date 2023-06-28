@@ -1,8 +1,8 @@
 import attrs
 from attrs.validators import instance_of
 
-from .model_config import ModelConfig
 from .inference_config import InferenceConfig
+from .model_config import ModelConfig
 from .train_config import TrainConfig
 from .utils import to_config
 

@@ -1,11 +1,9 @@
-import torch
-
-from cellulus.datasets import get_dataset
+from cellulus.datasets.meta_data import DatasetMetaData
 from cellulus.models import get_model
+from cellulus.post_process import post_process
 from cellulus.predict import predict
 from cellulus.segment import segment
-from cellulus.post_process import post_process
-from cellulus.datasets.meta_data import DatasetMetaData
+
 
 def infer(experiment_config):
     ...
@@ -39,9 +37,10 @@ def infer(experiment_config):
     prediction = predict(inference_config, model, dataset_meta_data)
 
     # if segmentation is also a dataset config as suggested, does this require that segmentation and prediction are in different containers?
-    segmentation = segment(prediction, inference_config)
+    segment(prediction, inference_config)
 
     post_process(segment, inference_config)
+
 
 def load_model():
     pass

@@ -10,7 +10,7 @@ class OCELoss(nn.Module):  # type: ignore
         regularization_weight: float,
         density: float,
         kappa: float,
-        num_spatial_dims: int
+        num_spatial_dims: int,
     ):
         super().__init__()
         self.temperature = temperature
@@ -35,13 +35,13 @@ class OCELoss(nn.Module):  # type: ignore
     def forward(self, prediction):
         if self.num_spatial_dims == 2:
             b, c, h, w = prediction.shape
-            
+
             num_anchors = int(self.density * h * w)
             anchor_coordinates_y = np.random.randint(
-                2*self.kappa, h - 2*self.kappa, num_anchors
+                2 * self.kappa, h - 2 * self.kappa, num_anchors
             )
             anchor_coordinates_x = np.random.randint(
-                2*self.kappa, w - 2*self.kappa, num_anchors
+                2 * self.kappa, w - 2 * self.kappa, num_anchors
             )
             anchor_coordinates = np.stack(
                 (anchor_coordinates_x, anchor_coordinates_y), axis=1
@@ -50,13 +50,13 @@ class OCELoss(nn.Module):  # type: ignore
             b, c, d, h, w = prediction.shape
             num_anchors = int(self.density * d * h * w)
             anchor_coordinates_z = np.random.randint(
-                2*self.kappa, d - 2*self.kappa, num_anchors
+                2 * self.kappa, d - 2 * self.kappa, num_anchors
             )
             anchor_coordinates_y = np.random.randint(
-                2*self.kappa, h - 2*self.kappa, num_anchors
+                2 * self.kappa, h - 2 * self.kappa, num_anchors
             )
             anchor_coordinates_x = np.random.randint(
-                2*self.kappa, w - 2*self.kappa, num_anchors
+                2 * self.kappa, w - 2 * self.kappa, num_anchors
             )
             anchor_coordinates = np.stack(
                 (anchor_coordinates_x, anchor_coordinates_y, anchor_coordinates_z),
@@ -71,13 +71,19 @@ class OCELoss(nn.Module):  # type: ignore
         reference_coordinates = anchor_coordinates + offsets
         anchor_coordinates = anchor_coordinates[np.newaxis, ...]
         reference_coordinates = reference_coordinates[np.newaxis, ...]
-        anchor_coordinates = torch.from_numpy(np.repeat(anchor_coordinates, b, 0)).cuda()
-        reference_coordinates = torch.from_numpy(np.repeat(reference_coordinates, b, 0)).cuda()
+        anchor_coordinates = torch.from_numpy(
+            np.repeat(anchor_coordinates, b, 0)
+        ).cuda()
+        reference_coordinates = torch.from_numpy(
+            np.repeat(reference_coordinates, b, 0)
+        ).cuda()
         anchor_embeddings = self.get_embeddings(
-            prediction, anchor_coordinates,
+            prediction,
+            anchor_coordinates,
         )  # B x N x 2/3
         reference_embeddings = self.get_embeddings(
-            prediction, reference_coordinates,
+            prediction,
+            reference_coordinates,
         )  # B x N x 2/3
         distance = self.distance_function(
             anchor_embeddings, reference_embeddings.detach()
@@ -90,26 +96,21 @@ class OCELoss(nn.Module):  # type: ignore
         )
 
     def sample_offsets(self, radius, num_samples):
-        if self.num_spatial_dims==2:
-            offset_x = np.random.randint(-radius, radius + 1,
-                                   size=2 * num_samples)
-            offset_y = np.random.randint(-radius, radius + 1,
-                                   size=2 * num_samples)
+        if self.num_spatial_dims == 2:
+            offset_x = np.random.randint(-radius, radius + 1, size=2 * num_samples)
+            offset_y = np.random.randint(-radius, radius + 1, size=2 * num_samples)
 
             offset_coordinates = np.stack((offset_x, offset_y), axis=1)
         elif self.num_spatial_dims == 3:
-            offset_x = np.random.randint(-radius, radius + 1,
-                                   size=2 * num_samples)
-            offset_y = np.random.randint(-radius, radius + 1,
-                                   size=2 * num_samples)
-            offset_z = np.random.randint(-radius, radius + 1,
-                                   size=2 * num_samples)
+            offset_x = np.random.randint(-radius, radius + 1, size=2 * num_samples)
+            offset_y = np.random.randint(-radius, radius + 1, size=2 * num_samples)
+            offset_z = np.random.randint(-radius, radius + 1, size=2 * num_samples)
 
             offset_coordinates = np.stack((offset_x, offset_y, offset_z), axis=1)
 
-        in_circle = (offset_coordinates**2).sum(axis=1) < radius ** 2
+        in_circle = (offset_coordinates**2).sum(axis=1) < radius**2
         offset_coordinates = offset_coordinates[in_circle]
-        not_zero = np.absolute(offset_coordinates).sum(axis=1) > 0            
+        not_zero = np.absolute(offset_coordinates).sum(axis=1) > 0
         offset_coordinates = offset_coordinates[not_zero]
 
         if len(offset_coordinates) < num_samples:
@@ -120,9 +121,9 @@ class OCELoss(nn.Module):  # type: ignore
     def get_embeddings(self, predictions, coordinates):
         selection = []
         for prediction, coordinate in zip(predictions, coordinates):
-            if self.num_spatial_dims==2:
+            if self.num_spatial_dims == 2:
                 embedding = prediction[:, coordinate[:, 1], coordinate[:, 0]]
-            elif self.num_spatial_dims==3:
+            elif self.num_spatial_dims == 3:
                 embedding = prediction[
                     :, coordinate[:, 2], coordinate[:, 1], coordinate[:, 0]
                 ]
