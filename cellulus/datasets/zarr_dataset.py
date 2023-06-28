@@ -25,6 +25,13 @@ class ZarrDataset(IterableDataset):  # type: ignore
                 axes, e.g., `["s", "c", "y", "x"]` for a 2D dataset.
 
 
+            crop_size:
+
+                The size of data crops used during training (distinct from the
+                "patch size" of the method: from each crop, multiple patches
+                will be randomly selected and the loss computed on them). This
+                should be equal to the input size of the model that predicts
+                the OCEs.
         """
 
         self.dataset_config = dataset_config
