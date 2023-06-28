@@ -1,4 +1,5 @@
 import torch
+from tqdm import tqdm
 
 from cellulus.criterions import get_loss
 from cellulus.datasets import get_dataset
@@ -65,9 +66,11 @@ def train(experiment_config):
         optimizer.load_state_dict(state["optim_state_dict"])
 
     # call `train_iteration`
-    for iteration, batch in zip(
-        range(start_iteration, experiment_config.train_config.max_iterations),
-        train_dataloader,
+    for iteration, batch in tqdm(
+        zip(
+            range(start_iteration, experiment_config.train_config.max_iterations),
+            train_dataloader,
+        )
     ):
         train_loss = train_iteration(
             batch,
