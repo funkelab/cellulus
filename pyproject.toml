@@ -44,7 +44,7 @@ homepage = "https://funkelab.github.io/cellulus"
 
 [project.scripts]
 train = "cellulus.cli:train"
-predict = "cellulus.cli:predict"
+infer = "cellulus.cli:infer"
 
 # https://hatch.pypa.io/latest/version/
 [tool.hatch.version]

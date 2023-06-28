@@ -2,7 +2,7 @@ import attrs
 from attrs.validators import instance_of
 
 from .model_config import ModelConfig
-from .predict_config import PredictConfig
+from .inference_config import InferenceConfig
 from .train_config import TrainConfig
 from .utils import to_config
 
@@ -31,7 +31,7 @@ class ExperimentConfig:
 
             Configuration object for training.
 
-        predict_config:
+        inference_config:
 
             Configuration object for prediction.
     """
@@ -43,6 +43,6 @@ class ExperimentConfig:
     train_config: TrainConfig = attrs.field(
         default=None, converter=to_config(TrainConfig)
     )
-    predict_config: PredictConfig = attrs.field(
-        default=None, converter=to_config(PredictConfig)
+    inference_config: InferenceConfig = attrs.field(
+        default=None, converter=to_config(InferenceConfig)
     )
