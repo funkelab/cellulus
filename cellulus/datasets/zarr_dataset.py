@@ -2,10 +2,11 @@ import math
 from typing import Tuple
 
 import gunpowder as gp
-import zarr
 from torch.utils.data import IterableDataset
 
 from cellulus.configs import DatasetConfig
+
+from .meta_data import DatasetMetaData
 
 
 class ZarrDataset(IterableDataset):  # type: ignore
@@ -28,7 +29,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
 
         self.dataset_config = dataset_config
         self.crop_size = crop_size
-        self.__open_zarr()
+        self.__read_meta_data()
 
         assert len(crop_size) == self.num_spatial_dims, (
             f'"crop_size" must have the same dimension as the '
@@ -83,77 +84,15 @@ class ZarrDataset(IterableDataset):  # type: ignore
                 sample = self.pipeline.request_batch(self.request)
                 yield sample[self.raw].data[0]
 
-    def __open_zarr(self):
-        container = zarr.open(self.dataset_config.container_path, "r")
-        try:
-            self.data = container[self.dataset_config.dataset_name]
-        except KeyError:
-            self.__invalid_dataset(
-                f"Zarr container {self.dataset_config.container_path} does not contain "
-                f'"{self.dataset_config.dataset_name}" dataset'
-            )
+    def __read_meta_data(self):
+        meta_data = DatasetMetaData(self.dataset_config)
 
-        try:
-            self.axis_names = self.data.attrs["axis_names"]
-        except KeyError:
-            self.__invalid_dataset(
-                f'"{self.dataset_config.dataset_name}" dataset in '
-                f'{self.dataset_config.container_path} does not contain "axis_names" '
-                "attribute"
-            )
-
-        self.num_dims = len(self.axis_names)
-        self.num_spatial_dims = 0
-        self.num_samples = None
-        self.num_channels = None
-        self.sample_dim = None
-        self.channel_dim = None
-        self.time_dim = None
-
-        for dim, axis_name in enumerate(self.axis_names):
-            if axis_name == "s":
-                self.sample_dim = dim
-                self.num_samples = self.data.shape[dim]
-            elif axis_name == "c":
-                self.channel_dim = dim
-                self.num_channels = self.data.shape[dim]
-            elif axis_name == "t":
-                self.num_spatial_dims += 1
-                self.time_dim = dim
-            elif axis_name in ["z", "y", "x"]:
-                self.num_spatial_dims += 1
-
-        if self.sample_dim is None:
-            self.__invalid_dataset(
-                f'"{self.dataset_config.dataset_name}" dataset in '
-                f"{self.dataset_config.container_path} does not have a sample dimension"
-            )
-
-        if self.channel_dim is None:
-            self.__invalid_dataset(
-                f'"{self.dataset_config.dataset_name}" dataset in '
-                f"{self.dataset_config.container_path} does not have a channel "
-                "dimension"
-            )
-        if self.num_dims != len(self.data.shape):
-            self.__invalid_dataset(
-                f'"{self.dataset_config.dataset_name}" dataset has '
-                f'{len(self.data.shape)} dimensions, but attribute "axis_names" '
-                f"has {self.num_dims} entries"
-            )
-
-    def __invalid_dataset(self, message):
-        raise RuntimeError(
-            message
-            + "\n\n"
-            + (
-                "The raw dataset should have shape "
-                "(s, c, [t,] [z,] y, x), where s = # of samples, c = # of channels, "
-                "t = # of frames, and z/y/x are spatial extents. The dataset should "
-                'have an "axis_names" attribute that contains the names of the used '
-                'axes, e.g., ["s", "c", "y", "x"] for a 2D dataset.'
-            )
-        )
+        self.num_dims = meta_data.num_dims
+        self.num_spatial_dims = meta_data.num_spatial_dims
+        self.num_channels = meta_data.num_channels
+        self.sample_dim = meta_data.sample_dim
+        self.channel_dim = meta_data.channel_dim
+        self.time_dim = meta_data.time_dim
 
     def get_num_channels(self):
         return self.num_channels
