@@ -26,7 +26,7 @@ class TrainConfig:
 
             The maximum number of iterations to train for.
 
-        initial_learning_rate:
+        initial_learning_rate (default = 4e-5):
 
             Initial learning rate of the optimizer.
 
@@ -37,6 +37,14 @@ class TrainConfig:
         regularizer_weight (default = 1e-5):
 
             The weight of the L2 regularizer on the object-centric embeddings.
+
+        density (default = 0.2)
+
+            Determines the fraction of patches to sample per crop, during training.
+
+        kappa (default = 10.0):
+
+            Neighborhood radius to extract patches from
 
         save_model_every (default = 1e3):
 
@@ -67,10 +75,10 @@ class TrainConfig:
     batch_size: int = attrs.field(default=8, validator=instance_of(int))
     max_iterations: int = attrs.field(default=100_000, validator=instance_of(int))
     initial_learning_rate: float = attrs.field(
-        default=4e-4, validator=instance_of(float)
+        default=4e-5, validator=instance_of(float)
     )
-    weight_decay: float = attrs.field(default=1e-4, validator=instance_of(float))
-
+    density: float = attrs.field(default=0.2, validator=instance_of(float))
+    kappa: float = attrs.field(default=10.0, validator=instance_of(float))
     temperature: float = attrs.field(default=10.0, validator=instance_of(float))
     regularizer_weight: float = attrs.field(default=1e-5, validator=instance_of(float))
     save_model_every: int = attrs.field(default=1_000, validator=instance_of(int))
