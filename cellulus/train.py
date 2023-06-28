@@ -108,13 +108,14 @@ def train_iteration(
     model.train()
     for param_group in optimizer.param_groups:
         print("learning rate: {}".format(param_group["lr"]))
-    for i, samples in enumerate(train_dataloader):
-        prediction = model(samples)
-        loss = criterion(prediction)
-        loss = loss.mean()
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+    samples = next(iter(train_dataloader))
+    prediction = model(samples)
+    loss = criterion(prediction)
+    loss = loss.mean()
+    print(loss.item())
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
     return loss.item()
 
 
