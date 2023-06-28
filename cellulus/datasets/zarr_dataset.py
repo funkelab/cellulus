@@ -77,18 +77,20 @@ class ZarrDataset(IterableDataset):  # type: ignore
             + gp.SimpleAugment(mirror_only=spatial_dims, transpose_only=spatial_dims)
         )
 
-        # request one sample, all channels, plus crop dimensions
-        self.request = gp.BatchRequest()
-        self.request[self.raw] = gp.ArraySpec(
-            roi=gp.Roi((0,) * self.num_dims, (1, self.num_channels, *self.crop_size))
-        )
-
     def __yield_sample(self):
         """An infinite generator of crops."""
 
         with gp.build(self.pipeline):
             while True:
-                sample = self.pipeline.request_batch(self.request)
+                # request one sample, all channels, plus crop dimensions
+                request = gp.BatchRequest()
+                request[self.raw] = gp.ArraySpec(
+                    roi=gp.Roi(
+                        (0,) * self.num_dims, (1, self.num_channels, *self.crop_size)
+                    )
+                )
+
+                sample = self.pipeline.request_batch(request)
                 yield sample[self.raw].data[0]
 
     def __read_meta_data(self):
