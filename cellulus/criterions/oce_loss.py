@@ -89,10 +89,9 @@ class OCELoss(nn.Module):  # type: ignore
             anchor_embeddings, reference_embeddings.detach()
         )
         nonlinear_distance = self.nonlinearity(distance)
-        print(nonlinear_distance.sum())
         return (
-            nonlinear_distance.sum()
-            + self.regularization_weight * anchor_embeddings.norm(2, dim=-1).sum()
+            nonlinear_distance.mean()
+            + self.regularization_weight * anchor_embeddings.norm(2, dim=-1).mean()
         )
 
     def sample_offsets(self, radius, num_samples):
