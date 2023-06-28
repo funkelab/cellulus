@@ -67,7 +67,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
             )
             + gp.RandomLocation()
             + gp.ElasticAugment(
-                control_point_spacing=(10,) * self.num_spatial_dims,
+                control_point_spacing=(64,) * self.num_spatial_dims,
                 jitter_sigma=(2.0,) * self.num_spatial_dims,
                 rotation_interval=(0, math.pi / 2),
                 scale_interval=(0.9, 1.1),
