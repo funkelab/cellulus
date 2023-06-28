@@ -1,11 +1,10 @@
-from cellulus.config import DatasetConfig
 import zarr
+
+from cellulus.configs import DatasetConfig
 
 
 class DatasetMetaData:
-
     def __init__(self, dataset_config: DatasetConfig):
-
         self.dataset_config = dataset_config
 
         container = zarr.open(self.dataset_config.container_path, "r")
