@@ -1,6 +1,6 @@
-from pathlib import Path
 from typing import Tuple
 
+from cellulus.configs.dataset_config import DatasetConfig
 from cellulus.datasets.zarr_dataset import ZarrDataset
 
 
