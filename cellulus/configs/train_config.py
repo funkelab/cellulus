@@ -96,5 +96,5 @@ class TrainConfig:
     save_snapshot_every: int = attrs.field(default=1_000, validator=instance_of(int))
     num_workers: int = attrs.field(default=8, validator=instance_of(int))
 
-    control_point_spacing: int = attrs.field(default=64, validator=instanceof(int))
-    control_point_jitter: float = attrs.field(default=2.0, validator=instanceof(float))
+    control_point_spacing: int = attrs.field(default=64, validator=instance_of(int))
+    control_point_jitter: float = attrs.field(default=2.0, validator=instance_of(float))
