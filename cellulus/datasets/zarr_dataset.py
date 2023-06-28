@@ -1,39 +1,39 @@
 import math
-from pathlib import Path
 from typing import Tuple
 
 import gunpowder as gp
 import zarr
 from torch.utils.data import IterableDataset
 
+from cellulus.configs import DatasetConfig
+
 
 class ZarrDataset(IterableDataset):  # type: ignore
-    def __init__(self, path: Path, crop_size: Tuple[int]):
+    def __init__(self, dataset_config: DatasetConfig, crop_size: Tuple[int]):
         """A dataset that serves random samples from a zarr container.
 
         Args:
 
-            path:
+            dataset_config:
 
-                The path of the zarr container to use. The zarr container
-                should contain a `"raw"` dataset with shape `(s, c, [t,] [z,]
-                y, x)`, where `s` = # of samples, `c` = # of channels, `t` = #
-                of frames, and `z`/`y`/`x` are spatial extents. The dataset
-                should have an `"axis_names"` attribute that contains the names
-                of the used axes, e.g., `["s", "c", "y", "x"]` for a 2D
-                dataset.
+                A dataset config object pointing to the zarr dataset to use.
+                The dataset should have shape `(s, c, [t,] [z,] y, x)`, where
+                `s` = # of samples, `c` = # of channels, `t` = # of frames, and
+                `z`/`y`/`x` are spatial extents. The dataset should have an
+                `"axis_names"` attribute that contains the names of the used
+                axes, e.g., `["s", "c", "y", "x"]` for a 2D dataset.
 
 
         """
 
-        self.path = path
+        self.dataset_config = dataset_config
         self.crop_size = crop_size
         self.__open_zarr()
 
         assert len(crop_size) == self.num_spatial_dims, (
             f'"crop_size" must have the same dimension as the '
-            'spatial(temporal) dimensions of the "raw" dataset which is '
-            f"{self.num_spatial_dims}, but it is {crop_size}"
+            f'spatial(temporal) dimensions of the "{self.dataset_config.dataset_name}" '
+            f"dataset which is {self.num_spatial_dims}, but it is {crop_size}"
         )
 
         self.__setup_pipeline()
@@ -53,7 +53,9 @@ class ZarrDataset(IterableDataset):  # type: ignore
 
         self.pipeline = (
             gp.ZarrSource(
-                self.path, {self.raw: "raw"}, array_specs={self.raw: raw_spec}
+                self.dataset_config.container_path,
+                {self.raw: self.dataset_config.dataset_name},
+                array_specs={self.raw: raw_spec},
             )
             + gp.RandomLocation()
             + gp.ElasticAugment(
@@ -82,19 +84,22 @@ class ZarrDataset(IterableDataset):  # type: ignore
                 yield sample[self.raw].data[0]
 
     def __open_zarr(self):
-        container = zarr.open(self.path, "r")
+        container = zarr.open(self.dataset_config.container_path, "r")
         try:
-            self.data = container["raw"]
+            self.data = container[self.dataset_config.dataset_name]
         except KeyError:
             self.__invalid_dataset(
-                f'Zarr container {self.path} does not contain a "raw" dataset'
+                f"Zarr container {self.dataset_config.container_path} does not contain "
+                f'"{self.dataset_config.dataset_name}" dataset'
             )
 
         try:
             self.axis_names = self.data.attrs["axis_names"]
         except KeyError:
             self.__invalid_dataset(
-                f'"raw" dataset in {self.path} does not contain "axis_names" attribute'
+                f'"{self.dataset_config.dataset_name}" dataset in '
+                f'{self.dataset_config.container_path} does not contain "axis_names" '
+                "attribute"
             )
 
         self.num_dims = len(self.axis_names)
@@ -120,17 +125,21 @@ class ZarrDataset(IterableDataset):  # type: ignore
 
         if self.sample_dim is None:
             self.__invalid_dataset(
-                f'"raw" dataset in {self.path} does not have a sample dimension'
+                f'"{self.dataset_config.dataset_name}" dataset in '
+                f"{self.dataset_config.container_path} does not have a sample dimension"
             )
 
         if self.channel_dim is None:
             self.__invalid_dataset(
-                f'"raw" dataset in {self.path} does not have a channel dimension'
+                f'"{self.dataset_config.dataset_name}" dataset in '
+                f"{self.dataset_config.container_path} does not have a channel "
+                "dimension"
             )
         if self.num_dims != len(self.data.shape):
             self.__invalid_dataset(
-                f'"raw" dataset has {len(self.data.shape)} dimensions, but attribute '
-                f'"axis_names" has {self.num_dims} entries'
+                f'"{self.dataset_config.dataset_name}" dataset has '
+                f'{len(self.data.shape)} dimensions, but attribute "axis_names" '
+                f"has {self.num_dims} entries"
             )
 
     def __invalid_dataset(self, message):
@@ -138,10 +147,10 @@ class ZarrDataset(IterableDataset):  # type: ignore
             message
             + "\n\n"
             + (
-                'The zarr container should contain a "raw" dataset with shape'
+                "The raw dataset should have shape "
                 "(s, c, [t,] [z,] y, x), where s = # of samples, c = # of channels, "
-                "t = # of frames, and z/y/x are spatial extents. The dataset should"
-                'have an "axis_names" attribute that contains the names of the used'
+                "t = # of frames, and z/y/x are spatial extents. The dataset should "
+                'have an "axis_names" attribute that contains the names of the used '
                 'axes, e.g., ["s", "c", "y", "x"] for a 2D dataset.'
             )
         )
