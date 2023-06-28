@@ -63,22 +63,9 @@ class UNetModel(nn.Module):  # type: ignore
                 nn.Conv3d(self.features_in_last_layer, out_channels, 1),
             )
 
-    def head_forward(self, last_layer_output):
-        out_cat = self.head(last_layer_output)
-        return out_cat
-
-    @staticmethod
-    def select_and_add_coordinates(output, coordinates):
-        selection = []
-        # output.shape = (b, c, h, w)
-        for o, c in zip(output, coordinates):
-            sel = o[:, c[:, 1], c[:, 0]]
-            sel = sel.transpose(1, 0)
-            sel += c
-            selection.append(sel)
-
-        # selection.shape = (b, c, p) where p is the number of selected positions
-        return torch.stack(selection, dim=0)
+    def head_forward(self, backbone_output):
+        out_head = self.head(backbone_output)
+        return out_head
 
     def forward(self, raw):
         h = self.backbone(raw)
