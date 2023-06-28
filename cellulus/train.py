@@ -10,9 +10,11 @@ torch.backends.cudnn.benchmark = True
 
 
 def train(experiment_config):
+    print(experiment_config)
+
     # create train dataset
     train_dataset = get_dataset(
-        path=experiment_config.train_config.train_data_config.container_path,
+        dataset_config=experiment_config.train_config.train_data_config,
         crop_size=experiment_config.train_config.crop_size,
     )
 
