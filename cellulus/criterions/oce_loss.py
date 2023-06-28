@@ -10,12 +10,14 @@ class OCELoss(nn.Module):  # type: ignore
         regularization_weight: float,
         density: float,
         kappa: float,
+        num_spatial_dims: int
     ):
         super().__init__()
         self.temperature = temperature
         self.regularization_weight = regularization_weight
         self.density = density
         self.kappa = kappa
+        self.num_spatial_dims = num_spatial_dims
 
         print(
             "Created OCE Loss-object with temperature={} and regularization={}".format(
@@ -31,29 +33,30 @@ class OCELoss(nn.Module):  # type: ignore
         return 1 - (-distance.pow(2) / self.temperature).exp()
 
     def forward(self, prediction):
-        if prediction.dim() == 4:
+        if self.num_spatial_dims == 2:
             b, c, h, w = prediction.shape
+            
             num_anchors = int(self.density * h * w)
             anchor_coordinates_y = np.random.randint(
-                self.kappa, h - self.kappa, num_anchors
+                2*self.kappa, h - 2*self.kappa, num_anchors
             )
             anchor_coordinates_x = np.random.randint(
-                self.kappa, w - self.kappa, num_anchors
+                2*self.kappa, w - 2*self.kappa, num_anchors
             )
             anchor_coordinates = np.stack(
                 (anchor_coordinates_x, anchor_coordinates_y), axis=1
             )  # N x 2
-        elif prediction.dim() == 5:
+        elif self.num_spatial_dims == 3:
             b, c, d, h, w = prediction.shape
             num_anchors = int(self.density * d * h * w)
             anchor_coordinates_z = np.random.randint(
-                self.kappa, d - self.kappa, num_anchors
+                2*self.kappa, d - 2*self.kappa, num_anchors
             )
             anchor_coordinates_y = np.random.randint(
-                self.kappa, h - self.kappa, num_anchors
+                2*self.kappa, h - 2*self.kappa, num_anchors
             )
             anchor_coordinates_x = np.random.randint(
-                self.kappa, w - self.kappa, num_anchors
+                2*self.kappa, w - 2*self.kappa, num_anchors
             )
             anchor_coordinates = np.stack(
                 (anchor_coordinates_x, anchor_coordinates_y, anchor_coordinates_z),
@@ -64,53 +67,62 @@ class OCELoss(nn.Module):  # type: ignore
         offsets = self.sample_offsets(
             radius=self.kappa,
             num_samples=len(anchor_coordinates),
-            ndim=prediction.dim(),
         )
         reference_coordinates = anchor_coordinates + offsets
-        reference_coordinates = reference_coordinates.astype(int)
         anchor_coordinates = anchor_coordinates[np.newaxis, ...]
         reference_coordinates = reference_coordinates[np.newaxis, ...]
-        anchor_coordinates = torch.from_numpy(np.repeat(anchor_coordinates, b, 0))
-        reference_coordinates = torch.from_numpy(np.repeat(reference_coordinates, b, 0))
+        anchor_coordinates = torch.from_numpy(np.repeat(anchor_coordinates, b, 0)).cuda()
+        reference_coordinates = torch.from_numpy(np.repeat(reference_coordinates, b, 0)).cuda()
         anchor_embeddings = self.get_embeddings(
-            prediction, anchor_coordinates, prediction.dim()
+            prediction, anchor_coordinates,
         )  # B x N x 2/3
         reference_embeddings = self.get_embeddings(
-            prediction, reference_coordinates, prediction.dim()
+            prediction, reference_coordinates,
         )  # B x N x 2/3
         distance = self.distance_function(
             anchor_embeddings, reference_embeddings.detach()
         )
         nonlinear_distance = self.nonlinearity(distance)
-
+        print(nonlinear_distance.sum())
         return (
             nonlinear_distance.sum()
             + self.regularization_weight * anchor_embeddings.norm(2, dim=-1).sum()
         )
 
-    def sample_offsets(self, radius, num_samples, ndim):
-        if ndim == 4:
-            theta = 2 * np.pi * np.random.random(num_samples)
-            r = radius * np.random.random(num_samples)
-            dx = r * np.cos(theta)
-            dy = r * np.sin(theta)
-            offsets = np.stack((dx, dy), axis=1)
-        elif ndim == 5:
-            theta = 2 * np.pi * np.random.random(num_samples)
-            r = radius * np.random.random(num_samples)
-            phi = np.pi * np.random.random(num_samples)
-            dz = r * np.cos(phi)
-            dy = r * np.sin(phi) * np.sin(theta)
-            dx = r * np.sin(phi) * np.cos(theta)
-            offsets = np.stack((dx, dy, dz), axis=1)
-        return offsets
+    def sample_offsets(self, radius, num_samples):
+        if self.num_spatial_dims==2:
+            offset_x = np.random.randint(-radius, radius + 1,
+                                   size=2 * num_samples)
+            offset_y = np.random.randint(-radius, radius + 1,
+                                   size=2 * num_samples)
 
-    def get_embeddings(self, predictions, coordinates, dim):
+            offset_coordinates = np.stack((offset_x, offset_y), axis=1)
+        elif self.num_spatial_dims == 3:
+            offset_x = np.random.randint(-radius, radius + 1,
+                                   size=2 * num_samples)
+            offset_y = np.random.randint(-radius, radius + 1,
+                                   size=2 * num_samples)
+            offset_z = np.random.randint(-radius, radius + 1,
+                                   size=2 * num_samples)
+
+            offset_coordinates = np.stack((offset_x, offset_y, offset_z), axis=1)
+
+        in_circle = (offset_coordinates**2).sum(axis=1) < radius ** 2
+        offset_coordinates = offset_coordinates[in_circle]
+        not_zero = np.absolute(offset_coordinates).sum(axis=1) > 0            
+        offset_coordinates = offset_coordinates[not_zero]
+
+        if len(offset_coordinates) < num_samples:
+            return self.sample_offsets(radius, num_samples)
+
+        return offset_coordinates[:num_samples]
+
+    def get_embeddings(self, predictions, coordinates):
         selection = []
         for prediction, coordinate in zip(predictions, coordinates):
-            if dim == 4:
+            if self.num_spatial_dims==2:
                 embedding = prediction[:, coordinate[:, 1], coordinate[:, 0]]
-            elif dim == 5:
+            elif self.num_spatial_dims==3:
                 embedding = prediction[
                     :, coordinate[:, 2], coordinate[:, 1], coordinate[:, 0]
                 ]
