@@ -27,7 +27,7 @@ def train(experiment_config):
     # set model
     model = get_model(
         in_channels=train_dataset.get_num_channels(),
-        out_channels=train_dataset.get_num_channels(),
+        out_channels=train_dataset.get_num_spatial_dims(),
         num_fmaps=experiment_config.model_config.num_fmaps,
         fmap_inc_factor=experiment_config.model_config.fmap_inc_factor,
         features_in_last_layer=experiment_config.model_config.features_in_last_layer,
@@ -39,13 +39,14 @@ def train(experiment_config):
     criterion = get_loss(
         regularizer_weight=experiment_config.train_config.regularizer_weight,
         temperature=experiment_config.train_config.temperature,
+        kappa=experiment_config.train_config.kappa,
+        density=experiment_config.train_config.density,
     )
 
     # set optimizer
     optimizer = torch.optim.Adam(
         model.parameters(),
         lr=experiment_config.train_config.initial_learning_rate,
-        weight_decay=experiment_config.train_config.weight_decay,
     )
 
     def lambda_(iteration):
@@ -64,10 +65,6 @@ def train(experiment_config):
         model.load_state_dict(state["model_state_dict"], strict=True)
         optimizer.load_state_dict(state["optim_state_dict"])
 
-    anchor_coordinates, reference_coordinates = get_anchors_references(
-        experiment_config.train_config.crop_size
-    )
-
     # call `train_iteration`
     for iteration in tqdm(
         range(start_iteration, experiment_config.train_config.max_iterations)
@@ -81,8 +78,6 @@ def train(experiment_config):
             model=model,
             criterion=criterion,
             optimizer=optimizer,
-            anchor_coordinates=anchor_coordinates,
-            reference_coordinates=reference_coordinates,
         )
         scheduler.step()
         print(f"===> train loss: {train_loss:.2f}")
@@ -109,23 +104,16 @@ def train_iteration(
     model,
     criterion,
     optimizer,
-    anchor_coordinates,
-    reference_coordinates,
 ):
     model.train()
     for param_group in optimizer.param_groups:
         print("learning rate: {}".format(param_group["lr"]))
     for i, samples in enumerate(train_dataloader):
         prediction = model(samples)
-        anchor_embeddings = model.select_and_add_coordinates(
-            prediction, anchor_coordinates
-        )
-        reference_embeddings = model.select_and_add_coordinates(
-            prediction, reference_coordinates
-        )
-        loss = criterion(anchor_embeddings, reference_embeddings)
+        loss = criterion(prediction)
         loss = loss.mean()
         optimizer.zero_grad()
+        loss.backward()
         optimizer.step()
     return loss.item()
 
@@ -135,8 +123,4 @@ def save_model(state, iteration):
 
 
 def save_snapshot(state, iteration):
-    pass
-
-
-def get_anchors_references(crop_size):
     pass
