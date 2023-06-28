@@ -10,7 +10,13 @@ from .meta_data import DatasetMetaData
 
 
 class ZarrDataset(IterableDataset):  # type: ignore
-    def __init__(self, dataset_config: DatasetConfig, crop_size: Tuple[int]):
+    def __init__(
+        self,
+        dataset_config: DatasetConfig,
+        crop_size: Tuple[int],
+        control_point_spacing: int,
+        control_point_jitter: float,
+    ):
         """A dataset that serves random samples from a zarr container.
 
         Args:
@@ -32,10 +38,23 @@ class ZarrDataset(IterableDataset):  # type: ignore
                 will be randomly selected and the loss computed on them). This
                 should be equal to the input size of the model that predicts
                 the OCEs.
+
+            control_point_spacing:
+
+                The distance in pixels between control points used for elastic
+                deformation of the raw data.
+
+            control_point_jitter:
+
+                How much to jitter the control points for elastic deformation
+                of the raw data, given as the standard deviation of a normal
+                distribution with zero mean.
         """
 
         self.dataset_config = dataset_config
         self.crop_size = crop_size
+        self.control_point_spacing = control_point_spacing
+        self.control_point_jitter = control_point_jitter
         self.__read_meta_data()
 
         assert len(crop_size) == self.num_spatial_dims, (
@@ -67,8 +86,9 @@ class ZarrDataset(IterableDataset):  # type: ignore
             )
             + gp.RandomLocation()
             + gp.ElasticAugment(
-                control_point_spacing=(64,) * self.num_spatial_dims,
-                jitter_sigma=(2.0,) * self.num_spatial_dims,
+                control_point_spacing=(self.control_point_spacing,)
+                * self.num_spatial_dims,
+                jitter_sigma=(self.control_point_jitter,) * self.num_spatial_dims,
                 rotation_interval=(0, math.pi / 2),
                 scale_interval=(0.9, 1.1),
                 subsample=4,

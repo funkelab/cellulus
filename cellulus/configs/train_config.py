@@ -58,6 +58,17 @@ class TrainConfig:
 
             The number of sub-processes to use for data-loading.
 
+        control_point_spacing (default = 64):
+
+            The distance in pixels between control points used for elastic
+            deformation of the raw data during training.
+
+        control_point_jitter (default = 2.0):
+
+            How much to jitter the control points for elastic deformation
+            of the raw data during training, given as the standard deviation of
+            a normal distribution with zero mean.
+
         train_data_config:
 
             Configuration object for the training data.
@@ -84,3 +95,6 @@ class TrainConfig:
     save_model_every: int = attrs.field(default=1_000, validator=instance_of(int))
     save_snapshot_every: int = attrs.field(default=1_000, validator=instance_of(int))
     num_workers: int = attrs.field(default=8, validator=instance_of(int))
+
+    control_point_spacing: int = attrs.field(default=64, validator=instanceof(int))
+    control_point_jitter: float = attrs.field(default=2.0, validator=instanceof(float))
