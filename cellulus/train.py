@@ -135,7 +135,9 @@ def train_iteration(
 
 
 def save_model(state, iteration):
-    pass
+    file_name = os.path.join("models", str(iteration).zfill(6) + ".pth")
+    torch.save(state, file_name)
+    print(f"Checkpoint saved at iteration {iteration}")
 
 
 def save_snapshot(batch, prediction, iteration):
