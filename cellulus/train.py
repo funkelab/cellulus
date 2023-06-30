@@ -1,3 +1,5 @@
+import os
+
 import torch
 import zarr
 from tqdm import tqdm
@@ -13,8 +15,11 @@ torch.backends.cudnn.benchmark = True
 def train(experiment_config):
     print(experiment_config)
 
+    if not os.path.exists("models"):
+        os.makedirs("models")
+
     train_config = experiment_config.train_config
-    model_config = experiment_config.train_config
+    model_config = experiment_config.model_config
 
     # create train dataset
     train_dataset = get_dataset(
