@@ -5,6 +5,7 @@ from tqdm import tqdm
 from cellulus.criterions import get_loss
 from cellulus.datasets import get_dataset
 from cellulus.models import get_model
+from cellulus.utils import get_logger
 
 torch.backends.cudnn.benchmark = True
 
@@ -62,6 +63,9 @@ def train(experiment_config):
 
     # set scheduler:
 
+    # set logger
+    logger = get_logger(keys=["train"], title="loss")
+
     # resume training
     start_iteration = 0
     if model_config.checkpoint is None:
@@ -86,12 +90,15 @@ def train(experiment_config):
             criterion=criterion,
             optimizer=optimizer,
         )
-        print(f"===> train loss: {train_loss:.2f}")
-
+        print(f"===> train loss: {train_loss:.6f}")
+        logger.add(key="train", value=train_loss)
+        logger.write()
+        logger.plot()
         state = {
             "iteration": iteration,
             "model_state_dict": model.state_dict(),
             "optim_state_dict": optimizer.state_dict(),
+            "logger_data": logger.data,
         }
         if iteration % train_config.save_model_every == 0:
             save_model(
