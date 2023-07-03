@@ -32,6 +32,7 @@ class DatasetMetaData:
         self.sample_dim = None
         self.channel_dim = None
         self.time_dim = None
+        self.array_shape = self.data.shape
 
         for dim, axis_name in enumerate(self.axis_names):
             if axis_name == "s":
