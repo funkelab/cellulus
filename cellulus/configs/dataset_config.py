@@ -19,5 +19,6 @@ class DatasetConfig:
             The name of the dataset containing raw data in the container.
     """
 
-    container_path: Path = attrs.field(converter=Path)
+    # container_path: Path = attrs.field(converter=Path)
+    container_path: str = attrs.field(validator=instance_of(str))
     dataset_name: str = attrs.field(validator=instance_of(str))
