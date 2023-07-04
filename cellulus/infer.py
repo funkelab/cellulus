@@ -3,6 +3,7 @@ from cellulus.models import get_model
 from cellulus.post_process import post_process
 from cellulus.predict import predict
 from cellulus.segment import segment
+import torch
 
 
 def infer(experiment_config):
@@ -30,6 +31,9 @@ def infer(experiment_config):
         downsampling_factors=experiment_config.model_config.downsampling_factors,
         num_spatial_dims=dataset_meta_data.get_num_spatial_dims(),
     )
+
+    # load checkpoint
+    model.load_state_dict(torch.load(inference_config.state_dict_path))
 
     # load checkpoint?
 

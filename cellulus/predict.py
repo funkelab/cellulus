@@ -25,7 +25,7 @@ def predict(inference_config, model, dataset_meta_data) -> DatasetConfig:
     num_channels = dataset_meta_data.num_dims
     array_shape = dataset_meta_data.array_shape
 
-    model.load_state_dict(torch.load(inference_config.state_dict_path))
+    
     model.eval()
 
     scan_request = gp.BatchRequest()
