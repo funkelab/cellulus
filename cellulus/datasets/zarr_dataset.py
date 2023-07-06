@@ -75,7 +75,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
         raw_spec = gp.ArraySpec(voxel_size=(1,) * self.num_dims, interpolatable=True)
 
         spatial_dims = tuple(
-            range(self.num_dims - self.num_spatial_dims, self.num_spatial_dims)
+            range(self.num_dims - self.num_spatial_dims, self.num_dims)
         )
 
         self.pipeline = (
