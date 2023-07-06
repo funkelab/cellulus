@@ -121,10 +121,15 @@ class OCELoss(nn.Module):  # type: ignore
         selection = []
         for prediction, coordinate in zip(predictions, coordinates):
             if self.num_spatial_dims == 2:
-                embedding = prediction[:, coordinate[:, 1].long(), coordinate[:, 0].long()]
+                embedding = prediction[
+                    :, coordinate[:, 1].long(), coordinate[:, 0].long()
+                ]
             elif self.num_spatial_dims == 3:
                 embedding = prediction[
-                    :, coordinate[:, 2], coordinate[:, 1].long(), coordinate[:, 0].long()
+                    :,
+                    coordinate[:, 2].long(),
+                    coordinate[:, 1].long(),
+                    coordinate[:, 0].long(),
                 ]
             embedding = embedding.transpose(1, 0)
             embedding += coordinate
