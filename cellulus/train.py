@@ -23,6 +23,7 @@ def train(experiment_config):
 
     # create train dataset
     train_dataset = get_dataset(
+        mode="train",
         dataset_config=train_config.train_data_config,
         crop_size=train_config.crop_size,
         control_point_spacing=train_config.control_point_spacing,
