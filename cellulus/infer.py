@@ -31,7 +31,7 @@ def infer(experiment_config):
     # set model
     model = get_model(
         in_channels=test_dataset.get_num_channels(),
-        out_channels=test_dataset.get_num_channels(),
+        out_channels=test_dataset.get_num_spatial_dims(),
         num_fmaps=model_config.num_fmaps,
         fmap_inc_factor=model_config.fmap_inc_factor,
         features_in_last_layer=model_config.features_in_last_layer,
