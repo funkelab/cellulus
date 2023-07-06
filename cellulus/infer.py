@@ -2,11 +2,11 @@ import os
 
 import torch
 
-from cellulus.datasets import get_dataset
 from cellulus.models import get_model
 from cellulus.predict import predict
+from cellulus.segment import segment
+from cellulus.post_process import post_process
 
-# from cellulus.segment import segment
 torch.backends.cudnn.benchmark = True
 
 
@@ -15,18 +15,6 @@ def infer(experiment_config):
 
     inference_config = experiment_config.inference_config
     model_config = experiment_config.model_config
-
-    # create test_dataset
-    test_dataset = get_dataset(
-        mode="eval",
-        dataset_config=inference_config.inference_data_config,
-        crop_size=inference_config.crop_size,
-    )
-
-    # create test dataloader
-    test_dataloader = torch.utils.data.DataLoader(
-        dataset=test_dataset, batch_size=1, shuffle=False
-    )
 
     # set model
     model = get_model(
@@ -52,14 +40,17 @@ def infer(experiment_config):
     # set in eval mode
     model.eval()
 
-    # create test dataloader
-    test_dataloader = torch.utils.data.DataLoader(
-        dataset=test_dataset, batch_size=1, shuffle=False
+    # get predicted embeddings...
+    prediction_dataset_config = predict(model, inference_config)
+    # ...turn them into a segmentation...
+    segmentation_dataset_config = segment(prediction_dataset_config, inference_config)
+    # ...and post-process the segmentation
+    post_processed_dataset_config = post_process(
+        segmentation_dataset_config, inference_config
     )
 
-    # get predicted embeddings
-    predict(test_dataloader, model, inference_config)
-
-    # segment(prediction, inference_config)
-
-    # post_process(segment, inference_config)
+    return (
+        prediction_dataset_config,
+        segmentation_dataset_config,
+        post_processed_dataset_config,
+    )

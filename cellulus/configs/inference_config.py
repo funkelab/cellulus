@@ -10,12 +10,14 @@ from .dataset_config import DatasetConfig
 class InferenceConfig:
     """Inference configuration.
 
-    inference_data_config:
+    dataset_config:
 
         Configuration object for the data to predict and segment.
     """
 
-    inference_data_config: DatasetConfig = attrs.field(
+    dataset_config: DatasetConfig = attrs.field(converter=lambda d: DatasetConfig(**d))
+
+    output_dataset_config: DatasetConfig = attrs.field(
         converter=lambda d: DatasetConfig(**d)
     )
 

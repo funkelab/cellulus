@@ -1,2 +1,2 @@
-def segment(prediction_dataset_config, infer_config) -> DatasetConfig:
+def segment(prediction_dataset_config, inference_config) -> DatasetConfig:
     pass
