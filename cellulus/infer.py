@@ -2,10 +2,11 @@ import os
 
 import torch
 
+from cellulus.datasets.meta_data import DatasetMetaData
 from cellulus.models import get_model
+from cellulus.post_process import post_process
 from cellulus.predict import predict
 from cellulus.segment import segment
-from cellulus.post_process import post_process
 
 torch.backends.cudnn.benchmark = True
 
@@ -15,16 +16,17 @@ def infer(experiment_config):
 
     inference_config = experiment_config.inference_config
     model_config = experiment_config.model_config
+    dataset_meta_data = DatasetMetaData(inference_config.dataset_config)
 
     # set model
     model = get_model(
-        in_channels=test_dataset.get_num_channels(),
-        out_channels=test_dataset.get_num_spatial_dims(),
+        in_channels=dataset_meta_data.num_channels,
+        out_channels=dataset_meta_data.num_spatial_dims,
         num_fmaps=model_config.num_fmaps,
         fmap_inc_factor=model_config.fmap_inc_factor,
         features_in_last_layer=model_config.features_in_last_layer,
         downsampling_factors=model_config.downsampling_factors,
-        num_spatial_dims=test_dataset.get_num_spatial_dims(),
+        num_spatial_dims=dataset_meta_data.num_spatial_dims,
     )
     model = model.cuda()
 
