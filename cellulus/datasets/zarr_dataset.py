@@ -55,7 +55,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
         self.crop_size = crop_size
         self.control_point_spacing = control_point_spacing
         self.control_point_jitter = control_point_jitter
-        self.__read_meta_data()
+        self.read_meta_data()
 
         assert len(crop_size) == self.num_spatial_dims, (
             f'"crop_size" must have the same dimension as the '
