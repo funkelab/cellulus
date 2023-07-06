@@ -113,15 +113,19 @@ class ZarrDataset(IterableDataset):  # type: ignore
                 sample = self.pipeline.request_batch(request)
                 yield sample[self.raw].data[0]
 
-    def __read_meta_data(self):
+    def read_meta_data(self):
         meta_data = DatasetMetaData(self.dataset_config)
 
         self.num_dims = meta_data.num_dims
         self.num_spatial_dims = meta_data.num_spatial_dims
         self.num_channels = meta_data.num_channels
+        self.num_samples = meta_data.num_samples
         self.sample_dim = meta_data.sample_dim
         self.channel_dim = meta_data.channel_dim
         self.time_dim = meta_data.time_dim
+        self.num_z = meta_data.num_z
+        self.num_y = meta_data.num_y
+        self.num_x = meta_data.num_x
 
     def get_num_channels(self):
         return self.num_channels
