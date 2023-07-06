@@ -3,7 +3,6 @@ import os
 import torch
 
 from cellulus.datasets import get_dataset
-from cellulus.datasets.meta_data import DatasetMetaData
 from cellulus.models import get_model
 from cellulus.predict import predict
 
@@ -15,7 +14,6 @@ def infer(experiment_config):
     print(experiment_config)
 
     inference_config = experiment_config.inference_config
-    DatasetMetaData(inference_config.inference_data_config)
     model_config = experiment_config.model_config
 
     # create test_dataset
