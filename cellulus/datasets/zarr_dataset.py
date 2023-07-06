@@ -14,8 +14,8 @@ class ZarrDataset(IterableDataset):  # type: ignore
         self,
         dataset_config: DatasetConfig,
         crop_size: Tuple[int],
-        control_point_spacing: int,
-        control_point_jitter: float,
+        control_point_spacing: int | None,
+        control_point_jitter: float | None,
     ):
         """A dataset that serves random samples from a zarr container.
 
