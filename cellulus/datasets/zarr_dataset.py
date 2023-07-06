@@ -14,8 +14,8 @@ class ZarrDataset(IterableDataset):  # type: ignore
         self,
         dataset_config: DatasetConfig,
         crop_size: Tuple[int],
-        control_point_spacing: int | None,
-        control_point_jitter: float | None,
+        control_point_spacing: int,
+        control_point_jitter: float,
     ):
         """A dataset that serves random samples from a zarr container.
 
@@ -55,7 +55,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
         self.crop_size = crop_size
         self.control_point_spacing = control_point_spacing
         self.control_point_jitter = control_point_jitter
-        self.read_meta_data()
+        self.__read_meta_data()
 
         assert len(crop_size) == self.num_spatial_dims, (
             f'"crop_size" must have the same dimension as the '
@@ -113,7 +113,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
                 sample = self.pipeline.request_batch(request)
                 yield sample[self.raw].data[0]
 
-    def read_meta_data(self):
+    def __read_meta_data(self):
         meta_data = DatasetMetaData(self.dataset_config)
 
         self.num_dims = meta_data.num_dims
@@ -123,9 +123,6 @@ class ZarrDataset(IterableDataset):  # type: ignore
         self.sample_dim = meta_data.sample_dim
         self.channel_dim = meta_data.channel_dim
         self.time_dim = meta_data.time_dim
-        self.num_z = meta_data.num_z
-        self.num_y = meta_data.num_y
-        self.num_x = meta_data.num_x
 
     def get_num_channels(self):
         return self.num_channels
