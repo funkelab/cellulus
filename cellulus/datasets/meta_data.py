@@ -32,7 +32,7 @@ class DatasetMetaData:
         self.sample_dim = None
         self.channel_dim = None
         self.time_dim = None
-
+        self.spatial_array = ()
         for dim, axis_name in enumerate(self.axis_names):
             if axis_name == "s":
                 self.sample_dim = dim
@@ -43,8 +43,15 @@ class DatasetMetaData:
             elif axis_name == "t":
                 self.num_spatial_dims += 1
                 self.time_dim = dim
-            elif axis_name in ["z", "y", "x"]:
+            elif axis_name == "z":
                 self.num_spatial_dims += 1
+                self.spatial_array += (self.data.shape[dim],)
+            elif axis_name == "y":
+                self.num_spatial_dims += 1
+                self.spatial_array += (self.data.shape[dim],)
+            elif axis_name == "x":
+                self.num_spatial_dims += 1
+                self.spatial_array += (self.data.shape[dim],)
 
         if self.sample_dim is None:
             self.__invalid_dataset(
