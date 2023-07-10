@@ -50,9 +50,9 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> Datase
     )
 
     # prepare the zarr dataset to write to
-    f = zarr.open(inference_config.output_dataset_config.container_path)
+    f = zarr.open(inference_config.prediction_dataset_config.container_path)
     ds = f.create_dataset(
-        inference_config.output_dataset_config.dataset_name,
+        inference_config.prediction_dataset_config.dataset_name,
         shape=(
             dataset_meta_data.num_samples,
             dataset_meta_data.num_channels + 1,
@@ -72,9 +72,9 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> Datase
         + predict
         + gp.ZarrWrite(
             dataset_names={
-                prediction: inference_config.output_dataset_config.dataset_name
+                prediction: inference_config.prediction_dataset_config.dataset_name
             },
-            output_filename=inference_config.output_dataset_config.container_path,
+            output_filename=inference_config.prediction_dataset_config.container_path,
         )
         + gp.Scan(scan_request)
     )
@@ -85,6 +85,6 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> Datase
 
     # return the dataset config for the prediction zarr dataset
     return DatasetConfig(
-        container_path=inference_config.output_dataset_config.container_path,
-        dataset_name=inference_config.output_dataset_config.dataset_name,
+        container_path=inference_config.prediction_dataset_config.container_path,
+        dataset_name=inference_config.prediction_dataset_config.dataset_name,
     )
