@@ -67,3 +67,5 @@ class InferenceConfig:
     num_infer_iterations = attrs.field(default=16, validator=instance_of(int))
     bandwidth = attrs.field(default=7, validator=instance_of(int))
     min_size = attrs.field(default=10, validator=instance_of(int))
+    growd = attrs.field(default=3, validator=instance_of(int))
+    threshold = attrs.field(default=6, validator=instance_of(int))
