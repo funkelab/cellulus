@@ -14,9 +14,17 @@ class InferenceConfig:
 
         Configuration object for the data to predict and segment.
 
-    output_dataset_config:
+    prediction_dataset_config:
 
         Configuration object produced by predict.py.
+
+    segmentation_dataset_config:
+
+        Configuration object produced by segment.py.
+
+    post_processed_dataset_config:
+
+        Configuration object produced by postprocess.py.
 
     crop_size:
 
@@ -30,14 +38,32 @@ class InferenceConfig:
 
         Number of times the salt-peper noise is added to the raw image.
 
+    bandwidth:
+
+        Band-width used to perform mean-shift clustering on the predicted
+        embeddings.
+
+    min_size:
+
+        Ignore objects which are smaller than min_size number of pixels.
+
     """
 
     dataset_config: DatasetConfig = attrs.field(converter=lambda d: DatasetConfig(**d))
 
-    output_dataset_config: DatasetConfig = attrs.field(
+    prediction_dataset_config: DatasetConfig = attrs.field(
         converter=lambda d: DatasetConfig(**d)
     )
 
+    segmentation_dataset_config: DatasetConfig = attrs.field(
+        converter=lambda d: DatasetConfig(**d)
+    )
+
+    post_processed_dataset_config: DatasetConfig = attrs.field(
+        converter=lambda d: DatasetConfig(**d)
+    )
     crop_size: Tuple = attrs.field(default=(252, 252), validator=instance_of(Tuple))
     p_salt_pepper = attrs.field(default=0.1, validator=instance_of(float))
     num_infer_iterations = attrs.field(default=16, validator=instance_of(int))
+    bandwidth = attrs.field(default=7, validator=instance_of(int))
+    min_size = attrs.field(default=10, validator=instance_of(int))
