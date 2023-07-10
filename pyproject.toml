@@ -26,6 +26,7 @@ dependencies = [
   "scikit-image",
   "tqdm",
   "gunpowder",
+  "scikit-learn",
   "funlib.learn.torch @ git+https://github.com/funkelab/funlib.learn.torch@f36decaf95e2b6d1b74a45b31660d29f8e57e5c4"
 ]
 
