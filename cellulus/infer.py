@@ -45,11 +45,9 @@ def infer(experiment_config):
     # get predicted embeddings...
     prediction_dataset_config = predict(model, inference_config)
     # ...turn them into a segmentation...
-    segmentation_dataset_config = segment(prediction_dataset_config, inference_config)
+    segmentation_dataset_config = segment(inference_config)
     # ...and post-process the segmentation
-    post_processed_dataset_config = post_process(
-        segmentation_dataset_config, inference_config
-    )
+    post_processed_dataset_config = post_process(inference_config)
 
     return (
         prediction_dataset_config,
