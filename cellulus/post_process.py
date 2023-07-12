@@ -29,13 +29,13 @@ def post_process(inference_config: InferenceConfig) -> DatasetConfig:
     ds2.attrs["resolution"] = (1,) * dataset_meta_data.num_dims
     ds2.attrs["offset"] = (0,) * dataset_meta_data.num_dims
 
-    for s in tqdm(range(dataset_meta_data.num_samples)):
-        segmentation = ds[s, 0]
-        distance_background = dtedt(ds[s, 0] == 0)
+    for sample in tqdm(range(dataset_meta_data.num_samples)):
+        segmentation = ds[sample, 0]
+        distance_background = dtedt(ds[sample, 0] == 0)
         mask = distance_background < inference_config.growd
         distance_background = dtedt(mask)
         segmentation[distance_background < inference_config.threshold] = 0
-        ds2[s, 0, ...] = segmentation
+        ds2[sample, 0, ...] = segmentation
 
     # return the dataset config for the post processed zarr dataset
     return DatasetConfig(

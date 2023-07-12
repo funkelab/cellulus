@@ -28,8 +28,8 @@ def segment(inference_config: InferenceConfig) -> DatasetConfig:
     ds2.attrs["resolution"] = (1,) * dataset_meta_data.num_dims
     ds2.attrs["offset"] = (0,) * dataset_meta_data.num_dims
 
-    for s in tqdm(range(dataset_meta_data.num_samples)):
-        embeddings = ds[s]
+    for sample in tqdm(range(dataset_meta_data.num_samples)):
+        embeddings = ds[sample]
         embeddings_std = embeddings[-1, ...]
         embeddings_mean = embeddings[
             np.newaxis, : dataset_meta_data.num_spatial_dims, ...
@@ -41,7 +41,7 @@ def segment(inference_config: InferenceConfig) -> DatasetConfig:
             min_size=inference_config.min_size,
         )
         ds2[
-            s,
+            sample,
             0,
             ...,
         ] = segmentation
