@@ -16,8 +16,10 @@ def segment(inference_config: InferenceConfig) -> DatasetConfig:
     ds = f[inference_config.prediction_dataset_config.dataset_name]
 
     # prepare the zarr dataset to write to
-    f2 = zarr.open(inference_config.segmentation_dataset_config.container_path)
-    ds2 = f2.create_dataset(
+    f_segmentation = zarr.open(
+        inference_config.segmentation_dataset_config.container_path
+    )
+    ds_segmentation = f_segmentation.create_dataset(
         inference_config.segmentation_dataset_config.dataset_name,
         shape=(
             dataset_meta_data.num_samples,
@@ -25,8 +27,8 @@ def segment(inference_config: InferenceConfig) -> DatasetConfig:
             *dataset_meta_data.spatial_array,
         ),
     )
-    ds2.attrs["resolution"] = (1,) * dataset_meta_data.num_dims
-    ds2.attrs["offset"] = (0,) * dataset_meta_data.num_dims
+    ds_segmentation.attrs["resolution"] = (1,) * dataset_meta_data.num_dims
+    ds_segmentation.attrs["offset"] = (0,) * dataset_meta_data.num_dims
 
     for sample in tqdm(range(dataset_meta_data.num_samples)):
         embeddings = ds[sample]
@@ -40,7 +42,7 @@ def segment(inference_config: InferenceConfig) -> DatasetConfig:
             bandwidth=inference_config.bandwidth,
             min_size=inference_config.min_size,
         )
-        ds2[
+        ds_segmentation[
             sample,
             0,
             ...,
