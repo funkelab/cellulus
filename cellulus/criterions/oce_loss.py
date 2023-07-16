@@ -38,10 +38,10 @@ class OCELoss(nn.Module):  # type: ignore
 
             num_anchors = int(self.density * h * w)
             anchor_coordinates_y = np.random.randint(
-                2 * self.kappa, h - 2 * self.kappa, num_anchors
+                self.kappa, h - self.kappa, num_anchors
             )
             anchor_coordinates_x = np.random.randint(
-                2 * self.kappa, w - 2 * self.kappa, num_anchors
+                self.kappa, w - self.kappa, num_anchors
             )
             anchor_coordinates = np.stack(
                 (anchor_coordinates_x, anchor_coordinates_y), axis=1
@@ -50,13 +50,13 @@ class OCELoss(nn.Module):  # type: ignore
             b, c, d, h, w = prediction.shape
             num_anchors = int(self.density * d * h * w)
             anchor_coordinates_z = np.random.randint(
-                2 * self.kappa, d - 2 * self.kappa, num_anchors
+                self.kappa, d - self.kappa, num_anchors
             )
             anchor_coordinates_y = np.random.randint(
-                2 * self.kappa, h - 2 * self.kappa, num_anchors
+                self.kappa, h - self.kappa, num_anchors
             )
             anchor_coordinates_x = np.random.randint(
-                2 * self.kappa, w - 2 * self.kappa, num_anchors
+                self.kappa, w - self.kappa, num_anchors
             )
             anchor_coordinates = np.stack(
                 (anchor_coordinates_x, anchor_coordinates_y, anchor_coordinates_z),
@@ -101,17 +101,15 @@ class OCELoss(nn.Module):  # type: ignore
 
             offset_coordinates = np.stack((offset_x, offset_y), axis=1)
         elif self.num_spatial_dims == 3:
-            offset_x = np.random.randint(-radius, radius + 1, size=2 * num_samples)
-            offset_y = np.random.randint(-radius, radius + 1, size=2 * num_samples)
-            offset_z = np.random.randint(-radius, radius + 1, size=2 * num_samples)
+            offset_x = np.random.randint(-radius, radius + 1, size=3 * num_samples)
+            offset_y = np.random.randint(-radius, radius + 1, size=3 * num_samples)
+            offset_z = np.random.randint(-radius, radius + 1, size=3 * num_samples)
 
             offset_coordinates = np.stack((offset_x, offset_y, offset_z), axis=1)
-
         in_circle = (offset_coordinates**2).sum(axis=1) < radius**2
         offset_coordinates = offset_coordinates[in_circle]
         not_zero = np.absolute(offset_coordinates).sum(axis=1) > 0
         offset_coordinates = offset_coordinates[not_zero]
-
         if len(offset_coordinates) < num_samples:
             return self.sample_offsets(radius, num_samples)
 
