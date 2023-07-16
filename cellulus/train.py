@@ -24,7 +24,7 @@ def train(experiment_config):
     # create train dataset
     train_dataset = get_dataset(
         dataset_config=train_config.train_data_config,
-        crop_size=train_config.crop_size,
+        crop_size=tuple(train_config.crop_size),
         control_point_spacing=train_config.control_point_spacing,
         control_point_jitter=train_config.control_point_jitter,
     )
@@ -45,7 +45,9 @@ def train(experiment_config):
         num_fmaps=model_config.num_fmaps,
         fmap_inc_factor=model_config.fmap_inc_factor,
         features_in_last_layer=model_config.features_in_last_layer,
-        downsampling_factors=model_config.downsampling_factors,
+        downsampling_factors=[
+            tuple(factor) for factor in model_config.downsampling_factors
+        ],
         num_spatial_dims=train_dataset.get_num_spatial_dims(),
     )
 
