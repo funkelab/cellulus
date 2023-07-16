@@ -2,12 +2,11 @@ import gunpowder as gp
 import torch
 import zarr
 
-from cellulus.configs.dataset_config import DatasetConfig
 from cellulus.configs.inference_config import InferenceConfig
 from cellulus.datasets.meta_data import DatasetMetaData
 
 
-def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> DatasetConfig:
+def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
     # get the dataset_config data out of inference_config
     dataset_config = inference_config.dataset_config
     dataset_meta_data = DatasetMetaData(dataset_config)
@@ -82,9 +81,3 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> Datase
     # request to pipeline for ROI of whole image/volume
     with gp.build(pipeline):
         pipeline.request_batch(gp.BatchRequest())
-
-    # return the dataset config for the prediction zarr dataset
-    return DatasetConfig(
-        container_path=inference_config.prediction_dataset_config.container_path,
-        dataset_name=inference_config.prediction_dataset_config.dataset_name,
-    )
