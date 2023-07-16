@@ -3,6 +3,7 @@ import os
 import torch
 
 from cellulus.datasets.meta_data import DatasetMetaData
+from cellulus.evaluate import evaluate
 from cellulus.models import get_model
 from cellulus.post_process import post_process
 from cellulus.predict import predict
@@ -43,14 +44,10 @@ def infer(experiment_config):
     model.eval()
 
     # get predicted embeddings...
-    prediction_dataset_config = predict(model, inference_config)
+    predict(model, inference_config)
     # ...turn them into a segmentation...
-    segmentation_dataset_config = segment(inference_config)
+    segment(inference_config)
     # ...and post-process the segmentation
-    post_processed_dataset_config = post_process(inference_config)
-
-    return (
-        prediction_dataset_config,
-        segmentation_dataset_config,
-        post_processed_dataset_config,
-    )
+    post_process(inference_config)
+    # ...and evaluate if groundtruth exists
+    evaluate(inference_config)
