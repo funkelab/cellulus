@@ -26,7 +26,9 @@ def infer(experiment_config):
         num_fmaps=model_config.num_fmaps,
         fmap_inc_factor=model_config.fmap_inc_factor,
         features_in_last_layer=model_config.features_in_last_layer,
-        downsampling_factors=model_config.downsampling_factors,
+        downsampling_factors=[
+            tuple(factor) for factor in model_config.downsampling_factors
+        ],
         num_spatial_dims=dataset_meta_data.num_spatial_dims,
     )
     model = model.cuda()
