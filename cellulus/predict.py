@@ -22,6 +22,7 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
     input_shape = gp.Coordinate(
         1, dataset_meta_data.num_channels, *inference_config.crop_size
     )
+
     output_shape = gp.Coordinate(
         model(
             torch.zeros(
@@ -33,6 +34,7 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
     input_size = input_shape * voxel_size
     output_size = output_shape * voxel_size
     context = (input_size - output_size) / 2
+    context = context * gp.Coordinate((0, 0, 1, 1, 1))
 
     raw = gp.ArrayKey("RAW")
     prediction = gp.ArrayKey("PREDICT")
@@ -54,7 +56,7 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
         inference_config.prediction_dataset_config.dataset_name,
         shape=(
             dataset_meta_data.num_samples,
-            dataset_meta_data.num_channels + 1,
+            dataset_meta_data.num_spatial_dims + 1,
             *dataset_meta_data.spatial_array,
         ),
     )
