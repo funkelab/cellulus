@@ -34,7 +34,9 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
     input_size = input_shape * voxel_size
     output_size = output_shape * voxel_size
     context = (input_size - output_size) / 2
-    context = context * gp.Coordinate((0, 0, 1, 1, 1))
+    context = context * gp.Coordinate(
+        (*(0,) * 2, *(1,) * dataset_meta_data.num_spatial_dims)
+    )
 
     raw = gp.ArrayKey("RAW")
     prediction = gp.ArrayKey("PREDICT")
