@@ -21,7 +21,7 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> Datase
 
     # prediction crop size is the size of the scanned tiles to be provided to the model
     input_shape = gp.Coordinate(
-        1, dataset_meta_data.num_channels, *inference_config.crop_size
+        (1, dataset_meta_data.num_channels, *inference_config.crop_size)
     )
     output_shape = gp.Coordinate(
         model(
@@ -56,7 +56,7 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> Datase
         shape=(
             dataset_meta_data.num_samples,
             dataset_meta_data.num_channels + 1,
-            *dataset_meta_data.spatial_array,
+            *output_shape[-dataset_meta_data.num_spatial_dims:],
         ),
     )
     ds.attrs["resolution"] = (1,) * dataset_meta_data.num_dims
