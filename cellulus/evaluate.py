@@ -23,8 +23,8 @@ def evaluate(inference_config: InferenceConfig, groundtruth_dataset_name: str) -
     F1_list = []
     SEG_list = []
     for sample in tqdm(range(dataset_meta_data.num_samples)):
-        prediction = ds[sample, 0].astype(np.uint16)
-        groundtruth = ds_postprocessed[sample, 0].astype(np.uint16)
+        groundtruth = ds[sample, 0].astype(np.uint16)
+        prediction = ds_postprocessed[sample, 0].astype(np.uint16)
         IoU = compute_pairwise_IoU(prediction, groundtruth)
 
         F1 = compute_F1(IoU)
