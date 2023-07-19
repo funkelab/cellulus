@@ -6,12 +6,12 @@ from cellulus.configs.inference_config import InferenceConfig
 from cellulus.datasets.meta_data import DatasetMetaData
 
 
-def evaluate(inference_config: InferenceConfig) -> None:
+def evaluate(inference_config: InferenceConfig, groundtruth_dataset_name: str) -> None:
     dataset_config = inference_config.dataset_config
     dataset_meta_data = DatasetMetaData(dataset_config)
 
     f = zarr.open(dataset_config.container_path)
-    ds = f["test/groundtruth"]
+    ds = f[groundtruth_dataset_name]
 
     f_postprocessed = zarr.open(
         inference_config.segmentation_dataset_config.container_path
