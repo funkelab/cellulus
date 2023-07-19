@@ -6,7 +6,7 @@ from cellulus.datasets.zarr_dataset import ZarrDataset
 
 def get_dataset(
     dataset_config: DatasetConfig,
-    crop_size: Tuple[int],
+    crop_size: Tuple[int, ...],
     control_point_spacing: int,
     control_point_jitter: float,
 ) -> ZarrDataset:

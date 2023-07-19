@@ -9,7 +9,7 @@ def get_model(
     num_fmaps: int,
     fmap_inc_factor: int,
     features_in_last_layer: int,
-    downsampling_factors: List[Tuple[int, int]],
+    downsampling_factors: List[Tuple[int, ...]],
     num_spatial_dims: int,
 ) -> UNetModel:
     return UNetModel(

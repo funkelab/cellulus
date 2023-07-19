@@ -10,13 +10,11 @@ class UNetModel(nn.Module):  # type: ignore
         self,
         in_channels: int,
         out_channels: int,
-        num_fmaps: int = 64,
-        fmap_inc_factor: int = 3,
-        features_in_last_layer: int = 64,
-        downsampling_factors: List[Tuple[int, int]] = [
-            (2, 2),
-        ],
-        num_spatial_dims: int = 2,
+        num_fmaps: int,
+        fmap_inc_factor: int,
+        features_in_last_layer: int,
+        downsampling_factors: List[Tuple[int, ...]],
+        num_spatial_dims: int,
     ):
         super().__init__()
         self.in_channels = in_channels

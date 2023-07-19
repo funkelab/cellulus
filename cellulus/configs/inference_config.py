@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import List
 
 import attrs
 from attrs.validators import instance_of
@@ -62,7 +62,7 @@ class InferenceConfig:
     post_processed_dataset_config: DatasetConfig = attrs.field(
         converter=lambda d: DatasetConfig(**d)
     )
-    crop_size: Tuple = attrs.field(default=(252, 252), validator=instance_of(Tuple))
+    crop_size: List = attrs.field(default=[252, 252], validator=instance_of(List))
     p_salt_pepper = attrs.field(default=0.1, validator=instance_of(float))
     num_infer_iterations = attrs.field(default=16, validator=instance_of(int))
     bandwidth = attrs.field(default=7, validator=instance_of(int))

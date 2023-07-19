@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import zarr
 
 from cellulus.configs import DatasetConfig
@@ -26,13 +28,13 @@ class DatasetMetaData:
             )
 
         self.num_dims = len(self.axis_names)
-        self.num_spatial_dims = 0
-        self.num_samples = None
-        self.num_channels = None
+        self.num_spatial_dims: int = 0
+        self.num_samples: int = 0
+        self.num_channels: int = 0
         self.sample_dim = None
         self.channel_dim = None
         self.time_dim = None
-        self.spatial_array = ()
+        self.spatial_array: Tuple[int, ...] = ()
         for dim, axis_name in enumerate(self.axis_names):
             if axis_name == "s":
                 self.sample_dim = dim
@@ -56,7 +58,8 @@ class DatasetMetaData:
         if self.sample_dim is None:
             self.__invalid_dataset(
                 f'"{self.dataset_config.dataset_name}" dataset in '
-                f"{self.dataset_config.container_path} does not have a sample dimension"
+                f"{self.dataset_config.container_path} does not have a sample "
+                "dimension"
             )
 
         if self.channel_dim is None:

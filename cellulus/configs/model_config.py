@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 import attrs
 from attrs.validators import instance_of
@@ -29,7 +29,7 @@ class ModelConfig:
         downsampling_factors:
 
             A list of downsampling factors, each given per dimension (e.g.,
-            [(2,2), (3,3)] would correspond to two downsample layers, one with
+            [[2,2], [3,3]] would correspond to two downsample layers, one with
             an isotropic factor of 2, and another one with 3). This parameter
             will also determine the number of levels in the U-Net.
 
@@ -46,5 +46,9 @@ class ModelConfig:
     num_fmaps: int = attrs.field(validator=instance_of(int))
     fmap_inc_factor: int = attrs.field(validator=instance_of(int))
     features_in_last_layer: int = attrs.field(default=64)
-    downsampling_factors: List[Tuple[int, int]] = attrs.field(default=[(2, 2)])
+    downsampling_factors: List[List[int]] = attrs.field(
+        default=[
+            [2, 2],
+        ]
+    )
     checkpoint: Path = attrs.field(default=None, converter=to_path)

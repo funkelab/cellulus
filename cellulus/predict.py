@@ -2,12 +2,11 @@ import gunpowder as gp
 import torch
 import zarr
 
-from cellulus.configs.dataset_config import DatasetConfig
 from cellulus.configs.inference_config import InferenceConfig
 from cellulus.datasets.meta_data import DatasetMetaData
 
 
-def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> DatasetConfig:
+def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
     # get the dataset_config data out of inference_config
     dataset_config = inference_config.dataset_config
     dataset_meta_data = DatasetMetaData(dataset_config)
@@ -23,6 +22,7 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> Datase
     input_shape = gp.Coordinate(
         (1, dataset_meta_data.num_channels, *inference_config.crop_size)
     )
+
     output_shape = gp.Coordinate(
         model(
             torch.zeros(
@@ -34,6 +34,9 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> Datase
     input_size = input_shape * voxel_size
     output_size = output_shape * voxel_size
     context = (input_size - output_size) / 2
+    context = context * gp.Coordinate(
+        (*(0,) * 2, *(1,) * dataset_meta_data.num_spatial_dims)
+    )
 
     raw = gp.ArrayKey("RAW")
     prediction = gp.ArrayKey("PREDICT")
@@ -55,8 +58,8 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> Datase
         inference_config.prediction_dataset_config.dataset_name,
         shape=(
             dataset_meta_data.num_samples,
-            dataset_meta_data.num_channels + 1,
-            *output_shape[-dataset_meta_data.num_spatial_dims:],
+            dataset_meta_data.num_spatial_dims + 1,
+            *dataset_meta_data.spatial_array,
         ),
     )
     ds.attrs["resolution"] = (1,) * dataset_meta_data.num_dims
@@ -82,9 +85,3 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> Datase
     # request to pipeline for ROI of whole image/volume
     with gp.build(pipeline):
         pipeline.request_batch(gp.BatchRequest())
-
-    # return the dataset config for the prediction zarr dataset
-    return DatasetConfig(
-        container_path=inference_config.prediction_dataset_config.container_path,
-        dataset_name=inference_config.prediction_dataset_config.dataset_name,
-    )

@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import List
 
 import attrs
 from attrs.validators import instance_of
@@ -82,7 +82,7 @@ class TrainConfig:
     validate_data_config: DatasetConfig = attrs.field(
         converter=to_config(DatasetConfig)
     )
-    crop_size: Tuple = attrs.field(default=(252, 252), validator=instance_of(Tuple))
+    crop_size: List = attrs.field(default=[252, 252], validator=instance_of(List))
     batch_size: int = attrs.field(default=8, validator=instance_of(int))
     max_iterations: int = attrs.field(default=100_000, validator=instance_of(int))
     initial_learning_rate: float = attrs.field(

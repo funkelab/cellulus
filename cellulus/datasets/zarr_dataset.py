@@ -13,7 +13,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
     def __init__(
         self,
         dataset_config: DatasetConfig,
-        crop_size: Tuple[int],
+        crop_size: Tuple[int, ...],
         control_point_spacing: int,
         control_point_jitter: float,
     ):
