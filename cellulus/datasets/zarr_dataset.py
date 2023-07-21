@@ -74,9 +74,8 @@ class ZarrDataset(IterableDataset):  # type: ignore
         # treat all dimensions as spatial, with a voxel size of 1
         raw_spec = gp.ArraySpec(voxel_size=(1,) * self.num_dims, interpolatable=True)
 
-        spatial_dims = tuple(
-            range(self.num_dims - self.num_spatial_dims, self.num_dims)
-        )
+        # spatial_dims = tuple(range(self.num_dims - self.num_spatial_dims,
+        # self.num_dims))
 
         self.pipeline = (
             gp.ZarrSource(
@@ -94,7 +93,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
                 subsample=4,
                 spatial_dims=self.num_spatial_dims,
             )
-            + gp.SimpleAugment(mirror_only=spatial_dims, transpose_only=spatial_dims)
+            # + gp.SimpleAugment(mirror_only=spatial_dims, transpose_only=spatial_dims)
         )
 
     def __yield_sample(self):
