@@ -38,6 +38,10 @@ class TrainConfig:
 
             The weight of the L2 regularizer on the object-centric embeddings.
 
+        reduce_mean (default = True):
+
+            If True, the loss contribution is averaged across all pairs of patches.
+
         density (default = 0.2)
 
             Determines the fraction of patches to sample per crop, during training.
@@ -92,6 +96,7 @@ class TrainConfig:
     kappa: float = attrs.field(default=10.0, validator=instance_of(float))
     temperature: float = attrs.field(default=10.0, validator=instance_of(float))
     regularizer_weight: float = attrs.field(default=1e-5, validator=instance_of(float))
+    reduce_mean: bool = attrs.field(default=True, validator=instance_of(bool))
     save_model_every: int = attrs.field(default=1_000, validator=instance_of(int))
     save_snapshot_every: int = attrs.field(default=1_000, validator=instance_of(int))
     num_workers: int = attrs.field(default=8, validator=instance_of(int))
