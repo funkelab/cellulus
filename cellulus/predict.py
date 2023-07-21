@@ -11,8 +11,7 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
     dataset_config = inference_config.dataset_config
     dataset_meta_data = DatasetMetaData(dataset_config)
 
-    voxel_size = gp.Coordinate((1,) * dataset_meta_data.num_dims)
-
+    voxel_size = gp.Coordinate((1,) * dataset_meta_data.num_spatial_dims)
     model.set_infer(
         p_salt_pepper=inference_config.p_salt_pepper,
         num_infer_iterations=inference_config.num_infer_iterations,
@@ -31,12 +30,11 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
             ).cuda()
         ).shape
     )
-    input_size = input_shape * voxel_size
-    output_size = output_shape * voxel_size
+
+    input_size = gp.Coordinate(input_shape[2:]) * voxel_size
+    output_size = gp.Coordinate(output_shape[2:]) * voxel_size
+
     context = (input_size - output_size) / 2
-    context = context * gp.Coordinate(
-        (*(0,) * 2, *(1,) * dataset_meta_data.num_spatial_dims)
-    )
 
     raw = gp.ArrayKey("RAW")
     prediction = gp.ArrayKey("PREDICT")
@@ -62,8 +60,8 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
             *dataset_meta_data.spatial_array,
         ),
     )
-    ds.attrs["resolution"] = (1,) * dataset_meta_data.num_dims
-    ds.attrs["offset"] = (0,) * dataset_meta_data.num_dims
+    ds.attrs["resolution"] = (1,) * dataset_meta_data.num_spatial_dims
+    ds.attrs["offset"] = (0,) * dataset_meta_data.num_spatial_dims
 
     pipeline = (
         gp.ZarrSource(
