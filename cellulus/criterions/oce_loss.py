@@ -11,6 +11,7 @@ class OCELoss(nn.Module):  # type: ignore
         density: float,
         kappa: float,
         num_spatial_dims: int,
+        reduce_mean: bool,
     ):
         super().__init__()
         self.temperature = temperature
@@ -18,12 +19,7 @@ class OCELoss(nn.Module):  # type: ignore
         self.density = density
         self.kappa = kappa
         self.num_spatial_dims = num_spatial_dims
-
-        print(
-            "Created OCE Loss-object with temperature={} and regularization={}".format(
-                temperature, regularization_weight
-            )
-        )
+        self.reduce_mean = reduce_mean
 
     def distance_function(self, e0, e1):
         diff = e0 - e1
@@ -89,10 +85,14 @@ class OCELoss(nn.Module):  # type: ignore
             anchor_embeddings, reference_embeddings.detach()
         )
         nonlinear_distance = self.nonlinearity(distance)
-        return (
-            nonlinear_distance.mean()
-            + self.regularization_weight * anchor_embeddings.norm(2, dim=-1).mean()
+
+        loss = nonlinear_distance + self.regularization_weight * anchor_embeddings.norm(
+            2, dim=-1
         )
+        if self.reduce_mean:
+            return loss.mean()
+        else:
+            return loss.sum()
 
     def sample_offsets(self, radius, num_samples):
         if self.num_spatial_dims == 2:
