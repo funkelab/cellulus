@@ -35,6 +35,18 @@ def evaluate(inference_config: InferenceConfig) -> None:
     print(f"The mean F1 score is {np.mean(F1_list)}")
     print(f"The mean SEG score is {np.mean(SEG_list)}")
 
+    txt_file = "results.txt"
+    with open(txt_file, "w") as f:
+        f.writelines("file index, F1, SEG \n")
+        f.writelines("+++++++++++++++++++++++++++++++++\n")
+        for sample in range(dataset_meta_data.num_samples):
+            f.writelines(
+                f"{sample}, {F1_list[sample]:.05f}, {SEG_list[sample]:.05f} \n"
+            )
+        f.writelines("+++++++++++++++++++++++++++++++++\n")
+        f.writelines(f"Avg. F1 is {np.mean(F1_list):.05f} \n")
+        f.writelines(f"Avg. SEG is {np.mean(SEG_list):.05f} \n")
+
 
 def compute_pairwise_IoU(prediction, groundtruth):
     prediction_ids = np.unique(prediction)[1:]
