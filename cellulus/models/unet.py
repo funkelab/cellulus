@@ -3,6 +3,7 @@ from typing import List, Tuple
 import torch
 import torch.nn as nn
 from funlib.learn.torch.models import UNet
+from tqdm import tqdm
 
 
 class UNetModel(nn.Module):  # type: ignore
@@ -76,20 +77,30 @@ class UNetModel(nn.Module):  # type: ignore
             h = self.backbone(raw)
             return self.head_forward(h)
         elif self.mode == "infer":
-            predictions = []
-            for val in [0.5, 1.0]:
-                for _ in range(self.num_infer_iterations):
-                    noisy_input = raw.detach().clone()
-                    rnd = torch.rand(*noisy_input.shape).cuda()
-                    noisy_input[rnd <= self.p_salt_pepper] = val
-                    pred = (
-                        self.head_forward(self.backbone(noisy_input))[0].detach().cpu()
-                    )
-                    predictions.append(pred)
+            embeddings = []
+            for sample in tqdm(range(raw.shape[0])):
+                raw_sample = raw[sample : sample + 1, ...]
+                predictions = []
+                for val in [0.5, 1.0]:
+                    for _ in range(self.num_infer_iterations):
+                        noisy_input = raw_sample.detach().clone()
+                        rnd = torch.rand(*noisy_input.shape).cuda()
+                        noisy_input[rnd <= self.p_salt_pepper] = val
+                        pred = (
+                            self.head_forward(self.backbone(noisy_input))[0]
+                            .detach()
+                            .cpu()
+                        )
+                        predictions.append(pred)
 
-            embedding_std, embedding_mean = torch.std_mean(
-                torch.stack(predictions, dim=0), dim=0, keepdim=False, unbiased=False
-            )
-            embedding_std = embedding_std.sum(dim=0, keepdim=True)
-            embedding = torch.cat((embedding_mean, embedding_std), dim=0)
-            return torch.unsqueeze(embedding, dim=0)
+                embedding_std, embedding_mean = torch.std_mean(
+                    torch.stack(predictions, dim=0),
+                    dim=0,
+                    keepdim=False,
+                    unbiased=False,
+                )
+
+                embedding_std = embedding_std.sum(dim=0, keepdim=True)
+                embeddings.append(torch.cat((embedding_mean, embedding_std), dim=0))
+
+            return torch.stack(embeddings, dim=0)
