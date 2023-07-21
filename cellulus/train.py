@@ -60,6 +60,7 @@ def train(experiment_config):
         kappa=train_config.kappa,
         density=train_config.density,
         num_spatial_dims=train_dataset.get_num_spatial_dims(),
+        reduce_mean=train_config.reduce_mean,
     )
 
     # set optimizer
@@ -91,27 +92,34 @@ def train(experiment_config):
             train_dataloader,
         )
     ):
+        scheduler = torch.optim.lr_scheduler.LambdaLR(
+            optimizer, lr_lambda=lambda_, last_epoch=iteration - 1
+        )
+
         train_loss, prediction = train_iteration(
             batch,
             model=model,
             criterion=criterion,
             optimizer=optimizer,
         )
+        scheduler.step()
         print(f"===> train loss: {train_loss:.6f}")
         logger.add(key="train", value=train_loss)
         logger.write()
         logger.plot()
-        state = {
-            "iteration": iteration,
-            "model_state_dict": model.state_dict(),
-            "optim_state_dict": optimizer.state_dict(),
-            "logger_data": logger.data,
-        }
+
         if iteration % train_config.save_model_every == 0:
-            save_model(
-                state,
-                iteration,
-            )
+            is_lowest = train_loss < lowest_loss
+            lowest_loss = min(train_loss, lowest_loss)
+            state = {
+                "iteration": iteration,
+                "lowest_loss": lowest_loss,
+                "model_state_dict": model.state_dict(),
+                "optim_state_dict": optimizer.state_dict(),
+                "logger_data": logger.data,
+            }
+            save_model(state, iteration, is_lowest)
+
         if iteration % train_config.save_snapshot_every == 0:
             save_snapshot(
                 batch,
@@ -136,10 +144,13 @@ def train_iteration(
     return loss.item(), prediction
 
 
-def save_model(state, iteration):
+def save_model(state, iteration, is_lowest=False):
     file_name = os.path.join("models", str(iteration).zfill(6) + ".pth")
     torch.save(state, file_name)
     print(f"Checkpoint saved at iteration {iteration}")
+    if is_lowest:
+        file_name = os.path.join("models", "best_loss.pth")
+        torch.save(state, file_name)
 
 
 def save_snapshot(batch, prediction, iteration):
