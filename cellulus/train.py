@@ -71,19 +71,26 @@ def train(experiment_config):
 
     # set scheduler:
 
+    def lambda_(iteration):
+        return pow((1 - ((iteration) / train_config.max_iterations)), 0.9)
+
     # set logger
     logger = get_logger(keys=["train"], title="loss")
 
     # resume training
     start_iteration = 0
+    lowest_loss = 1e7
+
     if model_config.checkpoint is None:
         pass
     else:
         print(f"Resuming model from {model_config.checkpoint}")
         state = torch.load(model_config.checkpoint)
         start_iteration = state["iteration"] + 1
+        lowest_loss = state["lowest_loss"]
         model.load_state_dict(state["model_state_dict"], strict=True)
         optimizer.load_state_dict(state["optim_state_dict"])
+        logger.data = state["logger_data"]
 
     # call `train_iteration`
     for iteration, batch in tqdm(
@@ -135,6 +142,7 @@ def train_iteration(
     optimizer,
 ):
     model.train()
+
     prediction = model(batch.cuda())
     loss = criterion(prediction)
     loss = loss.mean()
