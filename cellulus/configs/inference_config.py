@@ -26,6 +26,11 @@ class InferenceConfig:
 
         Configuration object produced by postprocess.py.
 
+
+    evaluation_dataset_config:
+
+        Configuration object for the ground truth masks.
+
     crop_size:
 
         ROI used by the scan node in gunpowder.
@@ -62,6 +67,11 @@ class InferenceConfig:
     post_processed_dataset_config: DatasetConfig = attrs.field(
         converter=lambda d: DatasetConfig(**d)
     )
+
+    evaluation_dataset_config: DatasetConfig = attrs.field(
+        converter=lambda d: DatasetConfig(**d)
+    )
+
     crop_size: List = attrs.field(default=[252, 252], validator=instance_of(List))
     p_salt_pepper = attrs.field(default=0.1, validator=instance_of(float))
     num_infer_iterations = attrs.field(default=16, validator=instance_of(int))
