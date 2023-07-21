@@ -6,17 +6,17 @@ from cellulus.configs.inference_config import InferenceConfig
 from cellulus.datasets.meta_data import DatasetMetaData
 
 
-def evaluate(inference_config: InferenceConfig, groundtruth_dataset_name: str) -> None:
+def evaluate(inference_config: InferenceConfig) -> None:
     dataset_config = inference_config.dataset_config
     dataset_meta_data = DatasetMetaData(dataset_config)
 
-    f = zarr.open(dataset_config.container_path)
-    ds = f[groundtruth_dataset_name]
+    f = zarr.open(inference_config.evaluation_dataset_config.container_path)
+    ds = f[inference_config.evaluation_dataset_config.dataset_name]
 
-    f_postprocessed = zarr.open(
+    f_segmentation = zarr.open(
         inference_config.segmentation_dataset_config.container_path
     )
-    ds_postprocessed = f_postprocessed[
+    ds_segmentation = f_segmentation[
         inference_config.segmentation_dataset_config.dataset_name
     ]
 
@@ -24,7 +24,7 @@ def evaluate(inference_config: InferenceConfig, groundtruth_dataset_name: str) -
     SEG_list = []
     for sample in tqdm(range(dataset_meta_data.num_samples)):
         groundtruth = ds[sample, 0].astype(np.uint16)
-        prediction = ds_postprocessed[sample, 0].astype(np.uint16)
+        prediction = ds_segmentation[sample, 0].astype(np.uint16)
         IoU = compute_pairwise_IoU(prediction, groundtruth)
 
         F1 = compute_F1(IoU)
