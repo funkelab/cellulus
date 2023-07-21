@@ -24,7 +24,7 @@ def post_process(inference_config: InferenceConfig) -> None:
         shape=(
             dataset_meta_data.num_samples,
             1,
-            *ds.shape[-dataset_meta_data.num_spatial_dims:],
+            *dataset_meta_data.spatial_array,
         ),
     )
     ds_postprocessed.attrs["resolution"] = (1,) * dataset_meta_data.num_dims
