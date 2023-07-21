@@ -31,9 +31,11 @@ def post_process(inference_config: InferenceConfig) -> None:
     ds_postprocessed.attrs["offset"] = (0,) * dataset_meta_data.num_dims
 
     for sample in tqdm(range(dataset_meta_data.num_samples)):
+        # first instance label masks are expanded by `grow_distance`
+        # next, expanded  instance label masks are shrunk by `shrink_distance`
         segmentation = ds[sample, 0]
-        distance_background = dtedt(ds[sample, 0] == 0)
-        mask = distance_background < inference_config.growd
-        distance_background = dtedt(mask)
-        segmentation[distance_background < inference_config.threshold] = 0
+        distance_foreground = dtedt(segmentation == 0)
+        expanded_mask = distance_foreground < inference_config.grow_distance
+        distance_background = dtedt(expanded_mask)
+        segmentation[distance_background < inference_config.shrink_distance] = 0
         ds_postprocessed[sample, 0, ...] = segmentation
