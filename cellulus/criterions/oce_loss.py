@@ -67,12 +67,20 @@ class OCELoss(nn.Module):  # type: ignore
         reference_coordinates = anchor_coordinates + offsets
         anchor_coordinates = anchor_coordinates[np.newaxis, ...]
         reference_coordinates = reference_coordinates[np.newaxis, ...]
-        anchor_coordinates = torch.from_numpy(
-            np.repeat(anchor_coordinates, b, 0)
-        ).cuda()
-        reference_coordinates = torch.from_numpy(
-            np.repeat(reference_coordinates, b, 0)
-        ).cuda()
+        if torch.cuda.is_available():
+            anchor_coordinates = torch.from_numpy(
+                np.repeat(anchor_coordinates, b, 0)
+            ).cuda()
+            reference_coordinates = torch.from_numpy(
+                np.repeat(reference_coordinates, b, 0)
+            ).cuda()
+        else:
+            anchor_coordinates = torch.from_numpy(
+                np.repeat(anchor_coordinates, b, 0)
+            )
+            reference_coordinates = torch.from_numpy(
+                np.repeat(reference_coordinates, b, 0)
+            )
         anchor_embeddings = self.get_embeddings(
             prediction,
             anchor_coordinates,

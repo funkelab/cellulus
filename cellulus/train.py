@@ -51,7 +51,8 @@ def train(experiment_config):
         num_spatial_dims=train_dataset.get_num_spatial_dims(),
     )
 
-    model = model.cuda()
+    if torch.cuda.is_available():
+        model = model.cuda()
 
     # set loss
     criterion = get_loss(
@@ -143,7 +144,10 @@ def train_iteration(
 ):
     model.train()
 
-    prediction = model(batch.cuda())
+    if torch.cuda.is_available():
+        prediction = model(batch.cuda())
+    else:
+        prediction = model(batch)
     loss = criterion(prediction)
     loss = loss.mean()
     optimizer.zero_grad()
