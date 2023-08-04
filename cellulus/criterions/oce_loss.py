@@ -75,9 +75,7 @@ class OCELoss(nn.Module):  # type: ignore
                 np.repeat(reference_coordinates, b, 0)
             ).cuda()
         else:
-            anchor_coordinates = torch.from_numpy(
-                np.repeat(anchor_coordinates, b, 0)
-            )
+            anchor_coordinates = torch.from_numpy(np.repeat(anchor_coordinates, b, 0))
             reference_coordinates = torch.from_numpy(
                 np.repeat(reference_coordinates, b, 0)
             )
