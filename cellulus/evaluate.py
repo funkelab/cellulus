@@ -14,10 +14,10 @@ def evaluate(inference_config: InferenceConfig) -> None:
     ds = f[inference_config.evaluation_dataset_config.dataset_name]
 
     f_segmentation = zarr.open(
-        inference_config.segmentation_dataset_config.container_path
+        inference_config.post_processed_dataset_config.container_path
     )
     ds_segmentation = f_segmentation[
-        inference_config.segmentation_dataset_config.dataset_name
+        inference_config.post_processed_dataset_config.dataset_name
     ]
 
     F1_list = []
