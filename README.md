@@ -1,5 +1,4 @@
-<h2 align="center">Unsupervised Learning of Object-Centric Embeddings  for Cell Instance
-Segmentation in Microscopy Images</h2>
+<h2 align="center">Unsupervised Learning of Object-Centric Embeddings  for Cell Instance Segmentation in Microscopy Images</h2>
 
 ## Table of Contents
 
@@ -9,7 +8,6 @@ Segmentation in Microscopy Images</h2>
 - **[Training & Inference on your data](#training-and-inference-on-your-data)**
 - **[Issues](#issues)**
 - **[Citation](#citation)**
-- **[Acknowledgements](#acknowledgements)**
 
 
 ### Introduction
@@ -31,23 +29,18 @@ conda install pytorch torchvision pytorch-cuda=11.7 -c pytorch -c nvidia
 git clone https://github.com/funkelab/cellulus.git
 cd cellulus
 pip install -e .
-pip install git+https://github.com/funkelab/funlib.learn.torch
 ```
 
 ### Getting Started
 
-Look in the `examples` directory,  and try out the `Immune` notebook for 2D images or `Simulated-3D` notebooks for volumetric (3D) images. 
+Try out the `tutorial.ipynb` notebook for 2D images. 
 
 ### Training and Inference on your data
    
 `train.zarr`, `val.zarr` (optional) and `test.zarr` type files should be present.
 These should contain `raw` (raw image files) and `groundtruth` (optional) (ground truth instance label masks, which are used for evaluation).
+Images should already be normalized to have intensities between 0 and 1. 
 
-```mermaid
-graph LR
-A[*.zarr] --> B[raw];
-A --> C[groundtruth];
-```
 
 ### Issues
 
@@ -67,5 +60,4 @@ If you find our work useful in your research, please consider citing:
 
 
 
-### Acknowledgements
 
