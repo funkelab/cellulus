@@ -25,9 +25,9 @@ def evaluate(inference_config: InferenceConfig) -> None:
     SEG = 0
     n_ids = 0
     for sample in tqdm(range(dataset_meta_data.num_samples)):
-        if np.any(ds[sample, 0]-ds[sample, 0].astype(np.uint16)):
-            mapping={v:k for k,v in enumerate(np.unique(ds[sample, 0]))}
-            u,inv = np.unique(ds[sample, 0],return_inverse = True)
+        if np.any(ds[sample, 0] - ds[sample, 0].astype(np.uint16)):
+            mapping = {v: k for k, v in enumerate(np.unique(ds[sample, 0]))}
+            u, inv = np.unique(ds[sample, 0], return_inverse=True)
             Y1 = np.array([mapping[x] for x in u])[inv].reshape(ds[sample, 0].shape)
             groundtruth = Y1.astype(np.uint16)
         else:
