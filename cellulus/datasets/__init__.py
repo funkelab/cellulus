@@ -1,6 +1,7 @@
 from typing import Tuple
 
 from cellulus.configs import DatasetConfig
+from cellulus.datasets.meta_data import DatasetMetaData  # noqa
 from cellulus.datasets.zarr_dataset import ZarrDataset
 
 
