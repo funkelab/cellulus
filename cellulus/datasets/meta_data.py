@@ -6,28 +6,8 @@ from cellulus.configs import DatasetConfig
 
 
 class DatasetMetaData:
-    def __init__(self, dataset_config: DatasetConfig):
-        self.dataset_config = dataset_config
-
-        container = zarr.open(self.dataset_config.container_path, "r")
-        try:
-            self.data = container[self.dataset_config.dataset_name]
-        except KeyError:
-            self.__invalid_dataset(
-                f"Zarr container {self.dataset_config.container_path} does not contain "
-                f'"{self.dataset_config.dataset_name}" dataset'
-            )
-
-        try:
-            self.axis_names = self.data.attrs["axis_names"]
-        except KeyError:
-            self.__invalid_dataset(
-                f'"{self.dataset_config.dataset_name}" dataset in '
-                f'{self.dataset_config.container_path} does not contain "axis_names" '
-                "attribute"
-            )
-
-        self.num_dims = len(self.axis_names)
+    def __init__(self, shape, axis_names):
+        self.num_dims = len(axis_names)
         self.num_spatial_dims: int = 0
         self.num_samples: int = 0
         self.num_channels: int = 0
@@ -35,47 +15,68 @@ class DatasetMetaData:
         self.channel_dim = None
         self.time_dim = None
         self.spatial_array: Tuple[int, ...] = ()
-        for dim, axis_name in enumerate(self.axis_names):
+        for dim, axis_name in enumerate(axis_names):
             if axis_name == "s":
                 self.sample_dim = dim
-                self.num_samples = self.data.shape[dim]
+                self.num_samples = shape[dim]
             elif axis_name == "c":
                 self.channel_dim = dim
-                self.num_channels = self.data.shape[dim]
+                self.num_channels = shape[dim]
             elif axis_name == "t":
                 self.num_spatial_dims += 1
                 self.time_dim = dim
             elif axis_name == "z":
                 self.num_spatial_dims += 1
-                self.spatial_array += (self.data.shape[dim],)
+                self.spatial_array += (shape[dim],)
             elif axis_name == "y":
                 self.num_spatial_dims += 1
-                self.spatial_array += (self.data.shape[dim],)
+                self.spatial_array += (shape[dim],)
             elif axis_name == "x":
                 self.num_spatial_dims += 1
-                self.spatial_array += (self.data.shape[dim],)
+                self.spatial_array += (shape[dim],)
 
         if self.sample_dim is None:
-            self.__invalid_dataset(
-                f'"{self.dataset_config.dataset_name}" dataset in '
-                f"{self.dataset_config.container_path} does not have a sample "
-                "dimension"
-            )
+            self.__invalid_dataset("dataset does not have a sample dimension")
 
         if self.channel_dim is None:
+            self.__invalid_dataset("dataset does not have a channel dimension")
+
+        if self.num_dims != len(shape):
             self.__invalid_dataset(
-                f'"{self.dataset_config.dataset_name}" dataset in '
-                f"{self.dataset_config.container_path} does not have a channel "
-                "dimension"
-            )
-        if self.num_dims != len(self.data.shape):
-            self.__invalid_dataset(
-                f'"{self.dataset_config.dataset_name}" dataset has '
-                f'{len(self.data.shape)} dimensions, but attribute "axis_names" '
-                f"has {self.num_dims} entries"
+                f"dataset has {len(shape)} dimensions, but attribute "
+                f"axis_names has {self.num_dims} entries"
             )
 
-    def __invalid_dataset(self, message):
+    @staticmethod
+    def from_dataset_config(dataset_config: DatasetConfig) -> DatasetMetaData:
+        container = zarr.open(dataset_config.container_path, "r")
+        try:
+            data = container[dataset_config.dataset_name]
+        except KeyError:
+            DatasetMetaData.__invalid_dataset(
+                f"Zarr container {dataset_config.container_path} does not contain "
+                f'"{dataset_config.dataset_name}" dataset'
+            )
+
+        try:
+            axis_names = data.attrs["axis_names"]
+        except KeyError:
+            DatasetMetaData.__invalid_dataset(
+                f'"{dataset_config.dataset_name}" dataset in '
+                f'{dataset_config.container_path} does not contain "axis_names" '
+                "attribute"
+            )
+
+        try:
+            return DatasetMetaData(data.shape, axis_names)
+        except RuntimeError as e:
+            raise RuntimeError(
+                f'"{dataset_config.dataset_name}" dataset in '
+                f"{dataset_config.container_path} has invalid meta-data"
+            ) from e
+
+    @staticmethod
+    def __invalid_dataset(message):
         raise RuntimeError(
             message
             + "\n\n"

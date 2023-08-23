@@ -113,7 +113,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
                 yield sample[self.raw].data[0]
 
     def __read_meta_data(self):
-        meta_data = DatasetMetaData(self.dataset_config)
+        meta_data = DatasetMetaData.from_dataset_config(self.dataset_config)
 
         self.num_dims = meta_data.num_dims
         self.num_spatial_dims = meta_data.num_spatial_dims
