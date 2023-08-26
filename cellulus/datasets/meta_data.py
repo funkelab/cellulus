@@ -48,7 +48,7 @@ class DatasetMetaData:
             )
 
     @staticmethod
-    def from_dataset_config(dataset_config: DatasetConfig) -> DatasetMetaData:
+    def from_dataset_config(dataset_config: DatasetConfig) -> "DatasetMetaData":
         container = zarr.open(dataset_config.container_path, "r")
         try:
             data = container[dataset_config.dataset_name]
