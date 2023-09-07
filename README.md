@@ -19,8 +19,8 @@ We refer to the techniques elaborated in the publication, here as **Cellulus**. 
 With `Cellulus`, we obtain state-of-the-art results on multiple real-world microscopy datasets. 
 
 ### Dependencies 
-We have tested this implementation using `cudatoolkit` version 11.7 on a `linux` OS machine. 
-One could execute these lines of code to run this branch:
+
+One could execute these lines of code to run using GPU:
 
 ```
 conda create -n cellulus python
@@ -30,6 +30,19 @@ git clone https://github.com/funkelab/cellulus.git
 cd cellulus
 pip install -e .
 ```
+
+If you would like to use the `cpu` or `mps`:
+
+```
+conda create -n cellulus python
+conda activate cellulus
+pip install torch
+git clone https://github.com/funkelab/cellulus.git
+cd cellulus
+pip install -e .
+```
+
+and set `device=cpu` or `device=mps` in `train.toml` and `infer.toml`.
 
 ### Getting Started
 
