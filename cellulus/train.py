@@ -83,13 +83,13 @@ def train(experiment_config):
 
     # resume training
     start_iteration = 0
-    lowest_loss = 1e7
+    lowest_loss = 1e0
 
     if model_config.checkpoint is None:
         pass
     else:
         print(f"Resuming model from {model_config.checkpoint}")
-        state = torch.load(model_config.checkpoint)
+        state = torch.load(model_config.checkpoint, map_location=device)
         start_iteration = state["iteration"] + 1
         lowest_loss = state["lowest_loss"]
         model.load_state_dict(state["model_state_dict"], strict=True)
