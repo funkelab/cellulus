@@ -12,6 +12,7 @@ class OCELoss(nn.Module):  # type: ignore
         kappa: float,
         num_spatial_dims: int,
         reduce_mean: bool,
+        device: torch.device,
     ):
         super().__init__()
         self.temperature = temperature
@@ -20,6 +21,7 @@ class OCELoss(nn.Module):  # type: ignore
         self.kappa = kappa
         self.num_spatial_dims = num_spatial_dims
         self.reduce_mean = reduce_mean
+        self.device = device
 
     def distance_function(self, e0, e1):
         diff = e0 - e1
@@ -67,18 +69,12 @@ class OCELoss(nn.Module):  # type: ignore
         reference_coordinates = anchor_coordinates + offsets
         anchor_coordinates = anchor_coordinates[np.newaxis, ...]
         reference_coordinates = reference_coordinates[np.newaxis, ...]
-        if torch.cuda.is_available():
-            anchor_coordinates = torch.from_numpy(
-                np.repeat(anchor_coordinates, b, 0)
-            ).cuda()
-            reference_coordinates = torch.from_numpy(
-                np.repeat(reference_coordinates, b, 0)
-            ).cuda()
-        else:
-            anchor_coordinates = torch.from_numpy(np.repeat(anchor_coordinates, b, 0))
-            reference_coordinates = torch.from_numpy(
-                np.repeat(reference_coordinates, b, 0)
-            )
+        anchor_coordinates = torch.from_numpy(np.repeat(anchor_coordinates, b, 0)).to(
+            self.device
+        )
+        reference_coordinates = torch.from_numpy(
+            np.repeat(reference_coordinates, b, 0)
+        ).to(self.device)
         anchor_embeddings = self.get_embeddings(
             prediction,
             anchor_coordinates,
