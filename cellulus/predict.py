@@ -12,9 +12,14 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
     dataset_meta_data = DatasetMetaData.from_dataset_config(dataset_config)
 
     voxel_size = gp.Coordinate((1,) * dataset_meta_data.num_spatial_dims)
+
+    # set device
+    device = torch.device(inference_config.device)
+
     model.set_infer(
         p_salt_pepper=inference_config.p_salt_pepper,
         num_infer_iterations=inference_config.num_infer_iterations,
+        device=device,
     )
 
     # prediction crop size is the size of the scanned tiles to be provided to the model
@@ -27,7 +32,7 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
             torch.zeros(
                 (1, dataset_meta_data.num_channels, *inference_config.crop_size),
                 dtype=torch.float32,
-            ).cuda()
+            ).to(device)
         ).shape
     )
 
