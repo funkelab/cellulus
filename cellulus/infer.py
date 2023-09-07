@@ -34,11 +34,14 @@ def infer(experiment_config):
         ],
         num_spatial_dims=dataset_meta_data.num_spatial_dims,
     )
-    model = model.cuda()
+    # set device
+    device = torch.device(inference_config.device)
+
+    model = model.to(device)
 
     # load checkpoint
     if os.path.exists(model_config.checkpoint):
-        state = torch.load(model_config.checkpoint)
+        state = torch.load(model_config.checkpoint, map_location=device)
         model.load_state_dict(state["model_state_dict"], strict=True)
     else:
         assert (
