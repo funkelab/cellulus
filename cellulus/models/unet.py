@@ -63,10 +63,11 @@ class UNetModel(nn.Module):  # type: ignore
                 nn.Conv3d(self.features_in_last_layer, out_channels, 1),
             )
 
-    def set_infer(self, p_salt_pepper, num_infer_iterations):
+    def set_infer(self, p_salt_pepper, num_infer_iterations, device):
         self.mode = "infer"
         self.p_salt_pepper = p_salt_pepper
         self.num_infer_iterations = num_infer_iterations
+        self.device: torch.device = device
 
     def head_forward(self, backbone_output):
         out_head = self.head(backbone_output)
@@ -84,7 +85,7 @@ class UNetModel(nn.Module):  # type: ignore
                 for val in [0.5, 1.0]:
                     for _ in range(self.num_infer_iterations):
                         noisy_input = raw_sample.detach().clone()
-                        rnd = torch.rand(*noisy_input.shape).cuda()
+                        rnd = torch.rand(*noisy_input.shape).to(self.device)
                         noisy_input[rnd <= self.p_salt_pepper] = val
                         pred = (
                             self.head_forward(self.backbone(noisy_input))[0]
