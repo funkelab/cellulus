@@ -11,7 +11,7 @@ description = "Unsupervised Segmentation of Cells in Microscopy Images"
 readme = "README.md"
 license = { text = "MIT" }
 authors = [
-    { name = "Steffen Wolf", email = "" },
+    { name = "Steffen Wolf", email = "steffenjwolf@gmail.com" },
     { name = "Manan Lalit", email = "lalitm@janelia.hhmi.org" },
     { name = "Henry Westmacott", email = "henryjw@mrc-lmb.cam.ac.uk" },
     { name = "Jan Funke", email = "funkej@janelia.hhmi.org" },
@@ -27,7 +27,9 @@ dependencies = [
   "tqdm",
   "gunpowder",
   "scikit-learn",
-  "funlib.learn.torch @ git+https://github.com/funkelab/funlib.learn.torch@f36decaf95e2b6d1b74a45b31660d29f8e57e5c4"
+  "funlib.learn.torch @ git+https://github.com/funkelab/funlib.learn.torch@f36decaf95e2b6d1b74a45b31660d29f8e57e5c4",
+  "matplotlib", 
+  "pandas"
 ]
 
 [project.optional-dependencies]
