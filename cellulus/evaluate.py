@@ -8,7 +8,7 @@ from cellulus.datasets.meta_data import DatasetMetaData
 
 def evaluate(inference_config: InferenceConfig) -> None:
     dataset_config = inference_config.dataset_config
-    dataset_meta_data = DatasetMetaData(dataset_config)
+    dataset_meta_data = DatasetMetaData.from_dataset_config(dataset_config)
 
     f = zarr.open(inference_config.evaluation_dataset_config.container_path)
     ds = f[inference_config.evaluation_dataset_config.dataset_name]

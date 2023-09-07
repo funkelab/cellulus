@@ -17,7 +17,10 @@ def infer(experiment_config):
 
     inference_config = experiment_config.inference_config
     model_config = experiment_config.model_config
-    dataset_meta_data = DatasetMetaData(inference_config.dataset_config)
+
+    dataset_meta_data = DatasetMetaData.from_dataset_config(
+        inference_config.dataset_config
+    )
 
     # set model
     model = get_model(

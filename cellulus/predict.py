@@ -9,7 +9,7 @@ from cellulus.datasets.meta_data import DatasetMetaData
 def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
     # get the dataset_config data out of inference_config
     dataset_config = inference_config.dataset_config
-    dataset_meta_data = DatasetMetaData(dataset_config)
+    dataset_meta_data = DatasetMetaData.from_dataset_config(dataset_config)
 
     voxel_size = gp.Coordinate((1,) * dataset_meta_data.num_spatial_dims)
     model.set_infer(
