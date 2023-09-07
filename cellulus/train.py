@@ -51,8 +51,10 @@ def train(experiment_config):
         num_spatial_dims=train_dataset.get_num_spatial_dims(),
     )
 
-    if torch.cuda.is_available():
-        model = model.cuda()
+    # set device
+    device = torch.device(train_config.device)
+
+    model = model.to(device)
 
     # set loss
     criterion = get_loss(
@@ -62,6 +64,7 @@ def train(experiment_config):
         density=train_config.density,
         num_spatial_dims=train_dataset.get_num_spatial_dims(),
         reduce_mean=train_config.reduce_mean,
+        device=device,
     )
 
     # set optimizer
@@ -105,10 +108,7 @@ def train(experiment_config):
         )
 
         train_loss, prediction = train_iteration(
-            batch,
-            model=model,
-            criterion=criterion,
-            optimizer=optimizer,
+            batch, model=model, criterion=criterion, optimizer=optimizer, device=device
         )
         scheduler.step()
         print(f"===> train loss: {train_loss:.6f}")
@@ -136,18 +136,9 @@ def train(experiment_config):
             )
 
 
-def train_iteration(
-    batch,
-    model,
-    criterion,
-    optimizer,
-):
+def train_iteration(batch, model, criterion, optimizer, device):
     model.train()
-
-    if torch.cuda.is_available():
-        prediction = model(batch.cuda())
-    else:
-        prediction = model(batch)
+    prediction = model(batch.to(device))
     loss = criterion(prediction)
     loss = loss.mean()
     optimizer.zero_grad()
