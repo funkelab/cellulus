@@ -15,7 +15,7 @@ class TrainConfig:
 
         crop_size:
 
-            The size of the crops - specified as a tuple of pixels -
+            The size of the crops - specified as a list of number of pixels -
             extracted from the raw images, used during training.
 
         batch_size:
@@ -80,6 +80,13 @@ class TrainConfig:
         validate_data_config:
 
             Configuration object for the validation data.
+
+        device (default = 'cuda:0'):
+
+            The device to train on.
+            Set to 'cpu' to train without GPU.
+
+
     """
 
     train_data_config: DatasetConfig = attrs.field(converter=to_config(DatasetConfig))
@@ -103,3 +110,4 @@ class TrainConfig:
 
     control_point_spacing: int = attrs.field(default=64, validator=instance_of(int))
     control_point_jitter: float = attrs.field(default=2.0, validator=instance_of(float))
+    device: str = attrs.field(default="cuda:0", validator=instance_of(str))

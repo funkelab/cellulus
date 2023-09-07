@@ -52,6 +52,11 @@ class InferenceConfig:
 
         Ignore objects which are smaller than min_size number of pixels.
 
+    device (default = 'cuda:0'):
+
+            The device to train on.
+            Set to 'cpu' to train without GPU.
+
     """
 
     dataset_config: DatasetConfig = attrs.field(converter=lambda d: DatasetConfig(**d))
@@ -79,3 +84,4 @@ class InferenceConfig:
     min_size = attrs.field(default=10, validator=instance_of(int))
     grow_distance = attrs.field(default=3, validator=instance_of(int))
     shrink_distance = attrs.field(default=6, validator=instance_of(int))
+    device: str = attrs.field(default="cuda:0", validator=instance_of(str))
