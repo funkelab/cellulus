@@ -1,26 +1,21 @@
-<h2 align="center">Unsupervised Learning of Object-Centric Embeddings  for Cell Instance Segmentation in Microscopy Images</h2>
-
-## Table of Contents
+<h2 align="center">Cellulus</h2>
 
 - **[Introduction](#introduction)**
 - **[Dependencies](#dependencies)**
 - **[Getting Started](#getting-started)**
-- **[Training & Inference on your data](#training-and-inference-on-your-data)**
 - **[Issues](#issues)**
-- **[Citation](#citation)**
 
 
 ### Introduction
-This repository hosts the version of the code used for the **[preprint]()** **Unsupervised Learning of Object-Centric Embeddings for Cell Instance
-Segmentation in Microscopy Images**. 
+This repository hosts the version of the code used for the **[preprint]()** titled **Unsupervised Learning of *Object-Centric Embeddings* for Cell Instance Segmentation in Microscopy Images**. 
 
-We refer to the techniques elaborated in the publication, here as **Cellulus**. `Cellulus` is a method to perform instance-segmentation of objects in microscopy images in an unsupervised fashion i.e. requiring no ground truth labels during training. 
-
-With `Cellulus`, we obtain state-of-the-art results on multiple real-world microscopy datasets. 
+We refer to the proposed techniques described in the preprint as **Cellulus** - Cellulus is a deep learning based method which can be used to obtain instance-segmentation of objects in microscopy images in an unsupervised fashion i.e. requiring no ground truth labels during training. 
 
 ### Dependencies 
 
-One could execute these lines of code to run using GPU:
+One could execute these lines of code to create a new environment and install dependencies. 
+
+If you would like to run Cellulus, using GPU:
 
 ```
 conda create -n cellulus python
@@ -31,7 +26,7 @@ cd cellulus
 pip install -e .
 ```
 
-If you would like to use the `cpu` or `mps`:
+If you would like to run Cellulus, using CPU or the MPS framework:
 
 ```
 conda create -n cellulus python
@@ -42,33 +37,14 @@ cd cellulus
 pip install -e .
 ```
 
-and set `device=cpu` or `device=mps` in `train.toml` and `infer.toml`.
-
 ### Getting Started
 
 Try out the `tutorial.ipynb` notebook for 2D images. 
 
-### Training and Inference on your data
-   
-`train.zarr`, `val.zarr` (optional) and `test.zarr` type files should be present.
-These should contain `raw` (raw image files) and `groundtruth` (optional) (ground truth instance label masks, which are used for evaluation).
-Images should already be normalized to have intensities between 0 and 1. 
-
 
 ### Issues
 
-If you encounter any problems, please **[file an issue]** along with a description.
-
-[file an issue]: https://github.com/funkelab/cellulus/issues
-
-
-### Citation
-
-If you find our work useful in your research, please consider citing:
-
-```bibtex
-
-```
+If you encounter any problems, please **[file an issue](https://github.com/funkelab/cellulus/issues)** along with a description.
 
 
 
