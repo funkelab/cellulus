@@ -1,5 +1,6 @@
 import os
 
+import numpy as np
 import torch
 import zarr
 from tqdm import tqdm
@@ -169,8 +170,22 @@ def save_snapshot(batch, prediction, iteration):
     f = zarr.open("snapshots.zarr", "a")
     f[f"{iteration}/raw"] = batch.detach().cpu().numpy()
     f[f"{iteration}/raw"].attrs["axis_names"] = axis_names
-    f[f"{iteration}/prediction"] = prediction.detach().cpu().numpy()
+    f[f"{iteration}/raw"].attrs["resolution"] = [
+        1,
+    ] * num_spatial_dims
+
+    # normalize the offsets by subtracting the mean offset per image
+    prediction_cpu = prediction.detach().cpu().numpy()
+    prediction_cpu_reshaped = np.reshape(
+        prediction_cpu, (prediction_cpu.shape[0], prediction_cpu.shape[1], -1)
+    )
+    mean_prediction = np.mean(prediction_cpu_reshaped, 2)
+    prediction_cpu -= mean_prediction[(...,) + (np.newaxis,) * num_spatial_dims]
+    f[f"{iteration}/prediction"] = prediction_cpu
     f[f"{iteration}/prediction"].attrs["axis_names"] = axis_names
     f[f"{iteration}/prediction"].attrs["offset"] = prediction_offset
+    f[f"{iteration}/prediction"].attrs["resolution"] = [
+        1,
+    ] * num_spatial_dims
 
     print(f"Snapshot saved at iteration {iteration}")
