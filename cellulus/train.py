@@ -57,6 +57,11 @@ def train(experiment_config):
 
     model = model.to(device)
 
+    # initialize model weights
+    for _name, layer in model.named_modules():
+        if isinstance(layer, torch.nn.modules.conv._ConvNd):
+            torch.nn.init.kaiming_normal_(layer.weight, nonlinearity="relu")
+
     # set loss
     criterion = get_loss(
         regularizer_weight=train_config.regularizer_weight,
