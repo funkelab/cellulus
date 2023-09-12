@@ -4,6 +4,7 @@ import attrs
 from attrs.validators import instance_of
 
 from .dataset_config import DatasetConfig
+from .utils import to_config
 
 
 @attrs.define
@@ -54,8 +55,8 @@ class InferenceConfig:
 
     device (default = 'cuda:0'):
 
-            The device to train on.
-            Set to 'cpu' to train without GPU.
+            The device to infer on.
+            Set to 'cpu' to infer without GPU.
 
     """
 
@@ -74,9 +75,9 @@ class InferenceConfig:
     )
 
     evaluation_dataset_config: DatasetConfig = attrs.field(
-        converter=lambda d: DatasetConfig(**d)
+        default=None, converter=to_config(DatasetConfig)
     )
-
+    device: str = attrs.field(default="cuda:0", validator=instance_of(str))
     crop_size: List = attrs.field(default=[252, 252], validator=instance_of(List))
     p_salt_pepper = attrs.field(default=0.1, validator=instance_of(float))
     num_infer_iterations = attrs.field(default=16, validator=instance_of(int))
@@ -84,4 +85,3 @@ class InferenceConfig:
     min_size = attrs.field(default=10, validator=instance_of(int))
     grow_distance = attrs.field(default=3, validator=instance_of(int))
     shrink_distance = attrs.field(default=6, validator=instance_of(int))
-    device: str = attrs.field(default="cuda:0", validator=instance_of(str))
