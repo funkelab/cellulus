@@ -58,4 +58,5 @@ def infer(experiment_config):
     # ...and post-process the segmentation
     post_process(inference_config)
     # ...and evaluate if groundtruth exists
-    evaluate(inference_config)
+    if inference_config.evaluation_dataset_config is not None:
+        evaluate(inference_config)
