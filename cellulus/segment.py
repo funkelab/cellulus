@@ -25,9 +25,14 @@ def segment(inference_config: InferenceConfig) -> None:
             1,
             *dataset_meta_data.spatial_array,
         ),
+        dtype=np.uint16,
     )
-    ds_segmentation.attrs["resolution"] = (1,) * dataset_meta_data.num_dims
-    ds_segmentation.attrs["offset"] = (0,) * dataset_meta_data.num_dims
+
+    ds_segmentation.attrs["axis_names"] = ["s", "c"] + ["t", "z", "y", "x"][
+        -dataset_meta_data.num_spatial_dims :
+    ]
+    ds_segmentation.attrs["resolution"] = (1,) * dataset_meta_data.num_spatial_dims
+    ds_segmentation.attrs["offset"] = (0,) * dataset_meta_data.num_spatial_dims
 
     for sample in tqdm(range(dataset_meta_data.num_samples)):
         embeddings = ds[sample]
