@@ -1,3 +1,4 @@
+import numpy as np
 import zarr
 from scipy.ndimage import distance_transform_edt as dtedt
 from tqdm import tqdm
@@ -26,9 +27,14 @@ def post_process(inference_config: InferenceConfig) -> None:
             1,
             *dataset_meta_data.spatial_array,
         ),
+        dtype=np.uint16,
     )
-    ds_postprocessed.attrs["resolution"] = (1,) * dataset_meta_data.num_dims
-    ds_postprocessed.attrs["offset"] = (0,) * dataset_meta_data.num_dims
+
+    ds_postprocessed.attrs["axis_names"] = ["s", "c"] + ["t", "z", "y", "x"][
+        -dataset_meta_data.num_spatial_dims :
+    ]
+    ds_postprocessed.attrs["resolution"] = (1,) * dataset_meta_data.num_spatial_dims
+    ds_postprocessed.attrs["offset"] = (0,) * dataset_meta_data.num_spatial_dims
 
     for sample in tqdm(range(dataset_meta_data.num_samples)):
         # first instance label masks are expanded by `grow_distance`
