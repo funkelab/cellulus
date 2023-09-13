@@ -64,7 +64,12 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
             dataset_meta_data.num_spatial_dims + 1,
             *dataset_meta_data.spatial_array,
         ),
+        dtype=float,
     )
+
+    ds.attrs["axis_names"] = ["s", "c"] + ["t", "z", "y", "x"][
+        -dataset_meta_data.num_spatial_dims :
+    ]
     ds.attrs["resolution"] = (1,) * dataset_meta_data.num_spatial_dims
     ds.attrs["offset"] = (0,) * dataset_meta_data.num_spatial_dims
 
