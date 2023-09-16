@@ -49,6 +49,10 @@ class InferenceConfig:
         Band-width used to perform mean-shift clustering on the predicted
         embeddings.
 
+    reduction_probability:
+
+
+
     min_size:
 
         Ignore objects which are smaller than min_size number of pixels.
@@ -82,6 +86,7 @@ class InferenceConfig:
     p_salt_pepper = attrs.field(default=0.1, validator=instance_of(float))
     num_infer_iterations = attrs.field(default=16, validator=instance_of(int))
     bandwidth = attrs.field(default=7, validator=instance_of(int))
+    reduction_probability = attrs.field(default=0.1, validator=instance_of(float))
     min_size = attrs.field(default=10, validator=instance_of(int))
     grow_distance = attrs.field(default=3, validator=instance_of(int))
     shrink_distance = attrs.field(default=6, validator=instance_of(int))
