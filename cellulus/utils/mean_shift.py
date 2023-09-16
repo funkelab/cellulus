@@ -5,7 +5,9 @@ from skimage.filters import threshold_otsu
 from sklearn.cluster import MeanShift
 
 
-def mean_shift_segmentation(embedding_mean, embedding_std, bandwidth, min_size):
+def mean_shift_segmentation(
+    embedding_mean, embedding_std, bandwidth, min_size, reduction_probability
+):
     embedding_mean = torch.from_numpy(embedding_mean)
     if embedding_mean.ndim == 4:
         embedding_mean[:, 1] += torch.arange(embedding_mean.shape[2])[
@@ -30,7 +32,7 @@ def mean_shift_segmentation(embedding_mean, embedding_std, bandwidth, min_size):
         embedding_mean,
         bandwidth,
         mask=mask,
-        reduction_probability=0.1,
+        reduction_probability=reduction_probability,
         cluster_all=False,
     )[0]
     # segmentation = stardist.fill_label_holes(segmentation)
