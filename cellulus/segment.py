@@ -45,6 +45,7 @@ def segment(inference_config: InferenceConfig) -> None:
             embeddings_std,
             bandwidth=inference_config.bandwidth,
             min_size=inference_config.min_size,
+            reduction_probability=inference_config.reduction_probability,
         )
         ds_segmentation[
             sample,
