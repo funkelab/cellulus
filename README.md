@@ -31,7 +31,7 @@ If you would like to run Cellulus, using CPU or the MPS framework:
 ```
 conda create -n cellulus python
 conda activate cellulus
-pip install torch
+pip install torch torchvision
 git clone https://github.com/funkelab/cellulus.git
 cd cellulus
 pip install -e .
