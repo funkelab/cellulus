@@ -42,7 +42,7 @@ class TrainConfig:
 
             If True, the loss contribution is averaged across all pairs of patches.
 
-        density (default = 0.2)
+        density (default = 0.1)
 
             Determines the fraction of patches to sample per crop, during training.
 
@@ -99,7 +99,7 @@ class TrainConfig:
     initial_learning_rate: float = attrs.field(
         default=4e-5, validator=instance_of(float)
     )
-    density: float = attrs.field(default=0.2, validator=instance_of(float))
+    density: float = attrs.field(default=0.1, validator=instance_of(float))
     kappa: float = attrs.field(default=10.0, validator=instance_of(float))
     temperature: float = attrs.field(default=10.0, validator=instance_of(float))
     regularizer_weight: float = attrs.field(default=1e-5, validator=instance_of(float))
