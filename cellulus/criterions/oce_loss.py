@@ -34,7 +34,10 @@ class OCELoss(nn.Module):  # type: ignore
         if self.num_spatial_dims == 2:
             b, c, h, w = prediction.shape
 
-            num_anchors = int(self.density * h * w)
+            h_ = h - 2 * self.kappa  # unbiased height
+            w_ = w - 2 * self.kappa  # unbiased width
+
+            num_anchors = int(self.density * h_ * w_)
             anchor_coordinates_y = np.random.randint(
                 self.kappa, h - self.kappa, num_anchors
             )
@@ -46,7 +49,12 @@ class OCELoss(nn.Module):  # type: ignore
             )  # N x 2
         elif self.num_spatial_dims == 3:
             b, c, d, h, w = prediction.shape
-            num_anchors = int(self.density * d * h * w)
+
+            d_ = d - 2 * self.kappa  # unbiased depth
+            h_ = h - 2 * self.kappa  # unbiased height
+            w_ = w - 2 * self.kappa  # unbiased width
+
+            num_anchors = int(self.density * d_ * h_ * w_)
             anchor_coordinates_z = np.random.randint(
                 self.kappa, d - self.kappa, num_anchors
             )
