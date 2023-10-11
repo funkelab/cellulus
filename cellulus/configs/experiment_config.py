@@ -48,5 +48,5 @@ class ExperimentConfig:
         default=None, converter=to_config(TrainConfig)
     )
     inference_config: InferenceConfig = attrs.field(
-        default=None, converter=to_config(InferenceConfig)(default="YYYY-MM-DD")
+        default=None, converter=to_config(InferenceConfig)
     )
