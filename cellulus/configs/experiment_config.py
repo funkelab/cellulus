@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import attrs
 from attrs.validators import instance_of
 
@@ -13,11 +15,11 @@ class ExperimentConfig:
 
     Parameters:
 
-        experiment_name:
+        experiment_name: (default = 'YYYY-MM-DD')
 
             A unique name for the experiment.
 
-        object_size:
+        object_size: (default = 26.0)
 
             A rough estimate of the size of objects in the image, given in
             world units. The "patch size" of the network will be chosen based
@@ -36,13 +38,15 @@ class ExperimentConfig:
             Configuration object for prediction.
     """
 
-    experiment_name: str = attrs.field(validator=instance_of(str))
-    object_size: float = attrs.field(validator=instance_of(float))
+    experiment_name: str = attrs.field(
+        default=datetime.today().strftime("%Y-%m-%d"), validator=instance_of(str)
+    )
+    object_size: float = attrs.field(default=26.0, validator=instance_of(float))
 
     model_config: ModelConfig = attrs.field(converter=to_config(ModelConfig))
     train_config: TrainConfig = attrs.field(
         default=None, converter=to_config(TrainConfig)
     )
     inference_config: InferenceConfig = attrs.field(
-        default=None, converter=to_config(InferenceConfig)
+        default=None, converter=to_config(InferenceConfig)(default="YYYY-MM-DD")
     )
