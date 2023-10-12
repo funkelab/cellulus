@@ -77,7 +77,7 @@ class TrainConfig:
 
             Configuration object for the training data.
 
-        validate_data_config:
+        validate_data_config (default = None):
 
             Configuration object for the validation data.
 
@@ -91,7 +91,7 @@ class TrainConfig:
 
     train_data_config: DatasetConfig = attrs.field(converter=to_config(DatasetConfig))
     validate_data_config: DatasetConfig = attrs.field(
-        converter=to_config(DatasetConfig)
+        default=None, converter=to_config(DatasetConfig)
     )
     crop_size: List = attrs.field(default=[252, 252], validator=instance_of(List))
     batch_size: int = attrs.field(default=8, validator=instance_of(int))
