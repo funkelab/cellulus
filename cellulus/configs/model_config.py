@@ -40,7 +40,7 @@ class ModelConfig:
             checkpoint will be used to resume training, otherwise the network
             will be trained from scratch.
 
-        initialize (default: False)
+        initialize (default: True)
 
             If True, initialize the model weights with Kaiming Normal
 
@@ -55,4 +55,4 @@ class ModelConfig:
         ]
     )
     checkpoint: Path = attrs.field(default=None, converter=to_path)
-    initialize: bool = attrs.field(default=False, validator=instance_of(bool))
+    initialize: bool = attrs.field(default=True, validator=instance_of(bool))
