@@ -1,5 +1,6 @@
 import os
 
+import numpy as np
 import torch
 
 from cellulus.datasets.meta_data import DatasetMetaData
@@ -16,6 +17,15 @@ def infer(experiment_config):
     print(experiment_config)
 
     inference_config = experiment_config.inference_config
+
+    if inference_config.bandwidth is None:
+        inference_config.bandwidth = 0.5 * experiment_config.object_size
+
+    if inference_config.min_size is None:
+        inference_config.min_size = (
+            0.1 * np.pi * (experiment_config.object_size**2) / 4
+        )
+
     model_config = experiment_config.model_config
 
     dataset_meta_data = DatasetMetaData.from_dataset_config(
