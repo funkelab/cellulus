@@ -38,12 +38,12 @@ class ExperimentConfig:
             Configuration object for prediction.
     """
 
+    model_config: ModelConfig = attrs.field(converter=to_config(ModelConfig))
     experiment_name: str = attrs.field(
         default=datetime.today().strftime("%Y-%m-%d"), validator=instance_of(str)
     )
     object_size: float = attrs.field(default=26.0, validator=instance_of(float))
 
-    model_config: ModelConfig = attrs.field(converter=to_config(ModelConfig))
     train_config: TrainConfig = attrs.field(
         default=None, converter=to_config(TrainConfig)
     )
