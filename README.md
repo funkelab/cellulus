@@ -40,7 +40,7 @@ pip install -e .
 
 ### Getting Started
 
-Try out the Quick Start tutorial notebook available [here](). 
+Try out the `Quick Start` tutorial notebook available **[here](https://funkelab.github.io/cellulus/quickstart.html)**. 
 
 ### Citation
 
