@@ -3,11 +3,12 @@
 - **[Introduction](#introduction)**
 - **[Dependencies](#dependencies)**
 - **[Getting Started](#getting-started)**
+- **[Citation](#citation)**
 - **[Issues](#issues)**
 
 
 ### Introduction
-This repository hosts the version of the code used for the **[preprint](https://openaccess.thecvf.com/content/ICCV2023/papers/Wolf_Unsupervised_Learning_of_Object-Centric_Embeddings_for_Cell_Instance_Segmentation_in_ICCV_2023_paper.pdf)** titled **Unsupervised Learning of *Object-Centric Embeddings* for Cell Instance Segmentation in Microscopy Images**. 
+This repository hosts the version of the code used for the **[preprint](https://arxiv.org/pdf/2310.08501.pdf)** titled **Unsupervised Learning of *Object-Centric Embeddings* for Cell Instance Segmentation in Microscopy Images**. This work was accepted to the International Conference for Computer Vision (ICCV), 2023.
 
 We refer to the proposed techniques described in the preprint as **Cellulus** - Cellulus is a deep learning based method which can be used to obtain instance-segmentation of objects in microscopy images in an unsupervised fashion i.e. requiring no ground truth labels during training. 
 
@@ -39,14 +40,26 @@ pip install -e .
 
 ### Getting Started
 
-Try out the `tutorial.ipynb` notebook for 2D images. 
+Try out the Quick Start tutorial notebook available [here](). 
 
+### Citation
+
+If you find our work useful in your research, please consider citing:
+
+```bibtex
+@misc{wolf2023unsupervised,
+      title={Unsupervised Learning of Object-Centric Embeddings for Cell Instance Segmentation in Microscopy Images}, 
+      author={Steffen Wolf and Manan Lalit and Henry Westmacott and Katie McDole and Jan Funke},
+      year={2023},
+      eprint={2310.08501},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+```
 
 ### Issues
 
 If you encounter any problems, please **[file an issue](https://github.com/funkelab/cellulus/issues)** along with a description.
-
-
 
 
 
