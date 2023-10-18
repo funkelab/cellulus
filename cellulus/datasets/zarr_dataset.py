@@ -1,0 +1,192 @@
+import math
+from typing import Tuple
+
+import gunpowder as gp
+from torch.utils.data import IterableDataset
+
+from cellulus.configs import DatasetConfig
+
+from .meta_data import DatasetMetaData
+
+from cellulus.criterions import stardist_transform
+import numpy as np
+
+
+class ZarrDataset(IterableDataset):  # type: ignore
+    def __init__(
+        self,
+        dataset_config: DatasetConfig,
+        crop_size: Tuple[int, ...],
+        control_point_spacing: int,
+        control_point_jitter: float,
+        semi_supervised: bool = False,
+        supervised_dataset_config: DatasetConfig = None,
+        pseudo_dataset_config: DatasetConfig = None,
+        ):
+        """A dataset that serves random samples from a zarr container.
+
+        Args:
+
+            dataset_config:
+
+                A dataset config object pointing to the zarr dataset to use.
+                The dataset should have shape `(s, c, [t,] [z,] y, x)`, where
+                `s` = # of samples, `c` = # of channels, `t` = # of frames, and
+                `z`/`y`/`x` are spatial extents. The dataset should have an
+                `"axis_names"` attribute that contains the names of the used
+                axes, e.g., `["s", "c", "y", "x"]` for a 2D dataset.
+
+
+            crop_size:
+
+                The size of data crops used during training (distinct from the
+                "patch size" of the method: from each crop, multiple patches
+                will be randomly selected and the loss computed on them). This
+                should be equal to the input size of the model that predicts
+                the OCEs.
+
+            control_point_spacing:
+
+                The distance in pixels between control points used for elastic
+                deformation of the raw data.
+
+            control_point_jitter:
+
+                How much to jitter the control points for elastic deformation
+                of the raw data, given as the standard deviation of a normal
+                distribution with zero mean.
+        """
+
+        self.dataset_config = dataset_config
+        self.crop_size = crop_size
+        self.control_point_spacing = control_point_spacing
+        self.control_point_jitter = control_point_jitter
+        self.semi_supervised = semi_supervised
+        if supervised_dataset_config != None:
+            self.supervised_dataset_config = supervised_dataset_config
+            self.pseudo_dataset_config = pseudo_dataset_config
+        else:
+            self.supervised_dataset_config = None
+            self.pseudo_dataset_config = None
+            
+        self.__read_meta_data()
+
+        assert len(crop_size) == self.num_spatial_dims, (
+            f'"crop_size" must have the same dimension as the '
+            f'spatial(temporal) dimensions of the "{self.dataset_config.dataset_name}" '
+            f"dataset which is {self.num_spatial_dims}, but it is {crop_size}"
+        )
+
+        self.__setup_pipeline()
+
+    def __iter__(self):
+        return iter(self.__yield_sample())
+
+    def __setup_pipeline(self):
+        self.raw = gp.ArrayKey("RAW")
+        self.pseudo = gp.ArrayKey("PSEUDO")
+        self.supervised = gp.ArrayKey("SUPERVISED")
+
+        # treat all dimensions as spatial, with a voxel size of 1
+        raw_spec = gp.ArraySpec(voxel_size=(1,) * self.num_dims, interpolatable=True)
+
+        # spatial_dims = tuple(range(self.num_dims - self.num_spatial_dims,
+        # self.num_dims))
+
+        if self.supervised_dataset_config != None:
+            source_node = gp.ZarrSource(
+                self.dataset_config.container_path,
+                {self.raw: self.dataset_config.dataset_name,
+                 self.pseudo: self.pseudo_dataset_config.dataset_name,
+                 self.supervised: self.supervised_dataset_config.dataset_name},
+                array_specs={self.raw: raw_spec,
+                             self.pseudo: raw_spec,
+                             self.supervised: raw_spec},
+            )
+        else:
+            source_node = gp.ZarrSource(
+                self.dataset_config.container_path,
+                {self.raw: self.dataset_config.dataset_name},
+                array_specs={self.raw: raw_spec},
+            )
+        
+        # Elastic augmentation is incompatible with labels, because the images get 
+        # interpolated. If Elastic augmentation is required, the self-supervised
+        # training type needs to be switched from combined labels to separate.
+        # This is because stardist representations survive the Elastic Augment.
+        self.pipeline = (
+            source_node
+            + gp.RandomLocation()
+            # + gp.ElasticAugment(
+            #     control_point_spacing=(self.control_point_spacing,)
+            #     * self.num_spatial_dims,
+            #     jitter_sigma=(self.control_point_jitter,) * self.num_spatial_dims,
+            #     rotation_interval=(0, math.pi / 2),
+            #     scale_interval=(0.9, 1.1),
+            #     subsample=4,
+            #     spatial_dims=self.num_spatial_dims,
+            # )
+            # + gp.SimpleAugment(mirror_only=spatial_dims, transpose_only=spatial_dims)
+        )
+
+    def __yield_sample(self):
+        """An infinite generator of crops."""
+
+        with gp.build(self.pipeline):
+            while True:
+                # request one sample, all channels, plus crop dimensions
+                request = gp.BatchRequest()
+                request[self.raw] = gp.ArraySpec(
+                    roi=gp.Roi(
+                        (0,) * self.num_dims, (1, self.num_channels, *self.crop_size)
+                    )
+                )
+                if self.supervised_dataset_config != None:
+                    # if we have a supervised dataset config, we must be training a semi-supervised 
+                    # model. Therefore we need to add requests to our gp pipeline for pseudo- and 
+                    # GT-annotations
+                    request[self.pseudo] = gp.ArraySpec(
+                        roi=gp.Roi(
+                            (0,) * self.num_dims, (1, self.num_channels, *self.crop_size)
+                        )
+                    )
+                    request[self.supervised] = gp.ArraySpec(
+                        roi=gp.Roi(
+                            (0,) * self.num_dims, (1, self.num_channels, *self.crop_size)
+                        )
+                    )
+
+                sample = self.pipeline.request_batch(request)
+
+                if  self.semi_supervised:
+                    # If we are training a semi-supervised model, our dataset class needs to
+                    # return all of the below datasets  
+                    transformed_pseudo = stardist_transform(sample[self.pseudo].data[0])
+                    transformed_supervised = stardist_transform(sample[self.supervised].data[0])
+                    yield {'raw':sample[self.raw].data[0],
+                           'pseudo_stardist':transformed_pseudo,
+                           'supervised_stardist':transformed_supervised,
+                           'pseudo_labels':sample[self.pseudo].data[0],
+                           'supervised_labels':sample[self.supervised].data[0]}  
+                             
+                else:
+                    # if we are training a self-supervised model (i.e. standard cellulus),
+                    # we need to return just the raw image data.
+                    yield sample[self.raw].data[0]
+
+    def __read_meta_data(self):
+        meta_data = DatasetMetaData(self.dataset_config)
+
+        self.num_dims = meta_data.num_dims
+        self.num_spatial_dims = meta_data.num_spatial_dims
+        self.num_channels = meta_data.num_channels
+        self.num_samples = meta_data.num_samples
+        self.sample_dim = meta_data.sample_dim
+        self.channel_dim = meta_data.channel_dim
+        self.time_dim = meta_data.time_dim
+
+    def get_num_channels(self):
+        return self.num_channels
+
+    def get_num_spatial_dims(self):
+        return self.num_spatial_dims
