@@ -5,11 +5,9 @@ import gunpowder as gp
 from torch.utils.data import IterableDataset
 
 from cellulus.configs import DatasetConfig
+from cellulus.criterions import stardist_transform
 
 from .meta_data import DatasetMetaData
-
-from cellulus.criterions import stardist_transform
-import numpy as np
 
 
 class ZarrDataset(IterableDataset):  # type: ignore
@@ -22,7 +20,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
         semi_supervised: bool = False,
         supervised_dataset_config: DatasetConfig = None,
         pseudo_dataset_config: DatasetConfig = None,
-        ):
+    ):
         """A dataset that serves random samples from a zarr container.
 
         Args:
@@ -62,13 +60,13 @@ class ZarrDataset(IterableDataset):  # type: ignore
         self.control_point_spacing = control_point_spacing
         self.control_point_jitter = control_point_jitter
         self.semi_supervised = semi_supervised
-        if supervised_dataset_config != None:
+        if supervised_dataset_config is not None:
             self.supervised_dataset_config = supervised_dataset_config
             self.pseudo_dataset_config = pseudo_dataset_config
         else:
             self.supervised_dataset_config = None
             self.pseudo_dataset_config = None
-            
+
         self.__read_meta_data()
 
         assert len(crop_size) == self.num_spatial_dims, (
@@ -93,36 +91,40 @@ class ZarrDataset(IterableDataset):  # type: ignore
         # spatial_dims = tuple(range(self.num_dims - self.num_spatial_dims,
         # self.num_dims))
 
-        if self.supervised_dataset_config != None:
+        if self.supervised_dataset_config is not None:
             source_node = gp.ZarrSource(
                 self.dataset_config.container_path,
-                {self.raw: self.dataset_config.dataset_name,
-                 self.pseudo: self.pseudo_dataset_config.dataset_name,
-                 self.supervised: self.supervised_dataset_config.dataset_name},
-                array_specs={self.raw: raw_spec,
-                             self.pseudo: raw_spec,
-                             self.supervised: raw_spec},
+                {
+                    self.raw: self.dataset_config.dataset_name,
+                    self.pseudo: self.pseudo_dataset_config.dataset_name,
+                    self.supervised: self.supervised_dataset_config.dataset_name,
+                },
+                array_specs={
+                    self.raw: raw_spec,
+                    self.pseudo: raw_spec,
+                    self.supervised: raw_spec,
+                },
             )
 
-            # Elastic augmentation is incompatible with labels, because the images get 
+            # Elastic augmentation is incompatible with labels, because the images get
             # interpolated. If Elastic augmentation is required, the self-supervised
             # training type needs to be switched from combined labels to separate.
             # This is because stardist representations survive the Elastic Augment.
 
             self.pipeline = (
-            source_node
-            + gp.RandomLocation()
-            # + gp.ElasticAugment(
-            #     control_point_spacing=(self.control_point_spacing,)
-            #     * self.num_spatial_dims,
-            #     jitter_sigma=(self.control_point_jitter,) * self.num_spatial_dims,
-            #     rotation_interval=(0, math.pi / 2),
-            #     scale_interval=(0.9, 1.1),
-            #     subsample=4,
-            #     spatial_dims=self.num_spatial_dims,
-            # )
-            # + gp.SimpleAugment(mirror_only=spatial_dims, transpose_only=spatial_dims)
-        )
+                source_node
+                + gp.RandomLocation()
+                # + gp.ElasticAugment(
+                #     control_point_spacing=(self.control_point_spacing,)
+                #     * self.num_spatial_dims,
+                #     jitter_sigma=(self.control_point_jitter,) * self.num_spatial_dims,
+                #     rotation_interval=(0, math.pi / 2),
+                #     scale_interval=(0.9, 1.1),
+                #     subsample=4,
+                #     spatial_dims=self.num_spatial_dims,
+                # )
+                # + gp.SimpleAugment(mirror_only=spatial_dims, transpose_only=spatial_dims)  # noqa: E501
+            )
 
         else:
             source_node = gp.ZarrSource(
@@ -130,7 +132,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
                 {self.raw: self.dataset_config.dataset_name},
                 array_specs={self.raw: raw_spec},
             )
-        
+
             self.pipeline = (
                 source_node
                 + gp.RandomLocation()
@@ -143,7 +145,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
                     subsample=4,
                     spatial_dims=self.num_spatial_dims,
                 )
-                # + gp.SimpleAugment(mirror_only=spatial_dims, transpose_only=spatial_dims)
+                # + gp.SimpleAugment(mirror_only=spatial_dims, transpose_only=spatial_dims)  # noqa: E501
             )
 
     def __yield_sample(self):
@@ -158,37 +160,43 @@ class ZarrDataset(IterableDataset):  # type: ignore
                         (0,) * self.num_dims, (1, self.num_channels, *self.crop_size)
                     )
                 )
-                if self.supervised_dataset_config != None:
-                    # if we have a supervised dataset config, we must be training a semi-supervised 
-                    # model. Therefore we need to add requests to our gp pipeline for pseudo- and 
-                    # GT-annotations
+                if self.supervised_dataset_config is not None:
+                    # if we have a supervised dataset config, we must be training a semi
+                    # -supervised model. Therefore we need to add requests to our gp
+                    # pipeline for pseudo- and GT-annotations
                     request[self.pseudo] = gp.ArraySpec(
                         roi=gp.Roi(
-                            (0,) * self.num_dims, (1, self.num_channels, *self.crop_size)
+                            (0,) * self.num_dims,
+                            (1, self.num_channels, *self.crop_size),
                         )
                     )
                     request[self.supervised] = gp.ArraySpec(
                         roi=gp.Roi(
-                            (0,) * self.num_dims, (1, self.num_channels, *self.crop_size)
+                            (0,) * self.num_dims,
+                            (1, self.num_channels, *self.crop_size),
                         )
                     )
 
                 sample = self.pipeline.request_batch(request)
 
-                if  self.semi_supervised:
-                    # If we are training a semi-supervised model, our dataset class needs to
-                    # return all of the below datasets  
+                if self.semi_supervised:
+                    # If we are training a semi-supervised model, our dataset class
+                    # needs to return all of the below datasets
                     transformed_pseudo = stardist_transform(sample[self.pseudo].data[0])
-                    transformed_supervised = stardist_transform(sample[self.supervised].data[0])
-                    yield {'raw':sample[self.raw].data[0],
-                           'pseudo_stardist':transformed_pseudo,
-                           'supervised_stardist':transformed_supervised,
-                           'pseudo_labels':sample[self.pseudo].data[0],
-                           'supervised_labels':sample[self.supervised].data[0]}  
-                             
+                    transformed_supervised = stardist_transform(
+                        sample[self.supervised].data[0]
+                    )
+                    yield {
+                        "raw": sample[self.raw].data[0],
+                        "pseudo_stardist": transformed_pseudo,
+                        "supervised_stardist": transformed_supervised,
+                        "pseudo_labels": sample[self.pseudo].data[0],
+                        "supervised_labels": sample[self.supervised].data[0],
+                    }
+
                 else:
-                    # if we are training a self-supervised model (i.e. standard cellulus),
-                    # we need to return just the raw image data.
+                    # if we are training a self-supervised model (i.e. standard
+                    # cellulus), we need to return just the raw image data.
                     yield sample[self.raw].data[0]
 
     def __read_meta_data(self):

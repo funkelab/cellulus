@@ -19,7 +19,7 @@ def get_dataset(
         crop_size=crop_size,
         control_point_spacing=control_point_spacing,
         control_point_jitter=control_point_jitter,
-        semi_supervised = semi_supervised,
-        supervised_dataset_config = supervised_dataset_config,
-        pseudo_dataset_config = pseudo_dataset_config,
+        semi_supervised=semi_supervised,
+        supervised_dataset_config=supervised_dataset_config,
+        pseudo_dataset_config=pseudo_dataset_config,
     )

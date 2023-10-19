@@ -85,12 +85,14 @@ class SemiSupervisedTrainConfig:
             of the raw data during training, given as the standard deviation of
             a normal distribution with zero mean.
 
-        
+
     """
 
     raw_data_config: DatasetConfig = attrs.field(converter=to_config(DatasetConfig))
     pseudo_data_config: DatasetConfig = attrs.field(converter=to_config(DatasetConfig))
-    supervised_data_config: DatasetConfig = attrs.field(converter=to_config(DatasetConfig))
+    supervised_data_config: DatasetConfig = attrs.field(
+        converter=to_config(DatasetConfig)
+    )
 
     crop_size: List = attrs.field(default=[252, 252], validator=instance_of(List))
     batch_size: int = attrs.field(default=8, validator=instance_of(int))

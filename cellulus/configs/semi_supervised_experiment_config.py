@@ -9,7 +9,8 @@ from .utils import to_config
 
 @attrs.define
 class SemiSupervisedExperimentConfig:
-    """Top-level config for a semi-supervised experiment (containing training and prediction).
+    """Top-level config for a semi-supervised experiment
+       (containing training and prediction).
 
     Parameters:
 

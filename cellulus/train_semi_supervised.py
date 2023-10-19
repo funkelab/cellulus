@@ -1,15 +1,15 @@
 import os
 
+import numpy as np
 import torch
 import zarr
 from tqdm import tqdm
 
+from cellulus.criterions.stardist_loss import StardistLoss
 from cellulus.datasets import get_dataset
 from cellulus.models import get_model
-from cellulus.criterions.stardist_loss import StardistLoss
 from cellulus.utils import get_logger
-import torch.nn as nn
-import numpy as np
+
 
 def semisupervised_train(semi_sup_exp_config):
     print(semi_sup_exp_config)
@@ -22,13 +22,13 @@ def semisupervised_train(semi_sup_exp_config):
     semi_sup_train_config = semi_sup_exp_config.semi_sup_train_config
 
     raw_dataset = get_dataset(
-        dataset_config = semi_sup_train_config.raw_data_config,
-        crop_size = tuple(semi_sup_train_config.crop_size),
-        control_point_spacing = semi_sup_train_config.control_point_spacing,
-        control_point_jitter = semi_sup_train_config.control_point_jitter,
-        pseudo_dataset_config = semi_sup_train_config.pseudo_data_config,
-        supervised_dataset_config = semi_sup_train_config.supervised_data_config,
-        semi_supervised = True
+        dataset_config=semi_sup_train_config.raw_data_config,
+        crop_size=tuple(semi_sup_train_config.crop_size),
+        control_point_spacing=semi_sup_train_config.control_point_spacing,
+        control_point_jitter=semi_sup_train_config.control_point_jitter,
+        pseudo_dataset_config=semi_sup_train_config.pseudo_data_config,
+        supervised_dataset_config=semi_sup_train_config.supervised_data_config,
+        semi_supervised=True,
     )
 
     raw_dataloader = torch.utils.data.DataLoader(
@@ -53,9 +53,6 @@ def semisupervised_train(semi_sup_exp_config):
 
     if torch.cuda.is_available():
         model = model.cuda()
-
-
-    
 
     criterion = StardistLoss()
 
@@ -89,8 +86,7 @@ def semisupervised_train(semi_sup_exp_config):
     # call `train_iteration`
     for iteration, batch in tqdm(
         zip(
-            range(start_iteration, semi_sup_train_config.max_iterations),
-            raw_dataloader
+            range(start_iteration, semi_sup_train_config.max_iterations), raw_dataloader
         )
     ):
         scheduler = torch.optim.lr_scheduler.LambdaLR(
@@ -127,37 +123,35 @@ def semisupervised_train(semi_sup_exp_config):
                 iteration,
             )
 
-def train_iteration(
-    batch,
-    model,
-    criterion,
-    optimizer,
-    alpha = 0.5
-):
+
+def train_iteration(batch, model, criterion, optimizer, alpha=0.5):
     model.train()
 
     def unqiue_values_to_unique_ints(array):
         if np.any(array - array.astype(np.int16)):
-            mapping={v:k for k,v in enumerate(np.unique(array))}
-            u,inv = np.unique(array,return_inverse = True)
+            mapping = {v: k for k, v in enumerate(np.unique(array))}
+            u, inv = np.unique(array, return_inverse=True)
             Y1 = np.array([mapping[x] for x in u])[inv].reshape(array.shape)
             array = Y1.astype(np.int16)
         return array
 
     if torch.cuda.is_available():
-        batch['raw'] = batch['raw'].to("cuda")
-        batch['pseudo_stardist'] = batch['pseudo_stardist'].to("cuda")
-        batch['supervised_stardist'] = batch['supervised_stardist'].to("cuda")
-        batch['pseudo_labels'] = batch['pseudo_labels'].to("cuda")
-        batch['supervised_labels'] = batch['supervised_labels'].to("cuda")
-        batch['supervised_labels'] = torch.tensor(unqiue_values_to_unique_ints(batch['supervised_labels'].cpu().detach().numpy())).to("cuda")
+        batch["raw"] = batch["raw"].to("cuda")
+        batch["pseudo_stardist"] = batch["pseudo_stardist"].to("cuda")
+        batch["supervised_stardist"] = batch["supervised_stardist"].to("cuda")
+        batch["pseudo_labels"] = batch["pseudo_labels"].to("cuda")
+        batch["supervised_labels"] = batch["supervised_labels"].to("cuda")
+        batch["supervised_labels"] = torch.tensor(
+            unqiue_values_to_unique_ints(
+                batch["supervised_labels"].cpu().detach().numpy()
+            )
+        ).to("cuda")
 
-    prediction = model(batch['raw'])
-    
+    prediction = model(batch["raw"])
 
     def combine_GT_and_pseudo_labels(gt_labels, pseudo_labels):
         if gt_labels.shape != pseudo_labels.shape:
-            print('labelled images are different sizes')
+            print("labelled images are different sizes")
 
         combined_labels = np.zeros(gt_labels.shape)
         combined_labels[:] = gt_labels.cpu().detach().numpy()[:]
@@ -168,34 +162,58 @@ def train_iteration(
             # for each pseudo label, check it does not intersect with a GT label.
             # if it doesn't intersect, add it to the combined labels.
             # if it does intersect, leave it or add to ignore mask?
-            
+
             # all of the indicies that have this given label value
             # this_pseudo_label = np.where(np.any(pseudo_labels==pseudo_label_value))
 
-            if np.any(gt_labels.cpu().detach().numpy()[pseudo_labels.cpu().detach().numpy()==pseudo_label_value]):
+            if np.any(
+                gt_labels.cpu()
+                .detach()
+                .numpy()[pseudo_labels.cpu().detach().numpy() == pseudo_label_value]
+            ):
                 pass
             else:
-                combined_labels = combined_labels + pseudo_labels.cpu().detach().numpy()*(pseudo_labels.cpu().detach().numpy()==pseudo_label_value)
+                combined_labels = (
+                    combined_labels
+                    + pseudo_labels.cpu().detach().numpy()
+                    * (pseudo_labels.cpu().detach().numpy() == pseudo_label_value)
+                )
         return combined_labels
 
-    gt_labels = batch['supervised_labels'][:,:,:prediction.shape[2],:prediction.shape[3]]
-    pseudo_labels = batch['pseudo_labels'][:,:,:prediction.shape[2],:prediction.shape[3]]
-    combined_labels = combine_GT_and_pseudo_labels(gt_labels, pseudo_labels)
-    
     use_combined_loss = True
 
     if use_combined_loss:
         from cellulus.criterions import stardist_transform
 
-        combined_stardist = torch.tensor(stardist_transform(combined_labels)).cuda().unsqueeze(0)
+        gt_labels = batch["supervised_labels"][
+            :, :, : prediction.shape[2], : prediction.shape[3]
+        ]
+        pseudo_labels = batch["pseudo_labels"][
+            :, :, : prediction.shape[2], : prediction.shape[3]
+        ]
+        combined_labels = combine_GT_and_pseudo_labels(gt_labels, pseudo_labels)
+
+        combined_stardist = (
+            torch.tensor(stardist_transform(combined_labels)).cuda().unsqueeze(0)
+        )
 
         loss = criterion(prediction, combined_stardist)
-    else:
-        supervised_loss = criterion(prediction, batch['supervised_stardist'][:,:,:prediction.shape[2],:prediction.shape[3]])
-        semisupervised_loss = criterion(prediction, batch['pseudo_stardist'][:,:,:prediction.shape[2],:prediction.shape[3]])
-        loss = (alpha*supervised_loss) + ((1-alpha)*semisupervised_loss)
 
-    
+    else:
+        supervised_loss = criterion(
+            prediction,
+            batch["supervised_stardist"][
+                :, :, : prediction.shape[2], : prediction.shape[3]
+            ],
+        )
+        semisupervised_loss = criterion(
+            prediction,
+            batch["pseudo_stardist"][
+                :, :, : prediction.shape[2], : prediction.shape[3]
+            ],
+        )
+        loss = (alpha * supervised_loss) + ((1 - alpha) * semisupervised_loss)
+
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
@@ -212,29 +230,33 @@ def save_model(state, iteration, is_lowest=False):
 
 
 def save_snapshot(batch, prediction, iteration):
-    num_spatial_dims = len(batch['raw'].shape) - 2
+    num_spatial_dims = len(batch["raw"].shape) - 2
 
     axis_names = ["s", "c"] + ["t", "z", "y", "x"][-num_spatial_dims:]
     prediction_offset = tuple(
         (a - b) / 2
         for a, b in zip(
-            batch['raw'].shape[-num_spatial_dims:], prediction.shape[-num_spatial_dims:]
+            batch["raw"].shape[-num_spatial_dims:], prediction.shape[-num_spatial_dims:]
         )
     )
     f = zarr.open("semi_supervised_snapshots.zarr", "a")
-    f[f"{iteration}/raw"] = batch['raw'].detach().cpu().numpy()
+    f[f"{iteration}/raw"] = batch["raw"].detach().cpu().numpy()
     f[f"{iteration}/raw"].attrs["axis_names"] = axis_names
 
-    f[f"{iteration}/pseudo_stardist"] = batch['pseudo_stardist'].detach().cpu().numpy()
+    f[f"{iteration}/pseudo_stardist"] = batch["pseudo_stardist"].detach().cpu().numpy()
     f[f"{iteration}/pseudo_stardist"].attrs["axis_names"] = axis_names
 
-    f[f"{iteration}/pseudo_labels"] = batch['pseudo_labels'].detach().cpu().numpy()
+    f[f"{iteration}/pseudo_labels"] = batch["pseudo_labels"].detach().cpu().numpy()
     f[f"{iteration}/pseudo_labels"].attrs["axis_names"] = axis_names
 
-    f[f"{iteration}/supervised_stardist"] = batch['supervised_stardist'].detach().cpu().numpy()
+    f[f"{iteration}/supervised_stardist"] = (
+        batch["supervised_stardist"].detach().cpu().numpy()
+    )
     f[f"{iteration}/supervised_stardist"].attrs["supervised"] = axis_names
 
-    f[f"{iteration}/supervised_labels"] = batch['supervised_labels'].detach().cpu().numpy()
+    f[f"{iteration}/supervised_labels"] = (
+        batch["supervised_labels"].detach().cpu().numpy()
+    )
     f[f"{iteration}/supervised_labels"].attrs["supervised"] = axis_names
 
     f[f"{iteration}/prediction"] = prediction.detach().cpu().numpy()
@@ -242,6 +264,3 @@ def save_snapshot(batch, prediction, iteration):
     f[f"{iteration}/prediction"].attrs["offset"] = prediction_offset
 
     print(f"Snapshot saved at iteration {iteration}")
-
-
-
