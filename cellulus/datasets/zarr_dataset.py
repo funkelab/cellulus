@@ -103,18 +103,13 @@ class ZarrDataset(IterableDataset):  # type: ignore
                              self.pseudo: raw_spec,
                              self.supervised: raw_spec},
             )
-        else:
-            source_node = gp.ZarrSource(
-                self.dataset_config.container_path,
-                {self.raw: self.dataset_config.dataset_name},
-                array_specs={self.raw: raw_spec},
-            )
-        
-        # Elastic augmentation is incompatible with labels, because the images get 
-        # interpolated. If Elastic augmentation is required, the self-supervised
-        # training type needs to be switched from combined labels to separate.
-        # This is because stardist representations survive the Elastic Augment.
-        self.pipeline = (
+
+            # Elastic augmentation is incompatible with labels, because the images get 
+            # interpolated. If Elastic augmentation is required, the self-supervised
+            # training type needs to be switched from combined labels to separate.
+            # This is because stardist representations survive the Elastic Augment.
+
+            self.pipeline = (
             source_node
             + gp.RandomLocation()
             # + gp.ElasticAugment(
@@ -128,6 +123,28 @@ class ZarrDataset(IterableDataset):  # type: ignore
             # )
             # + gp.SimpleAugment(mirror_only=spatial_dims, transpose_only=spatial_dims)
         )
+
+        else:
+            source_node = gp.ZarrSource(
+                self.dataset_config.container_path,
+                {self.raw: self.dataset_config.dataset_name},
+                array_specs={self.raw: raw_spec},
+            )
+        
+            self.pipeline = (
+                source_node
+                + gp.RandomLocation()
+                + gp.ElasticAugment(
+                    control_point_spacing=(self.control_point_spacing,)
+                    * self.num_spatial_dims,
+                    jitter_sigma=(self.control_point_jitter,) * self.num_spatial_dims,
+                    rotation_interval=(0, math.pi / 2),
+                    scale_interval=(0.9, 1.1),
+                    subsample=4,
+                    spatial_dims=self.num_spatial_dims,
+                )
+                # + gp.SimpleAugment(mirror_only=spatial_dims, transpose_only=spatial_dims)
+            )
 
     def __yield_sample(self):
         """An infinite generator of crops."""
