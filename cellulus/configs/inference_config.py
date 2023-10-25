@@ -83,7 +83,7 @@ class InferenceConfig:
     )
     device: str = attrs.field(default="cuda:0", validator=instance_of(str))
     crop_size: List = attrs.field(default=[252, 252], validator=instance_of(List))
-    p_salt_pepper = attrs.field(default=0.1, validator=instance_of(float))
+    p_salt_pepper = attrs.field(default=0.01, validator=instance_of(float))
     num_infer_iterations = attrs.field(default=16, validator=instance_of(int))
     bandwidth = attrs.field(
         default=None, validator=attrs.validators.optional(instance_of(int))
