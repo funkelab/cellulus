@@ -3,7 +3,6 @@ from typing import List, Tuple
 import torch
 import torch.nn as nn
 from funlib.learn.torch.models import UNet
-from tqdm import tqdm
 
 
 class UNetModel(nn.Module):  # type: ignore
@@ -79,7 +78,7 @@ class UNetModel(nn.Module):  # type: ignore
             return self.head_forward(h)
         elif self.mode == "infer":
             embeddings = []
-            for sample in tqdm(range(raw.shape[0])):
+            for sample in range(raw.shape[0]):
                 raw_sample = raw[sample : sample + 1, ...]
                 predictions = []
                 for val in [0.5, 1.0]:

@@ -11,8 +11,6 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
     dataset_config = inference_config.dataset_config
     dataset_meta_data = DatasetMetaData.from_dataset_config(dataset_config)
 
-    voxel_size = gp.Coordinate((1,) * dataset_meta_data.num_spatial_dims)
-
     # set device
     device = torch.device(inference_config.device)
 
@@ -36,10 +34,24 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
         ).shape
     )
 
-    input_size = gp.Coordinate(input_shape[2:]) * voxel_size
-    output_size = gp.Coordinate(output_shape[2:]) * voxel_size
+    # treat all dimensions as spatial, with a voxel size of 1
+    voxel_size = (1,) * dataset_meta_data.num_dims
+    raw_spec = gp.ArraySpec(voxel_size=voxel_size, interpolatable=True)
 
-    context = (input_size - output_size) / 2
+    input_size = gp.Coordinate(input_shape) * gp.Coordinate(voxel_size)
+    output_size = gp.Coordinate(output_shape) * gp.Coordinate(voxel_size)
+    diff_size = input_size - output_size
+
+    if dataset_meta_data.num_spatial_dims == 2:
+        context = (0, 0, diff_size[2] // 2, diff_size[3] // 2)
+    elif dataset_meta_data.num_spatial_dims == 3:
+        context = (
+            0,
+            0,
+            diff_size[2] // 2,
+            diff_size[3] // 2,
+            diff_size[4] // 2,
+        )  # type: ignore
 
     raw = gp.ArrayKey("RAW")
     prediction = gp.ArrayKey("PREDICT")
@@ -52,7 +64,7 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
         model,
         inputs={"raw": raw},
         outputs={0: prediction},
-        array_specs={prediction: gp.ArraySpec(voxel_size=voxel_size)},
+        array_specs={prediction: raw_spec},
     )
 
     # prepare the zarr dataset to write to
@@ -67,17 +79,11 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
         dtype=float,
     )
 
-    ds.attrs["axis_names"] = ["s", "c"] + ["t", "z", "y", "x"][
-        -dataset_meta_data.num_spatial_dims :
-    ]
-    ds.attrs["resolution"] = (1,) * dataset_meta_data.num_spatial_dims
-    ds.attrs["offset"] = (0,) * dataset_meta_data.num_spatial_dims
-
     pipeline = (
         gp.ZarrSource(
             dataset_config.container_path,
             {raw: dataset_config.dataset_name},
-            {raw: gp.ArraySpec(voxel_size=voxel_size)},
+            {raw: gp.ArraySpec(voxel_size=voxel_size, interpolatable=True)},
         )
         + gp.Pad(raw, context)
         + predict
@@ -93,3 +99,10 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
     # request to pipeline for ROI of whole image/volume
     with gp.build(pipeline):
         pipeline.request_batch(gp.BatchRequest())
+
+    ds.attrs["axis_names"] = ["s", "c"] + ["t", "z", "y", "x"][
+        -dataset_meta_data.num_spatial_dims :
+    ]
+
+    ds.attrs["resolution"] = (1,) * dataset_meta_data.num_spatial_dims
+    ds.attrs["offset"] = (0,) * dataset_meta_data.num_spatial_dims
