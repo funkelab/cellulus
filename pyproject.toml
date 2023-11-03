@@ -25,7 +25,7 @@ dependencies = [
   "zarr",
   "scikit-image",
   "tqdm",
-  "gunpowder",
+  "gunpowder @git+https://github.com/funkelab/gunpowder@d721190fc40e16ef595e7623405d07f14102daed",
   "scikit-learn",
   "funlib.learn.torch @ git+https://github.com/funkelab/funlib.learn.torch@f36decaf95e2b6d1b74a45b31660d29f8e57e5c4",
   "matplotlib", 
