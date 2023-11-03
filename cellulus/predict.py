@@ -113,7 +113,7 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
             {raw: dataset_config.dataset_name},
             {raw: gp.ArraySpec(voxel_size=voxel_size, interpolatable=True)},
         )
-        + gp.Pad(raw, context)
+        + gp.Pad(raw, context, mode="reflect")
         + predict
         + gp.ZarrWrite(
             dataset_names={
