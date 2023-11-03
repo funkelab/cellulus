@@ -57,8 +57,36 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
     prediction = gp.ArrayKey("PREDICT")
 
     scan_request = gp.BatchRequest()
-    scan_request.add(raw, input_size)
-    scan_request.add(prediction, output_size)
+    if dataset_meta_data.num_spatial_dims == 2:
+        scan_request[raw] = gp.Roi(
+            (0, 0, -diff_size[2] // 2, -diff_size[3] // 2),
+            (1, dataset_meta_data.num_channels, input_size[2], input_size[3]),
+        )
+        scan_request[prediction] = gp.Roi(
+            (0, 0, 0, 0),
+            (1, dataset_meta_data.num_spatial_dims + 1, output_size[2], output_size[3]),
+        )
+    elif dataset_meta_data.num_spatial_dims == 3:
+        scan_request[raw] = gp.Roi(
+            (0, 0, -diff_size[2] // 2, -diff_size[3] // 2, -diff_size[4] // 2),
+            (
+                1,
+                dataset_meta_data.num_channels,
+                input_size[2],
+                input_size[3],
+                input_size[4],
+            ),
+        )
+        scan_request[prediction] = gp.Roi(
+            (0, 0, 0, 0, 0),
+            (
+                1,
+                dataset_meta_data.num_spatial_dims + 1,
+                output_size[2],
+                output_size[3],
+                output_size[4],
+            ),
+        )
 
     predict = gp.torch.Predict(
         model,
@@ -96,9 +124,50 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
         + gp.Scan(scan_request)
     )
 
+    request = gp.BatchRequest()
+    if dataset_meta_data.num_spatial_dims == 2:
+        request[raw] = gp.Roi(
+            (0, 0, -diff_size[2] // 2, -diff_size[3] // 2),
+            (
+                dataset_meta_data.num_samples,
+                dataset_meta_data.num_channels,
+                dataset_meta_data.spatial_array[0] + diff_size[2],
+                dataset_meta_data.spatial_array[1] + diff_size[3],
+            ),
+        )
+        request[prediction] = gp.Roi(
+            (0, 0, 0, 0),
+            (
+                dataset_meta_data.num_samples,
+                dataset_meta_data.num_spatial_dims + 1,
+                dataset_meta_data.spatial_array[0],
+                dataset_meta_data.spatial_array[1],
+            ),
+        )
+    elif dataset_meta_data.num_spatial_dims == 3:
+        request[raw] = gp.Roi(
+            (0, 0, -diff_size[2] // 2, -diff_size[3] // 2, -diff_size[4] // 2),
+            (
+                dataset_meta_data.num_samples,
+                dataset_meta_data.num_channels,
+                dataset_meta_data.spatial_array[0] + diff_size[2],
+                dataset_meta_data.spatial_array[1] + diff_size[3],
+                dataset_meta_data.spatial_array[2] + diff_size[4],
+            ),
+        )
+        request[prediction] = gp.Roi(
+            (0, 0, 0, 0, 0),
+            (
+                dataset_meta_data.num_samples,
+                dataset_meta_data.num_spatial_dims + 1,
+                dataset_meta_data.spatial_array[0],
+                dataset_meta_data.spatial_array[1],
+                dataset_meta_data.spatial_array[2],
+            ),
+        )
     # request to pipeline for ROI of whole image/volume
     with gp.build(pipeline):
-        pipeline.request_batch(gp.BatchRequest())
+        pipeline.request_batch(request)
 
     ds.attrs["axis_names"] = ["s", "c"] + ["t", "z", "y", "x"][
         -dataset_meta_data.num_spatial_dims :
