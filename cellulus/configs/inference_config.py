@@ -75,11 +75,11 @@ class InferenceConfig:
     )
 
     segmentation_dataset_config: DatasetConfig = attrs.field(
-        converter=lambda d: DatasetConfig(**d)
+        default=None, converter=lambda d: DatasetConfig(**d)
     )
 
     post_processed_dataset_config: DatasetConfig = attrs.field(
-        converter=lambda d: DatasetConfig(**d)
+        defualt=None, converter=lambda d: DatasetConfig(**d)
     )
 
     evaluation_dataset_config: DatasetConfig = attrs.field(
