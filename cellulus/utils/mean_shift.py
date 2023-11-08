@@ -1,12 +1,11 @@
 import numpy as np
 import torch
 from skimage import measure
-from skimage.filters import threshold_otsu
 from sklearn.cluster import MeanShift
 
 
 def mean_shift_segmentation(
-    embedding_mean, embedding_std, bandwidth, min_size, reduction_probability
+    embedding_mean, embedding_std, bandwidth, min_size, reduction_probability, threshold
 ):
     embedding_mean = torch.from_numpy(embedding_mean)
     if embedding_mean.ndim == 4:
@@ -26,7 +25,9 @@ def mean_shift_segmentation(
         embedding_mean[:, 0] += torch.arange(embedding_mean.shape[4])[
             None, None, None, :
         ]
-    mask = threshold_otsu(embedding_std) > embedding_std
+
+    mask = embedding_std < threshold
+
     mask = mask[None]
     segmentation = segment_with_meanshift(
         embedding_mean,
@@ -35,10 +36,6 @@ def mean_shift_segmentation(
         reduction_probability=reduction_probability,
         cluster_all=False,
     )[0]
-    # segmentation = stardist.fill_label_holes(segmentation)
-    # seg = remove_border(raw[..., 0],
-    #                    raw[..., 1],
-    #                    seg[None])[0]
     segmentation = sizefilter(segmentation, min_size)
     return segmentation
 
