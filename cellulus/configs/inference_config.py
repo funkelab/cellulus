@@ -62,9 +62,9 @@ class InferenceConfig:
             The device to infer on.
             Set to 'cpu' to infer without GPU.
 
-    num_bandwidth_levels:
+    num_thresholds (default = 3):
 
-        Number of bandwidths on which segmentations are produced.
+        Number of thresholds to obtain segmentations for.
 
     """
 
@@ -92,7 +92,7 @@ class InferenceConfig:
     bandwidth = attrs.field(
         default=None, validator=attrs.validators.optional(instance_of(int))
     )
-    num_bandwidth_levels = attrs.field(default=3, validator=instance_of(int))
+    num_thresholds = attrs.field(default=3, validator=instance_of(int))
     reduction_probability = attrs.field(default=0.1, validator=instance_of(float))
     min_size = attrs.field(
         default=None, validator=attrs.validators.optional(instance_of(int))
