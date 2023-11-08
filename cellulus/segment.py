@@ -1,5 +1,6 @@
 import numpy as np
 import zarr
+from skimage.filters import threshold_otsu
 from tqdm import tqdm
 
 from cellulus.configs.inference_config import InferenceConfig
@@ -22,7 +23,7 @@ def segment(inference_config: InferenceConfig) -> None:
         inference_config.segmentation_dataset_config.dataset_name,
         shape=(
             dataset_meta_data.num_samples,
-            inference_config.num_bandwidth_levels,
+            inference_config.num_thresholds,
             *dataset_meta_data.spatial_array,
         ),
         dtype=np.uint16,
@@ -40,13 +41,16 @@ def segment(inference_config: InferenceConfig) -> None:
         embeddings_mean = embeddings[
             np.newaxis, : dataset_meta_data.num_spatial_dims, ...
         ]
-        for level in range(inference_config.num_bandwidth_levels):
+        threshold = threshold_otsu(embeddings_std)
+        for level in range(inference_config.num_thresholds):
+            threshold += level * 0.05
             segmentation = mean_shift_segmentation(
                 embeddings_mean,
                 embeddings_std,
-                bandwidth=inference_config.bandwidth / (level + 1),
+                bandwidth=inference_config.bandwidth,
                 min_size=inference_config.min_size,
                 reduction_probability=inference_config.reduction_probability,
+                threshold=threshold,
             )
             ds_segmentation[
                 sample,
