@@ -62,11 +62,14 @@ def infer(experiment_config):
     model.eval()
 
     # get predicted embeddings...
-    predict(model, inference_config)
+    if inference_config.prediction_dataset_config is not None:
+        predict(model, inference_config)
     # ...turn them into a segmentation...
-    segment(inference_config)
+    if inference_config.segmentation_dataset_config is not None:
+        segment(inference_config)
     # ...and post-process the segmentation
-    post_process(inference_config)
+    if inference_config.post_processed_dataset_config is not None:
+        post_process(inference_config)
     # ...and evaluate if groundtruth exists
     if inference_config.evaluation_dataset_config is not None:
         evaluate(inference_config)
