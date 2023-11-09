@@ -11,13 +11,13 @@ def evaluate(inference_config: InferenceConfig) -> None:
     dataset_meta_data = DatasetMetaData.from_dataset_config(dataset_config)
 
     f = zarr.open(inference_config.evaluation_dataset_config.container_path)
-    ds = f[inference_config.evaluation_dataset_config.dataset_name]
+    ds = f[inference_config.evaluation_dataset_config.source_dataset_name]
 
     f_segmentation = zarr.open(
-        inference_config.post_processed_dataset_config.container_path
+        inference_config.evaluation_dataset_config.container_path
     )
     ds_segmentation = f_segmentation[
-        inference_config.post_processed_dataset_config.dataset_name
+        inference_config.evaluation_dataset_config.dataset_name
     ]
 
     for threshold in range(inference_config.num_thresholds):
