@@ -13,8 +13,8 @@ def post_process(inference_config: InferenceConfig) -> None:
     dataset_config = inference_config.dataset_config
     dataset_meta_data = DatasetMetaData.from_dataset_config(dataset_config)
 
-    f = zarr.open(inference_config.segmentation_dataset_config.container_path)
-    ds = f[inference_config.segmentation_dataset_config.dataset_name]
+    f = zarr.open(inference_config.post_processed_dataset_config.container_path)
+    ds = f[inference_config.post_processed_dataset_config.source_dataset_name]
 
     # prepare the zarr dataset to write to
     f_postprocessed = zarr.open(
