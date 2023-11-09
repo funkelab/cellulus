@@ -79,7 +79,7 @@ class InferenceConfig:
     )
 
     post_processed_dataset_config: DatasetConfig = attrs.field(
-        defualt=None, converter=lambda d: DatasetConfig(**d)
+        default=None, converter=lambda d: DatasetConfig(**d)
     )
 
     evaluation_dataset_config: DatasetConfig = attrs.field(
