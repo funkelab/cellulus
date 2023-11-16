@@ -20,7 +20,7 @@ def evaluate(inference_config: InferenceConfig) -> None:
         inference_config.evaluation_dataset_config.dataset_name
     ]
 
-    for threshold in range(inference_config.num_thresholds):
+    for bandwidth in range(inference_config.num_bandwidths):
         F1_list, SEG_list, TP_list, FP_list, FN_list = [], [], [], [], []
         SEG_dataset, n_ids_dataset = 0, 0
         for sample in tqdm(range(dataset_meta_data.num_samples)):
@@ -46,7 +46,7 @@ def evaluate(inference_config: InferenceConfig) -> None:
         print(f"F1 for dataset  is {F1_dataset:.05f}")
         print(f"SEG for dataset  is {SEG_dataset/n_ids_dataset:.05f}")
 
-        txt_file = f"results_threshold-{threshold}.txt"
+        txt_file = f"results_bandwidth-{bandwidth}.txt"
         with open(txt_file, "w") as f:
             f.writelines("file index, F1, SEG, TP, FP, FN \n")
             f.writelines("+++++++++++++++++++++++++++++++++\n")

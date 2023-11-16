@@ -23,7 +23,7 @@ def segment(inference_config: InferenceConfig) -> None:
         inference_config.segmentation_dataset_config.dataset_name,
         shape=(
             dataset_meta_data.num_samples,
-            inference_config.num_thresholds,
+            inference_config.num_bandwidths,
             *dataset_meta_data.spatial_array,
         ),
         dtype=np.uint16,
@@ -41,7 +41,7 @@ def segment(inference_config: InferenceConfig) -> None:
         "binary_" + inference_config.segmentation_dataset_config.dataset_name,
         shape=(
             dataset_meta_data.num_samples,
-            inference_config.num_thresholds,
+            1,
             *dataset_meta_data.spatial_array,
         ),
         dtype=np.uint16,
@@ -61,14 +61,13 @@ def segment(inference_config: InferenceConfig) -> None:
         embeddings_mean = embeddings[
             np.newaxis, : dataset_meta_data.num_spatial_dims, ...
         ].copy()
-        thresh_otsu = threshold_otsu(embeddings_std)
-        for level in range(inference_config.num_thresholds):
-            threshold = thresh_otsu + level * 0.1
-            ds_binary_segmentation[sample, level, ...] = embeddings_std < threshold
+        threshold = threshold_otsu(embeddings_std)
+        ds_binary_segmentation[sample, 0, ...] = embeddings_std < threshold
+        for bandwidth_factor in range(inference_config.num_bandwidths):
             segmentation = mean_shift_segmentation(
                 embeddings_mean,
                 embeddings_std,
-                bandwidth=inference_config.bandwidth,
+                bandwidth=inference_config.bandwidth / (2**bandwidth_factor),
                 min_size=inference_config.min_size,
                 reduction_probability=inference_config.reduction_probability,
                 threshold=threshold,
@@ -81,6 +80,6 @@ def segment(inference_config: InferenceConfig) -> None:
             ].copy()
             ds_segmentation[
                 sample,
-                level,
+                bandwidth_factor,
                 ...,
             ] = segmentation

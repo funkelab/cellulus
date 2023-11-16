@@ -24,7 +24,7 @@ def post_process(inference_config: InferenceConfig) -> None:
         inference_config.post_processed_dataset_config.dataset_name,
         shape=(
             dataset_meta_data.num_samples,
-            inference_config.num_thresholds,
+            inference_config.num_bandwidths,
             *dataset_meta_data.spatial_array,
         ),
         dtype=np.uint16,
@@ -39,10 +39,10 @@ def post_process(inference_config: InferenceConfig) -> None:
     for sample in tqdm(range(dataset_meta_data.num_samples)):
         # first instance label masks are expanded by `grow_distance`
         # next, expanded  instance label masks are shrunk by `shrink_distance`
-        for level in range(inference_config.num_thresholds):
-            segmentation = ds[sample, level]
+        for bandwidth_factor in range(inference_config.num_bandwidths):
+            segmentation = ds[sample, bandwidth_factor]
             distance_foreground = dtedt(segmentation == 0)
             expanded_mask = distance_foreground < inference_config.grow_distance
             distance_background = dtedt(expanded_mask)
             segmentation[distance_background < inference_config.shrink_distance] = 0
-            ds_postprocessed[sample, level, ...] = segmentation
+            ds_postprocessed[sample, bandwidth_factor, ...] = segmentation
