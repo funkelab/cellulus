@@ -25,7 +25,7 @@ def evaluate(inference_config: InferenceConfig) -> None:
         SEG_dataset, n_ids_dataset = 0, 0
         for sample in tqdm(range(dataset_meta_data.num_samples)):
             groundtruth = ds[sample, 0].astype(np.uint16)
-            prediction = ds_segmentation[sample, 0].astype(np.uint16)
+            prediction = ds_segmentation[sample, bandwidth].astype(np.uint16)
             IoU, SEG_image, n_GTids_image = compute_pairwise_IoU(
                 prediction, groundtruth
             )
@@ -52,8 +52,7 @@ def evaluate(inference_config: InferenceConfig) -> None:
             f.writelines("+++++++++++++++++++++++++++++++++\n")
             for sample in range(dataset_meta_data.num_samples):
                 f.writelines(
-                    f"{sample}, {F1_list[sample]:.05f}, {SEG_list[sample]:.05f}, \
-                        {TP_list[sample]}, {FP_list[sample]}, {FN_list[sample]}\n"
+                    f"{sample}, {F1_list[sample]:.05f}, {SEG_list[sample]:.05f}, {TP_list[sample]}, {FP_list[sample]}, {FN_list[sample]}\n"
                 )
             f.writelines("+++++++++++++++++++++++++++++++++\n")
             f.writelines(f"Avg. F1 (averaged per sample) is {np.mean(F1_list):.05f} \n")
