@@ -18,7 +18,7 @@ class DatasetConfig:
 
             The name of the dataset containing raw data in the container.
 
-        source_dataset_name:
+        secondary_dataset_name:
 
             The name of the dataset containing the data which needs processing.
 
@@ -27,6 +27,6 @@ class DatasetConfig:
 
     container_path: Path = attrs.field(converter=Path)
     dataset_name: str = attrs.field(validator=instance_of(str))
-    source_dataset_name: Path = attrs.field(
+    secondary_dataset_name: Path = attrs.field(
         default=None, validator=optional(instance_of(str))
     )
