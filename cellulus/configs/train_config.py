@@ -89,7 +89,9 @@ class TrainConfig:
 
     """
 
-    train_data_config: DatasetConfig = attrs.field(converter=to_config(DatasetConfig))
+    train_data_config: DatasetConfig = attrs.field(
+        default=None, converter=to_config(DatasetConfig)
+    )
     validate_data_config: DatasetConfig = attrs.field(
         default=None, converter=to_config(DatasetConfig)
     )
