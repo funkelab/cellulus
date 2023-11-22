@@ -49,6 +49,12 @@ class InferenceConfig:
         Band-width used to perform mean-shift clustering on the predicted
         embeddings.
 
+    threshold:
+
+        Threshold to use for binary partitioning into foreground and background
+        pixel regions. If None, this is figured out automatically by performing
+        Otsu Thresholding on the last channel of the predicted embeddings.
+
     reduction_probability:
 
 
@@ -89,6 +95,9 @@ class InferenceConfig:
     crop_size: List = attrs.field(default=[252, 252], validator=instance_of(List))
     p_salt_pepper = attrs.field(default=0.01, validator=instance_of(float))
     num_infer_iterations = attrs.field(default=16, validator=instance_of(int))
+    threshold = attrs.field(
+        default=None, validator=attrs.validators.optional(instance_of(float))
+    )
     bandwidth = attrs.field(
         default=None, validator=attrs.validators.optional(instance_of(int))
     )

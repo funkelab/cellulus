@@ -61,7 +61,12 @@ def segment(inference_config: InferenceConfig) -> None:
         embeddings_mean = embeddings[
             np.newaxis, : dataset_meta_data.num_spatial_dims, ...
         ].copy()
-        threshold = threshold_otsu(embeddings_std)
+        if inference_config.threshold is None:
+            threshold = threshold_otsu(embeddings_std)
+        else:
+            threshold = inference_config.threshold
+
+        print(f"For sample {sample}, binary threshold {threshold} was used.")
         ds_binary_segmentation[sample, 0, ...] = embeddings_std < threshold
         for bandwidth_factor in range(inference_config.num_bandwidths):
             segmentation = mean_shift_segmentation(
