@@ -74,7 +74,9 @@ class InferenceConfig:
 
     """
 
-    dataset_config: DatasetConfig = attrs.field(converter=lambda d: DatasetConfig(**d))
+    dataset_config: DatasetConfig = attrs.field(
+        default=None, converter=lambda d: DatasetConfig(**d)
+    )
 
     prediction_dataset_config: DatasetConfig = attrs.field(
         default=None, converter=to_config(DatasetConfig)
