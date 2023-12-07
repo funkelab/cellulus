@@ -18,20 +18,24 @@ def infer(experiment_config):
 
     inference_config = experiment_config.inference_config
 
-    if inference_config.bandwidth is None:
-        inference_config.bandwidth = int(0.5 * experiment_config.object_size)
-
-    if inference_config.min_size is None:
-        inference_config.min_size = int(
-            0.1 * np.pi * (experiment_config.object_size**2) / 4
-        )
-
     model_config = experiment_config.model_config
 
     dataset_meta_data = DatasetMetaData.from_dataset_config(
         inference_config.dataset_config
     )
 
+    if inference_config.bandwidth is None:
+        inference_config.bandwidth = int(0.5 * experiment_config.object_size)
+
+    if inference_config.min_size is None:
+        if dataset_meta_data.num_spatial_dims == 2:
+            inference_config.min_size = int(
+                0.1 * np.pi * (experiment_config.object_size**2) / 4
+            )
+        elif dataset_meta_data.num_spatial_dims == 3:
+            inference_config.min_size = int(
+                0.1 * 4.0 / 3.0 * np.pi * (experiment_config.object_size**3)
+            )
     # set model
     model = get_model(
         in_channels=dataset_meta_data.num_channels,
