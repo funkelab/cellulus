@@ -21,7 +21,7 @@ If you would like to run Cellulus, using GPU:
 ```
 conda create -n cellulus python
 conda activate cellulus
-conda install pytorch torchvision pytorch-cuda=11.7 -c pytorch -c nvidia
+conda install pytorch==2.0.1 torchvision==0.15.2 pytorch-cuda=11.7 -c pytorch -c nvidia
 git clone https://github.com/funkelab/cellulus.git
 cd cellulus
 pip install -e .
