@@ -19,7 +19,7 @@ One could execute these lines of code to create a new environment and install de
 If you would like to run Cellulus, using GPU:
 
 ```
-conda create -n cellulus python
+conda create -y -n cellulus python==3.9
 conda activate cellulus
 conda install pytorch==2.0.1 torchvision==0.15.2 pytorch-cuda=11.7 -c pytorch -c nvidia
 git clone https://github.com/funkelab/cellulus.git
@@ -27,10 +27,10 @@ cd cellulus
 pip install -e .
 ```
 
-If you would like to run Cellulus, using CPU or the MPS framework:
+If you would like to run Cellulus, using the CPU or the MPS framework:
 
 ```
-conda create -n cellulus python
+conda create -y -n cellulus python==3.9
 conda activate cellulus
 pip install torch torchvision
 git clone https://github.com/funkelab/cellulus.git
