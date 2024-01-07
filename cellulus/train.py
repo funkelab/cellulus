@@ -3,6 +3,7 @@ import os
 import numpy as np
 import torch
 import zarr
+from IPython.display import clear_output
 from tqdm import tqdm
 
 from cellulus.criterions import get_loss
@@ -118,6 +119,7 @@ def train(experiment_config):
             batch, model=model, criterion=criterion, optimizer=optimizer, device=device
         )
         scheduler.step()
+        clear_output(wait=True)
         print(f"===> train loss: {train_loss:.6f}")
         logger.add(key="train", value=train_loss)
         logger.write()
