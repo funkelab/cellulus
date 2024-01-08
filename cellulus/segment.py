@@ -15,7 +15,7 @@ def segment(inference_config: InferenceConfig) -> None:
     f = zarr.open(inference_config.segmentation_dataset_config.container_path)
     ds = f[inference_config.segmentation_dataset_config.secondary_dataset_name]
 
-    # prepare the zarr dataset to write to
+    # prepare the instance segmentation zarr dataset to write to
     f_segmentation = zarr.open(
         inference_config.segmentation_dataset_config.container_path
     )
@@ -35,8 +35,7 @@ def segment(inference_config: InferenceConfig) -> None:
     ds_segmentation.attrs["resolution"] = (1,) * dataset_meta_data.num_spatial_dims
     ds_segmentation.attrs["offset"] = (0,) * dataset_meta_data.num_spatial_dims
 
-    # prepare the zarr dataset to write to
-    zarr.open(inference_config.segmentation_dataset_config.container_path)
+    # prepare the binary segmentation zarr dataset to write to
     ds_binary_segmentation = f_segmentation.create_dataset(
         "binary_" + inference_config.segmentation_dataset_config.dataset_name,
         shape=(
@@ -55,6 +54,18 @@ def segment(inference_config: InferenceConfig) -> None:
     ) * dataset_meta_data.num_spatial_dims
     ds_binary_segmentation.attrs["offset"] = (0,) * dataset_meta_data.num_spatial_dims
 
+    # prepare the object centered embeddings zarr dataset to write to
+    ds_object_centered_embeddings = f_segmentation.create_dataset(
+        "centered_"
+        + inference_config.segmentation_dataset_config.secondary_dataset_name,
+        shape=(
+            dataset_meta_data.num_samples,
+            dataset_meta_data.num_spatial_dims + 1,
+            *dataset_meta_data.spatial_array,
+        ),
+        dtype=np.float,
+    )
+
     for sample in tqdm(range(dataset_meta_data.num_samples)):
         embeddings = ds[sample]
         embeddings_std = embeddings[-1, ...]
@@ -67,7 +78,33 @@ def segment(inference_config: InferenceConfig) -> None:
             threshold = inference_config.threshold
 
         print(f"For sample {sample}, binary threshold {threshold} was used.")
-        ds_binary_segmentation[sample, 0, ...] = embeddings_std < threshold
+        binary_mask = embeddings_std < threshold
+        ds_binary_segmentation[sample, 0, ...] = binary_mask
+
+        # find mean of embeddings
+        embeddings_centered = embeddings.copy()
+        embeddings_mean_masked = (
+            binary_mask[np.newaxis, np.newaxis, ...] * embeddings_mean
+        )
+        if embeddings_centered.shape[0] == 2:
+            c_x = embeddings_mean_masked[0, 0]
+            c_y = embeddings_mean_masked[0, 1]
+            c_x = c_x[c_x != 0].mean()
+            c_y = c_y[c_y != 0].mean()
+            embeddings_centered[0] -= c_x
+            embeddings_centered[1] -= c_y
+        elif embeddings_centered.shape[0] == 3:
+            c_x = embeddings_mean_masked[0, 0]
+            c_y = embeddings_mean_masked[0, 1]
+            c_z = embeddings_mean_masked[0, 2]
+            c_x = c_x[c_x != 0].mean()
+            c_y = c_y[c_y != 0].mean()
+            c_z = c_z[c_z != 0].mean()
+            embeddings_centered[0] -= c_x
+            embeddings_centered[1] -= c_y
+            embeddings_centered[2] -= c_z
+        ds_object_centered_embeddings[sample] = embeddings_centered
+
         for bandwidth_factor in range(inference_config.num_bandwidths):
             segmentation = mean_shift_segmentation(
                 embeddings_mean,
