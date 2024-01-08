@@ -11,66 +11,66 @@ from .utils import to_config
 class InferenceConfig:
     """Inference configuration.
 
-    dataset_config:
+    Parameters:
 
-        Configuration object for the data to predict and segment.
+        dataset_config:
 
-    prediction_dataset_config:
+            Configuration object for the data to predict and segment.
 
-        Configuration object produced by predict.py.
+        prediction_dataset_config:
 
-    segmentation_dataset_config:
+            Configuration object produced by predict.py.
 
-        Configuration object produced by segment.py.
+        segmentation_dataset_config:
 
-    post_processed_dataset_config:
+            Configuration object produced by segment.py.
 
-        Configuration object produced by postprocess.py.
+        post_processed_dataset_config:
+
+            Configuration object produced by postprocess.py.
+
+        evaluation_dataset_config:
+
+            Configuration object for the ground truth masks.
+
+        crop_size:
+
+            ROI used by the scan node in gunpowder.
+
+        p_salt_pepper:
+
+            Fraction of pixels that will have salt-pepper noise.
+
+        num_infer_iterations:
+
+            Number of times the salt-peper noise is added to the raw image.
+
+        bandwidth:
+
+            Band-width used to perform mean-shift clustering on the predicted
+            embeddings.
+
+        threshold:
+
+            Threshold to use for binary partitioning into foreground and background
+            pixel regions. If None, this is figured out automatically by performing
+            Otsu Thresholding on the last channel of the predicted embeddings.
+
+        reduction_probability:
 
 
-    evaluation_dataset_config:
+        min_size:
 
-        Configuration object for the ground truth masks.
+            Ignore objects which are smaller than min_size number of pixels.
 
-    crop_size:
-
-        ROI used by the scan node in gunpowder.
-
-    p_salt_pepper:
-
-        Fraction of pixels that will have salt-pepper noise.
-
-    num_infer_iterations:
-
-        Number of times the salt-peper noise is added to the raw image.
-
-    bandwidth:
-
-        Band-width used to perform mean-shift clustering on the predicted
-        embeddings.
-
-    threshold:
-
-        Threshold to use for binary partitioning into foreground and background
-        pixel regions. If None, this is figured out automatically by performing
-        Otsu Thresholding on the last channel of the predicted embeddings.
-
-    reduction_probability:
-
-
-
-    min_size:
-
-        Ignore objects which are smaller than min_size number of pixels.
-
-    device (default = 'cuda:0'):
+        device (default = 'cuda:0'):
 
             The device to infer on.
             Set to 'cpu' to infer without GPU.
 
-    num_bandwidths (default = 1):
+        num_bandwidths (default = 1):
 
-        Number of bandwidths to obtain segmentations for.
+            Number of bandwidths to obtain segmentations for.
 
     """
 
