@@ -94,15 +94,16 @@ class OCELoss(nn.Module):  # type: ignore
         distance = self.distance_function(
             anchor_embeddings, reference_embeddings.detach()
         )
-        nonlinear_distance = self.nonlinearity(distance)
-
-        loss = nonlinear_distance + self.regularization_weight * anchor_embeddings.norm(
+        oce_loss = self.nonlinearity(distance)
+        regularization_loss = self.regularization_weight * anchor_embeddings.norm(
             2, dim=-1
         )
+
+        loss = oce_loss + regularization_loss
         if self.reduce_mean:
-            return loss.mean()
+            return loss.mean(), oce_loss.mean(), regularization_loss.mean()
         else:
-            return loss.sum()
+            return loss.sum(), oce_loss.sum(), regularization_loss.sum()
 
     def sample_offsets(self, radius, num_samples):
         if self.num_spatial_dims == 2:
