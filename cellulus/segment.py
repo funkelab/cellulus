@@ -63,8 +63,21 @@ def segment(inference_config: InferenceConfig) -> None:
             dataset_meta_data.num_spatial_dims + 1,
             *dataset_meta_data.spatial_array,
         ),
-        dtype=np.float,
+        dtype=float,
     )
+
+    ds_object_centered_embeddings.attrs["axis_names"] = ["s", "c"] + [
+        "t",
+        "z",
+        "y",
+        "x",
+    ][-dataset_meta_data.num_spatial_dims :]
+    ds_object_centered_embeddings.attrs["resolution"] = (
+        1,
+    ) * dataset_meta_data.num_spatial_dims
+    ds_object_centered_embeddings.attrs["offset"] = (
+        0,
+    ) * dataset_meta_data.num_spatial_dims
 
     for sample in tqdm(range(dataset_meta_data.num_samples)):
         embeddings = ds[sample]
@@ -86,14 +99,14 @@ def segment(inference_config: InferenceConfig) -> None:
         embeddings_mean_masked = (
             binary_mask[np.newaxis, np.newaxis, ...] * embeddings_mean
         )
-        if embeddings_centered.shape[0] == 2:
+        if embeddings_centered.shape[0] == 3:
             c_x = embeddings_mean_masked[0, 0]
             c_y = embeddings_mean_masked[0, 1]
             c_x = c_x[c_x != 0].mean()
             c_y = c_y[c_y != 0].mean()
             embeddings_centered[0] -= c_x
             embeddings_centered[1] -= c_y
-        elif embeddings_centered.shape[0] == 3:
+        elif embeddings_centered.shape[0] == 4:
             c_x = embeddings_mean_masked[0, 0]
             c_y = embeddings_mean_masked[0, 1]
             c_z = embeddings_mean_masked[0, 2]
