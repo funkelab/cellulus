@@ -1,0 +1,73 @@
+# Project information
+site_name: Cellulus
+site_url: https://funkelab.github.io/cellulus
+site_author: Manan Lalit
+site_description: >-
+  Documentation for Cellulus
+
+# Repository
+repo_name: funkelab/cellulus
+repo_url: https://github.com/funkelab/cellulus
+
+# Configuration
+theme:
+  name: material
+  custom_dir: docs/overrides
+  features:
+    - navigation.footer
+    - navigation.indexes
+    - navigation.sections
+    - navigation.tabs
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/link
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch-off
+        name: Switch to system preference
+  icon:
+    logo: logo
+
+plugins:
+  - mkdocs-jupyter:
+      execute: True
+      ignore: ["*/*/*/.ipynb_checkpoints/*.py"]
+      include_source: True
+  - search:
+      separator: '[\s\u200b\-_,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+  - mkdocstrings
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started.md
+  - 2D Example:
+      - 01: examples/2d/01-data.py
+      - 02: examples/2d/02-train.py
+      - 03: examples/2d/03-infer.py
+  - API:
+      - Configs:
+          - DatasetConfig: api/dataset_config.md
+          - ExperimentConfig: api/experiment_config.md
+          - InferenceConfig: api/inference_config.md
+          - ModelConfig: api/model_config.md
+          - TrainConfig: api/train_config.md
+      - ZarrDataset: api/zarr_dataset.md
+      - OCELoss: api/oce_loss.md
