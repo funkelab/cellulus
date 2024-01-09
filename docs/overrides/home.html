@@ -1,0 +1,355 @@
+<!-- Custom HTML site displayed as the Home chapter -->
+
+{% extends "main.html" %} {% block tabs %} {{ super() }}
+
+<html>
+  <head>
+    <title>
+      Unsupervised Learning of Object-Centric Embeddings for Cell Instance
+      Segmentation in Microscopy Images
+    </title>
+    <meta property="og:image" content="resources/images/teaser.gif" />
+    <meta
+      property="og:title"
+      content="Unsupervised Learning of Object-Centric Embeddings for Cell Instance Segmentation in Microscopy Images"
+    />
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+    <link rel="stylesheet" href="css/zerogrid.css" />
+  </head>
+  <body>
+    <br />
+    <center>
+      <span style="font-size: 38px"
+        >Unsupervised Learning of Object-Centric Embeddings <br />
+        for Cell Instance Segmentation in Microscopy Images</span
+      >
+      <br />
+      <br />
+      <table align="center" width="800px">
+        <tr>
+          <td align="center">
+            <center>
+              <span style="font-size: 24px" width="100px">Steffen Wolf</span>
+            </center>
+          </td>
+          <td align="center">
+            <center>
+              <span style="font-size: 24px" width="100px">Manan Lalit</span>
+            </center>
+          </td>
+          <td align="center">
+            <center>
+              <span style="font-size: 24px" width="100px"
+                >Henry Westmacott</span
+              >
+            </center>
+          </td>
+          <td align="center">
+            <center>
+              <span style="font-size: 24px" width="100px">Kate McDole</span>
+            </center>
+          </td>
+          <td align="center">
+            <center>
+              <span style="font-size: 24px" width="100px">Jan Funke</span>
+            </center>
+          </td>
+        </tr>
+      </table>
+      <br />
+      <table align="center" width="400x">
+        <tr>
+          <td align="center" width="150px">
+            <center>
+              <span style="font-size: 24px; color: #3f51b5"
+                ><a
+                  href="https://openaccess.thecvf.com/content/ICCV2023/papers/Wolf_Unsupervised_Learning_of_Object-Centric_Embeddings_for_Cell_Instance_Segmentation_in_ICCV_2023_paper.pdf"
+                >
+                  [pdf]</a
+                ></span
+              >
+            </center>
+          </td>
+          <td align="center" width="150px">
+            <center>
+              <span style="font-size: 24px; color: #3f51b5"
+                ><a href="https://github.com/funkelab/cellulus">
+                  [code]</a
+                ></span
+              >
+            </center>
+          </td>
+        </tr>
+      </table>
+    </center>
+    <br />
+    <table align="center" width="1000px">
+      <tr>
+        <td width="800px">
+          <center>
+            <a href="./resources/images/teaser.png">
+              <img
+                class="rounded"
+                src="./resources/images/teaser.png"
+                width="80%"
+              /> </a
+            ><br />
+          </center>
+        </td>
+      </tr>
+      <tr>
+        <td width="800px">
+          <center>
+            <div style="text-align: justify; width: 800px">
+              <span style="font-size: 14px"
+                ><i
+                  ><strong
+                    >Method overview and example segmentations on diverse
+                    datasets.</strong
+                  >
+                  Top row: An unsupervised learning objective gives rise to
+                  object-centric embeddings (OCEs), such that patches extracted
+                  from the same object (green boxes) maintain their relative
+                  position to each other. Predicted densely, these OCEs allow
+                  instance segmentation of cells in microscopy images, by using
+                  a post-processing step such as mean-shift clustering. Bottom
+                  row: Example raw images and dense OCEs/instance segmentations
+                  on four datasets spanning different imaging modalities, cell
+                  sizes and shapes.
+                </i></span
+              >
+            </div>
+          </center>
+        </td>
+      </tr>
+    </table>
+    <center>
+      <p align="justify" style="width: 1000px">
+        Segmentation of objects in microscopy images is required for many
+        biomedical applications. We introduce object-centric embeddings (OCEs),
+        which embed image patches such that the spatial offsets between patches
+        cropped from the same object are preserved. Those learnt embeddings can
+        be used to delineate individual objects and thus obtain instance
+        segmentations. Here, we show theoretically that, under assumptions
+        commonly found in microscopy images, OCEs can be learnt through a
+        self-supervised task that predicts the spatial offset between image
+        patches. Together, this forms an unsupervised cell instance segmentation
+        method which we evaluate on nine diverse large-scale microscopy
+        datasets. Segmentations obtained with our method lead to substantially
+        improved results, compared to state-of-the-art baselines on six out of
+        nine datasets, and perform on par on the remaining three datasets. If
+        ground-truth annotations are available, our method serves as an
+        excellent starting point for supervised training, reducing the required
+        amount of ground-truth needed by one order of magnitude, thus
+        substantially increasing the practical applicability of our method.
+      </p>
+    </center>
+    <hr />
+    <center><h1>Overview</h1></center>
+
+    <br />
+
+    <table align="center" width="1000px">
+      <tr>
+        <td align="center" width="800px">
+          <center>
+            <img class="round" src="./resources/images/loss.png" width="80%" />
+          </center>
+          <!-- </br> -->
+        </td>
+      </tr>
+      <tr>
+        <td align="center" width="800px">
+          <div style="text-align: justify; width: 800px">
+            <span style="font-size: 14px"
+              ><i>
+                <strong
+                  >Unsupervised Learning of Object-Centric Embeddings</strong
+                >. During learning, small image patches are randomly cropped
+                from the raw image and embedded through a learnable function
+                into a 2D embedding space. The objective of the loss is to
+                ensure that the spatial offset between pairs of patches in the
+                raw image (green arrows) is preserved in the embedding space.
+              </i></span
+            >
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br />
+    <hr />
+    <center><h1>Results</h1></center>
+
+    <br />
+
+    <table align="center" width="1000px">
+      <tr>
+        <td align="center" width="800px">
+          <center>
+            <img
+              class="round"
+              src="./resources/images/results.png"
+              width="80%"
+            />
+          </center>
+          <!-- </br> -->
+        </td>
+      </tr>
+      <tr>
+        <td align="center" width="800px">
+          <div style="text-align: justify; width: 800px">
+            <span style="font-size: 14px"
+              ><i>
+                The pretrained models of StarDist and Cellpose are compared with
+                Cellulus on nine diverse microscopy image datasets. Two instance
+                segmentation metrics F1 and SEG are evaluated by comparing the
+                quality of predicted instance segmentation with the ground truth
+                instance segmentation. Best performing method on each dataset is
+                shown in bold. The last row TissueNet (all) shows a weighted
+                average (weights proportional to the number of images) of
+                results for Immune, Lung, Pancreas and Skin.
+              </i></span
+            >
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <br />
+    <hr />
+    <table class="center" align="center" width="1000px">
+      <center><h1>Paper</h1></center>
+      <tr>
+        <td align="center" width="800px">
+          <center>
+            <div id="inner">
+              <div class="paper-col">
+                <img
+                  class="paper-col-im"
+                  src="./resources/paper/paper_01.png"
+                />
+              </div>
+              <div class="paper-col">
+                <img
+                  class="paper-col-im"
+                  src="./resources/paper/paper_02.png"
+                />
+              </div>
+              <div class="paper-col">
+                <img
+                  class="paper-col-im"
+                  src="./resources/paper/paper_03.png"
+                />
+              </div>
+              <div class="paper-col">
+                <img
+                  class="paper-col-im"
+                  src="./resources/paper/paper_04.png"
+                />
+              </div>
+              <div class="paper-col">
+                <img
+                  class="paper-col-im"
+                  src="./resources/paper/paper_05.png"
+                />
+              </div>
+              <div class="paper-col">
+                <img
+                  class="paper-col-im"
+                  src="./resources/paper/paper_06.png"
+                />
+              </div>
+              <div class="paper-col">
+                <img
+                  class="paper-col-im"
+                  src="./resources/paper/paper_07.png"
+                />
+              </div>
+              <div class="paper-col">
+                <img
+                  class="paper-col-im"
+                  src="./resources/paper/paper_08.png"
+                />
+              </div>
+              <div class="paper-col">
+                <img
+                  class="paper-col-im"
+                  src="./resources/paper/paper_09.png"
+                />
+              </div>
+              <div class="paper-col">
+                <img
+                  class="paper-col-im"
+                  src="./resources/paper/paper_10.png"
+                />
+              </div>
+              <div class="paper-col">
+                <img
+                  class="paper-col-im"
+                  src="./resources/paper/paper_11.png"
+                />
+              </div>
+              <div class="paper-col">
+                <img
+                  class="paper-col-im"
+                  src="./resources/paper/paper_12.png"
+                />
+              </div>
+              <div class="paper-col">
+                <img
+                  class="paper-col-im"
+                  src="./resources/paper/paper_13.png"
+                />
+              </div>
+              <div class="paper-col">
+                <img
+                  class="paper-col-im"
+                  src="./resources/paper/paper_14.png"
+                />
+              </div>
+            </div>
+          </center>
+        </td>
+      </tr>
+    </table>
+    <br />
+
+    <table align="center" width="180px">
+      <tr>
+        <td>
+          <span style="font-size: 14pt; color: #3f51b5">
+            <center>
+              <a href="./resources/pdf/cellulus.pdf">[download]</a>
+            </center>
+          </span>
+        </td>
+
+        <td>
+          <span style="font-size: 14pt; color: #3f51b5">
+            <center>
+              <a href="./resources/bibtex.txt">[bibtex]</a>
+            </center>
+          </span>
+        </td>
+      </tr>
+    </table>
+    <br />
+
+    <hr />
+
+    <table align="center" width="1000px">
+      <tr>
+        <td>
+          <center><h1>Acknowledgements</h1></center>
+          <div style="text-align: justify">
+            S.W., H.W. and K.M. are supported by the Medical Research Council,
+            as part of UK Research and Innovation [MCUP1201/23].
+          </div>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+
+{% endblock %} {% block content %}{% endblock %} {% block footer %}{% endblock
+%}
