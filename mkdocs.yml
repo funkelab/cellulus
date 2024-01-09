@@ -14,6 +14,9 @@ theme:
   name: material
   custom_dir: docs/overrides
   features:
+    - content.code.annotate
+    - content.code.copy
+    - content.tooltips
     - navigation.footer
     - navigation.indexes
     - navigation.sections
