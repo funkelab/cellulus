@@ -14,6 +14,38 @@ class OCELoss(nn.Module):  # type: ignore
         reduce_mean: bool,
         device: torch.device,
     ):
+        """Class definition for loss.
+
+        Parameters
+        ----------
+
+            temperature:
+                Factor used to scale the gaussian function and control
+                the rate of damping.
+
+            regularization_weight:
+                The weight of the L2 regularizer on the object-centric embeddings.
+
+            density:
+                Determines the fraction of patches to sample per crop,
+                during training.
+
+            kappa:
+                Neighborhood radius to extract patches from.
+
+            num_spatial_dims:
+                Should be equal to 2 for 2D and 3 for 3D.
+
+            reduce_mean:
+                Should be set to True if the loss should be averaged over all
+                pixels, and set to False, if the sum of the loss over all pixels
+                is expected.
+
+            device:
+                The device to train on.
+                Set to 'cpu' to train without GPU.
+
+        """
         super().__init__()
         self.temperature = temperature
         self.regularization_weight = regularization_weight

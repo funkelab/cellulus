@@ -48,7 +48,7 @@ class TrainConfig:
 
         kappa (default = 10.0):
 
-            Neighborhood radius to extract patches from
+            Neighborhood radius to extract patches from.
 
         save_model_every (default = 1e3):
 
