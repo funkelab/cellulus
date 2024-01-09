@@ -140,4 +140,3 @@ visualize_2d(
     bottom_left_cmap="nipy_spectral",
     bottom_right_cmap="nipy_spectral",
 )
-
