@@ -33,15 +33,15 @@ model_config = ModelConfig(num_fmaps=num_fmaps, fmap_inc_factor=fmap_inc_factor)
 
 # Then, we specify training-specific parameters such as the `device`, which indicates the actual device to run the training on.
 # <br> The device could be set equal to `cuda:n` (where `n` is the index of the GPU, for e.g. `cuda:0`), `cpu` or `mps`. <br>
-# We set the `num_iterations` equal to `5e3` for demonstration purposes. <br>(This takes around 20 minutes on a Mac Book Pro with an Apple M2 Max chip).
+# We set the `max_iterations` equal to `5e3` for demonstration purposes. <br>(This takes around 20 minutes on a Mac Book Pro with an Apple M2 Max chip).
 
 device = "mps"
-num_iterations = 5e3
+max_iterations = 5e3
 
 train_config = TrainConfig(
     train_data_config=asdict(train_data_config),
     device=device,
-    num_iterations=num_iterations,
+    max_iterations=max_iterations,
 )
 
 # Next, we initialize the experiment config which puts together the config objects (`train_config` and `model_config`) which we defined above.
