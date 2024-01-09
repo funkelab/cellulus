@@ -2,8 +2,10 @@
 
 # In this notebook, we will use the `cellulus` model trained in the previous step to obtain instance segmentations.
 
+import urllib
 import zipfile
 
+import numpy as np
 import skimage
 import torch
 import zarr
@@ -14,6 +16,7 @@ from cellulus.configs.inference_config import InferenceConfig
 from cellulus.configs.model_config import ModelConfig
 from cellulus.infer import infer
 from cellulus.utils.misc import visualize_2d
+from matplotlib.colors import ListedColormap
 
 # ## Specify config values for datasets
 
@@ -95,6 +98,14 @@ infer(experiment_config)
 # ## Inspect predictions
 
 # Let's look at some of the predicted embeddings. <br>
+# We will first load a glasbey-like color map to show individual cells with a unique color.
+
+urllib.request.urlretrieve(
+    "https://github.com/funkelab/cellulus/releases/download/v0.0.1-tag/cmap_60.npy",
+    "cmap_60.npy",
+)
+new_cmp = ListedColormap(np.load("cmap_60.npy"))
+
 # Change the value of `index` below to look at the raw image (left), x-offset (bottom-left), y-offset (bottom-right) and uncertainty of the embedding (top-right).
 
 # +
@@ -137,6 +148,6 @@ visualize_2d(
     bottom_left_label="SEGMENTATION",
     bottom_right_label="POSTPROCESSED",
     top_right_cmap="gray",
-    bottom_left_cmap="nipy_spectral",
-    bottom_right_cmap="nipy_spectral",
+    bottom_left_cmap=new_cmp,
+    bottom_right_cmap=new_cmp,
 )
