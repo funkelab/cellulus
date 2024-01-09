@@ -1,0 +1,9 @@
+@misc{wolf2023unsupervised,
+      title={Unsupervised Learning of Object-Centric Embeddings for Cell Instance Segmentation in Microscopy Images}, 
+      author={Steffen Wolf and Manan Lalit and Henry Westmacott and Katie McDole and Jan Funke},
+      year={2023},
+      eprint={2310.08501},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+
