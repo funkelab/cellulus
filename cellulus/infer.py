@@ -18,20 +18,24 @@ def infer(experiment_config):
 
     inference_config = experiment_config.inference_config
 
-    if inference_config.bandwidth is None:
-        inference_config.bandwidth = int(0.5 * experiment_config.object_size)
-
-    if inference_config.min_size is None:
-        inference_config.min_size = int(
-            0.1 * np.pi * (experiment_config.object_size**2) / 4
-        )
-
     model_config = experiment_config.model_config
 
     dataset_meta_data = DatasetMetaData.from_dataset_config(
         inference_config.dataset_config
     )
 
+    if inference_config.bandwidth is None:
+        inference_config.bandwidth = int(0.5 * experiment_config.object_size)
+
+    if inference_config.min_size is None:
+        if dataset_meta_data.num_spatial_dims == 2:
+            inference_config.min_size = int(
+                0.1 * np.pi * (experiment_config.object_size**2) / 4
+            )
+        elif dataset_meta_data.num_spatial_dims == 3:
+            inference_config.min_size = int(
+                0.1 * 4.0 / 3.0 * np.pi * (experiment_config.object_size**3)
+            )
     # set model
     model = get_model(
         in_channels=dataset_meta_data.num_channels,
@@ -62,11 +66,14 @@ def infer(experiment_config):
     model.eval()
 
     # get predicted embeddings...
-    predict(model, inference_config)
+    if inference_config.prediction_dataset_config is not None:
+        predict(model, inference_config)
     # ...turn them into a segmentation...
-    segment(inference_config)
+    if inference_config.segmentation_dataset_config is not None:
+        segment(inference_config)
     # ...and post-process the segmentation
-    post_process(inference_config)
+    if inference_config.post_processed_dataset_config is not None:
+        post_process(inference_config)
     # ...and evaluate if groundtruth exists
     if inference_config.evaluation_dataset_config is not None:
         evaluate(inference_config)

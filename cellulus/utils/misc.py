@@ -43,6 +43,10 @@ def visualize_2d(
     top_right_label,
     bottom_left_label,
     bottom_right_label,
+    image_cmap="magma",
+    top_right_cmap=None,
+    bottom_left_cmap=None,
+    bottom_right_cmap=None,
 ):
     """
     Visualizes 2 x 2 grid with Top-Left (Image)
@@ -68,20 +72,20 @@ def visualize_2d(
     plt.figure(figsize=(15, 15))
     img_show = image if image.ndim == 2 else image[0, ...]
     plt.subplot(221)
-    plt.imshow(img_show, cmap="magma")
+    plt.imshow(img_show, cmap=image_cmap)
     plt.text(30, 30, "IM", fontdict=font)
     plt.axis("off")
     plt.subplot(222)
     plt.axis("off")
-    plt.imshow(top_right, interpolation="None")
+    plt.imshow(top_right, interpolation="None", cmap=top_right_cmap)
     plt.text(30, 30, top_right_label, fontdict=font)
     plt.subplot(223)
     plt.axis("off")
-    plt.imshow(bottom_left, interpolation="None")
+    plt.imshow(bottom_left, interpolation="None", cmap=bottom_left_cmap)
     plt.text(30, 30, bottom_left_label, fontdict=font)
     plt.subplot(224)
     plt.axis("off")
-    plt.imshow(bottom_right, interpolation="None")
+    plt.imshow(bottom_right, interpolation="None", cmap=bottom_right_cmap)
     plt.text(30, 30, bottom_right_label, fontdict=font)
     plt.tight_layout()
     plt.show()

@@ -3,6 +3,7 @@ import os
 import numpy as np
 import torch
 import zarr
+from IPython.display import clear_output
 from tqdm import tqdm
 
 from cellulus.criterions import get_loss
@@ -86,7 +87,7 @@ def train(experiment_config):
         return pow((1 - ((iteration) / train_config.max_iterations)), 0.9)
 
     # set logger
-    logger = get_logger(keys=["train"], title="loss")
+    logger = get_logger(keys=["loss", "oce_loss"], title="loss")
 
     # resume training
     start_iteration = 0
@@ -114,18 +115,20 @@ def train(experiment_config):
             optimizer, lr_lambda=lambda_, last_epoch=iteration - 1
         )
 
-        train_loss, prediction = train_iteration(
+        loss, oce_loss, prediction = train_iteration(
             batch, model=model, criterion=criterion, optimizer=optimizer, device=device
         )
         scheduler.step()
-        print(f"===> train loss: {train_loss:.6f}")
-        logger.add(key="train", value=train_loss)
+        clear_output(wait=True)
+        print(f"===> loss: {loss:.6f}, oce loss: {oce_loss:.6f}")
+        logger.add(key="loss", value=loss)
+        logger.add(key="oce_loss", value=oce_loss)
         logger.write()
         logger.plot()
 
         if iteration % train_config.save_model_every == 0:
-            is_lowest = train_loss < lowest_loss
-            lowest_loss = min(train_loss, lowest_loss)
+            is_lowest = oce_loss < lowest_loss
+            lowest_loss = min(oce_loss, lowest_loss)
             state = {
                 "iteration": iteration,
                 "lowest_loss": lowest_loss,
@@ -146,12 +149,16 @@ def train(experiment_config):
 def train_iteration(batch, model, criterion, optimizer, device):
     model.train()
     prediction = model(batch.to(device))
-    loss = criterion(prediction)
-    loss = loss.mean()
+    loss, oce_loss, regularization_loss = criterion(prediction)
+    loss, oce_loss, regularization_loss = (
+        loss.mean(),
+        oce_loss.mean(),
+        regularization_loss.mean(),
+    )
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
-    return loss.item(), prediction
+    return loss.item(), oce_loss.item(), prediction
 
 
 def save_model(state, iteration, is_lowest=False):

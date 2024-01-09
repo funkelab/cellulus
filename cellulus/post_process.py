@@ -13,8 +13,8 @@ def post_process(inference_config: InferenceConfig) -> None:
     dataset_config = inference_config.dataset_config
     dataset_meta_data = DatasetMetaData.from_dataset_config(dataset_config)
 
-    f = zarr.open(inference_config.segmentation_dataset_config.container_path)
-    ds = f[inference_config.segmentation_dataset_config.dataset_name]
+    f = zarr.open(inference_config.post_processed_dataset_config.container_path)
+    ds = f[inference_config.post_processed_dataset_config.secondary_dataset_name]
 
     # prepare the zarr dataset to write to
     f_postprocessed = zarr.open(
@@ -24,7 +24,7 @@ def post_process(inference_config: InferenceConfig) -> None:
         inference_config.post_processed_dataset_config.dataset_name,
         shape=(
             dataset_meta_data.num_samples,
-            1,
+            inference_config.num_bandwidths,
             *dataset_meta_data.spatial_array,
         ),
         dtype=np.uint16,
@@ -39,9 +39,10 @@ def post_process(inference_config: InferenceConfig) -> None:
     for sample in tqdm(range(dataset_meta_data.num_samples)):
         # first instance label masks are expanded by `grow_distance`
         # next, expanded  instance label masks are shrunk by `shrink_distance`
-        segmentation = ds[sample, 0]
-        distance_foreground = dtedt(segmentation == 0)
-        expanded_mask = distance_foreground < inference_config.grow_distance
-        distance_background = dtedt(expanded_mask)
-        segmentation[distance_background < inference_config.shrink_distance] = 0
-        ds_postprocessed[sample, 0, ...] = segmentation
+        for bandwidth_factor in range(inference_config.num_bandwidths):
+            segmentation = ds[sample, bandwidth_factor]
+            distance_foreground = dtedt(segmentation == 0)
+            expanded_mask = distance_foreground < inference_config.grow_distance
+            distance_background = dtedt(expanded_mask)
+            segmentation[distance_background < inference_config.shrink_distance] = 0
+            ds_postprocessed[sample, bandwidth_factor, ...] = segmentation

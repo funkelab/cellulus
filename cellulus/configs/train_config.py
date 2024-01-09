@@ -48,7 +48,7 @@ class TrainConfig:
 
         kappa (default = 10.0):
 
-            Neighborhood radius to extract patches from
+            Neighborhood radius to extract patches from.
 
         save_model_every (default = 1e3):
 
@@ -89,7 +89,9 @@ class TrainConfig:
 
     """
 
-    train_data_config: DatasetConfig = attrs.field(converter=to_config(DatasetConfig))
+    train_data_config: DatasetConfig = attrs.field(
+        default=None, converter=to_config(DatasetConfig)
+    )
     validate_data_config: DatasetConfig = attrs.field(
         default=None, converter=to_config(DatasetConfig)
     )

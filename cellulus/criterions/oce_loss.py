@@ -14,6 +14,38 @@ class OCELoss(nn.Module):  # type: ignore
         reduce_mean: bool,
         device: torch.device,
     ):
+        """Class definition for loss.
+
+        Parameters
+        ----------
+
+            temperature:
+                Factor used to scale the gaussian function and control
+                the rate of damping.
+
+            regularization_weight:
+                The weight of the L2 regularizer on the object-centric embeddings.
+
+            density:
+                Determines the fraction of patches to sample per crop,
+                during training.
+
+            kappa:
+                Neighborhood radius to extract patches from.
+
+            num_spatial_dims:
+                Should be equal to 2 for 2D and 3 for 3D.
+
+            reduce_mean:
+                Should be set to True if the loss should be averaged over all
+                pixels, and set to False, if the sum of the loss over all pixels
+                is expected.
+
+            device:
+                The device to train on.
+                Set to 'cpu' to train without GPU.
+
+        """
         super().__init__()
         self.temperature = temperature
         self.regularization_weight = regularization_weight
@@ -94,15 +126,16 @@ class OCELoss(nn.Module):  # type: ignore
         distance = self.distance_function(
             anchor_embeddings, reference_embeddings.detach()
         )
-        nonlinear_distance = self.nonlinearity(distance)
-
-        loss = nonlinear_distance + self.regularization_weight * anchor_embeddings.norm(
+        oce_loss = self.nonlinearity(distance)
+        regularization_loss = self.regularization_weight * anchor_embeddings.norm(
             2, dim=-1
         )
+
+        loss = oce_loss + regularization_loss
         if self.reduce_mean:
-            return loss.mean()
+            return loss.mean(), oce_loss.mean(), regularization_loss.mean()
         else:
-            return loss.sum()
+            return loss.sum(), oce_loss.sum(), regularization_loss.sum()
 
     def sample_offsets(self, radius, num_samples):
         if self.num_spatial_dims == 2:
