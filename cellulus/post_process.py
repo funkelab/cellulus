@@ -5,6 +5,7 @@ from tqdm import tqdm
 
 from cellulus.configs.inference_config import InferenceConfig
 from cellulus.datasets.meta_data import DatasetMetaData
+from cellulus.utils.misc import size_filter
 
 
 def post_process(inference_config: InferenceConfig) -> None:
@@ -36,6 +37,7 @@ def post_process(inference_config: InferenceConfig) -> None:
     ds_postprocessed.attrs["resolution"] = (1,) * dataset_meta_data.num_spatial_dims
     ds_postprocessed.attrs["offset"] = (0,) * dataset_meta_data.num_spatial_dims
 
+    # remove halo
     for sample in tqdm(range(dataset_meta_data.num_samples)):
         # first instance label masks are expanded by `grow_distance`
         # next, expanded  instance label masks are shrunk by `shrink_distance`
@@ -46,3 +48,10 @@ def post_process(inference_config: InferenceConfig) -> None:
             distance_background = dtedt(expanded_mask)
             segmentation[distance_background < inference_config.shrink_distance] = 0
             ds_postprocessed[sample, bandwidth_factor, ...] = segmentation
+
+    # size filter - remove small objects
+    for sample in tqdm(range(dataset_meta_data.num_samples)):
+        for bandwidth_factor in range(inference_config.num_bandwidths):
+            ds_postprocessed[sample, bandwidth_factor, ...] = size_filter(
+                ds_postprocessed[sample, bandwidth_factor], inference_config.min_size
+            )
