@@ -6,14 +6,15 @@ class Cluster2d:
     """
     Class for Greedy Clustering of Embeddings on 2D samples.
     """
+
     def __init__(self, width, height, fg_mask, device):
         """Initializes objects of class `Cluster2d`.
 
         Parameters
         ----------
-            
-            width: 
-            
+
+            width:
+
                 Width (`W`) of the Raw Image, in number of pixels.
 
             height:
@@ -25,12 +26,12 @@ class Cluster2d:
                 Foreground Mask corresponding to the region which should be
                 partitioned into individual objects.
 
-            device: 
+            device:
 
                 Device on which inference is being run.
 
         """
-        
+
         xm = torch.linspace(0, width - 1, width).view(1, 1, -1).expand(1, height, width)
         ym = (
             torch.linspace(0, height - 1, height)
@@ -59,7 +60,7 @@ class Cluster2d:
 
                 Embeddings predicted for the whole raw imnage sample.
 
-            bandwidth: 
+            bandwidth:
 
                 Clustering bandwidth or sigma.
 
@@ -67,7 +68,7 @@ class Cluster2d:
 
                 Clusters below the `min_object_size` are ignored.
 
-            seed_thresh (default = 0.9): 
+            seed_thresh (default = 0.9):
 
                 Pixels with certainty below 0.9 are ignored to be object
                 centers.
@@ -77,7 +78,7 @@ class Cluster2d:
                 If number of pixels which have not been clustered yet falls
                 below min_unclustered_sum, the clustering proces stops.
 
-                
+
         """
         prediction = torch.from_numpy(prediction).to(self.device)
         height, width = prediction.size(1), prediction.size(2)
@@ -123,15 +124,15 @@ class Cluster3d:
     """
     Class for Greedy Clustering of Embeddings for 3D samples.
     """
+
     def __init__(self, width, height, depth, fg_mask, device):
-        
         """Initializes objects of class `Cluster3d`.
 
         Parameters
         ----------
-            
-            width: 
-            
+
+            width:
+
                 Width (`W`) of the Raw Image, in number of pixels.
 
             height:
@@ -140,14 +141,14 @@ class Cluster3d:
 
             depth:
 
-                Depth (`D`) of the Raw Image, in number of pixels. 
+                Depth (`D`) of the Raw Image, in number of pixels.
 
             fg_mask: (shape is `D` x `H` x `W`)
 
                 Foreground Mask corresponding to the region which should be
                 partitioned into individual objects.
 
-            device: 
+            device:
 
                 Device on which inference is being run.
 
@@ -180,7 +181,6 @@ class Cluster3d:
         seed_thresh=0.9,
         min_unclustered_sum=0,
     ):
-        
         """Cluster Function..
 
         Parameters
@@ -190,7 +190,7 @@ class Cluster3d:
 
                 Embeddings predicted for the whole raw imnage sample.
 
-            bandwidth: 
+            bandwidth:
 
                 Clustering bandwidth or sigma.
 
@@ -198,7 +198,7 @@ class Cluster3d:
 
                 Clusters below the `min_object_size` are ignored.
 
-            seed_thresh (default = 0.9): 
+            seed_thresh (default = 0.9):
 
                 Pixels with certainty below 0.9 are ignored to be object
                 centers.
@@ -208,12 +208,13 @@ class Cluster3d:
                 If number of pixels which have not been clustered yet falls
                 below min_unclustered_sum, the clustering proces stops.
 
-        """        
+        """
         prediction = torch.from_numpy(prediction).to(self.device)
         depth, height, width = (
             prediction.size(1),
             prediction.size(2),
-            prediction.size(3))
+            prediction.size(3),
+        )
         xyzm_s = self.xyzm[:, 0:depth, 0:height, 0:width]
         embeddings = prediction[0:3] + xyzm_s  # 3 x d x h x w
         seed_map = prediction[3:4]  # 1 x d x h x w
