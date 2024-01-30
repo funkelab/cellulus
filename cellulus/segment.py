@@ -5,6 +5,7 @@ from tqdm import tqdm
 
 from cellulus.configs.inference_config import InferenceConfig
 from cellulus.datasets.meta_data import DatasetMetaData
+from cellulus.utils.greedy_cluster import Cluster2d, Cluster3d
 from cellulus.utils.mean_shift import mean_shift_segmentation
 
 
@@ -118,23 +119,50 @@ def segment(inference_config: InferenceConfig) -> None:
             embeddings_centered[2] -= c_z
         ds_object_centered_embeddings[sample] = embeddings_centered
 
-        for bandwidth_factor in range(inference_config.num_bandwidths):
-            segmentation = mean_shift_segmentation(
-                embeddings_mean,
-                embeddings_std,
-                bandwidth=inference_config.bandwidth / (2**bandwidth_factor),
-                min_size=inference_config.min_size,
-                reduction_probability=inference_config.reduction_probability,
-                threshold=threshold,
-            )
-            # Note that the line below is needed
-            # because the embeddings_mean is modified
-            # by mean_shift_segmentation
-            embeddings_mean = embeddings[
-                np.newaxis, : dataset_meta_data.num_spatial_dims, ...
-            ].copy()
-            ds_segmentation[
-                sample,
-                bandwidth_factor,
-                ...,
-            ] = segmentation
+        if inference_config.clustering == "meanshift":
+            for bandwidth_factor in range(inference_config.num_bandwidths):
+                segmentation = mean_shift_segmentation(
+                    embeddings_mean,
+                    embeddings_std,
+                    bandwidth=inference_config.bandwidth / (2**bandwidth_factor),
+                    min_size=inference_config.min_size,
+                    reduction_probability=inference_config.reduction_probability,
+                    threshold=threshold,
+                )
+                # Note that the line below is needed
+                # because the embeddings_mean is modified
+                # by mean_shift_segmentation
+                embeddings_mean = embeddings[
+                    np.newaxis, : dataset_meta_data.num_spatial_dims, ...
+                ].copy()
+
+        elif inference_config.clustering == "greedy":
+            if dataset_meta_data.num_spatial_dims == 3:
+                cluster3d = Cluster3d(
+                    width=embeddings.shape[-1],
+                    height=embeddings.shape[-2],
+                    depth=embeddings.shape[-3],
+                    fg_mask=binary_mask,
+                    device=inference_config.device,
+                )
+                for bandwidth_factor in range(inference_config.num_bandwidths):
+                    segmentation = cluster3d.cluster(
+                        prediction=embeddings,
+                        bandwidth=inference_config.bandwidth / (2**bandwidth_factor),
+                        min_object_size=inference_config.min_size,
+                    )
+            elif dataset_meta_data.num_spatial_dims == 2:
+                cluster2d = Cluster2d(
+                    width=embeddings.shape[-1],
+                    height=embeddings.shape[-2],
+                    fg_mask=binary_mask,
+                    device=inference_config.device,
+                )
+                for bandwidth_factor in range(inference_config.num_bandwidths):
+                    segmentation = cluster2d.cluster(
+                        prediction=embeddings,
+                        bandwidth=inference_config.bandwidth / (2**bandwidth_factor),
+                        min_object_size=inference_config.min_size,
+                    )
+
+        ds_segmentation[sample, bandwidth_factor, ...] = segmentation
