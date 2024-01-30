@@ -127,8 +127,8 @@ def train(experiment_config):
         logger.plot()
 
         if iteration % train_config.save_model_every == 0:
-            is_lowest = oce_loss < lowest_loss
-            lowest_loss = min(oce_loss, lowest_loss)
+            is_lowest = loss < lowest_loss
+            lowest_loss = min(loss, lowest_loss)
             state = {
                 "iteration": iteration,
                 "lowest_loss": lowest_loss,
@@ -150,11 +150,6 @@ def train_iteration(batch, model, criterion, optimizer, device):
     model.train()
     prediction = model(batch.to(device))
     loss, oce_loss, regularization_loss = criterion(prediction)
-    loss, oce_loss, regularization_loss = (
-        loss.mean(),
-        oce_loss.mean(),
-        regularization_loss.mean(),
-    )
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
