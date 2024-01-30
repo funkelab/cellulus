@@ -11,20 +11,17 @@ def evaluate(inference_config: InferenceConfig) -> None:
     dataset_meta_data = DatasetMetaData.from_dataset_config(dataset_config)
 
     f = zarr.open(inference_config.evaluation_dataset_config.container_path)
-    ds = f[inference_config.evaluation_dataset_config.secondary_dataset_name]
-
-    f_segmentation = zarr.open(
-        inference_config.evaluation_dataset_config.container_path
-    )
-    ds_segmentation = f_segmentation[
-        inference_config.evaluation_dataset_config.dataset_name
+    ds_segmentation = f[
+        inference_config.evaluation_dataset_config.secondary_dataset_name
     ]
+
+    ds_groundtruth = f[inference_config.evaluation_dataset_config.dataset_name]
 
     for bandwidth in range(inference_config.num_bandwidths):
         F1_list, SEG_list, TP_list, FP_list, FN_list = [], [], [], [], []
         SEG_dataset, n_ids_dataset = 0, 0
         for sample in tqdm(range(dataset_meta_data.num_samples)):
-            groundtruth = ds[sample, 0].astype(np.uint16)
+            groundtruth = ds_groundtruth[sample, 0].astype(np.uint16)
             prediction = ds_segmentation[sample, bandwidth].astype(np.uint16)
             IoU, SEG_image, n_GTids_image = compute_pairwise_IoU(
                 prediction, groundtruth
@@ -38,8 +35,6 @@ def evaluate(inference_config: InferenceConfig) -> None:
             FP_list.append(FP_image)
             FN_list.append(FN_image)
             print(f"{sample}:, F1={F1_image:.3f}, SEG={SEG_image/n_GTids_image:.3f}")
-        print(f"The mean F1 score is {np.mean(F1_list)}")
-        print(f"The mean SEG score is {np.mean(SEG_list)}")
 
         F1_dataset = 2 * sum(TP_list) / (2 * sum(TP_list) + sum(FP_list) + sum(FN_list))
 
@@ -52,13 +47,14 @@ def evaluate(inference_config: InferenceConfig) -> None:
             f.writelines("+++++++++++++++++++++++++++++++++\n")
             for sample in range(dataset_meta_data.num_samples):
                 f.writelines(
-                    f"{sample}, {F1_list[sample]:.05f}, {SEG_list[sample]:.05f}, {TP_list[sample]}, {FP_list[sample]}, {FN_list[sample]}\n"
+                    f"{sample},"
+                    + f" {F1_list[sample]:.05f},"
+                    + f" {SEG_list[sample]:.05f},"
+                    + f" {TP_list[sample]},"
+                    + f" {FP_list[sample]},"
+                    + f" {FN_list[sample]}\n",
                 )
             f.writelines("+++++++++++++++++++++++++++++++++\n")
-            f.writelines(f"Avg. F1 (averaged per sample) is {np.mean(F1_list):.05f} \n")
-            f.writelines(
-                f"Avg. SEG (averaged per sample) is {np.mean(SEG_list):.05f} \n"
-            )
             f.writelines(f"F1 for complete dataset is {F1_dataset:.05f} \n")
             f.writelines(
                 f"SEG for complete dataset is {SEG_dataset/n_ids_dataset:.05f} \n"
@@ -91,7 +87,7 @@ def compute_pairwise_IoU(prediction, groundtruth):
 
 
 def compute_F1(IoU_table, threshold=0.5):
-    IoU_table_thresholded = IoU_table >= threshold
+    IoU_table_thresholded = IoU_table > threshold
     FP = np.sum(np.sum(IoU_table_thresholded, axis=1) == 0)
     FN = np.sum(np.sum(IoU_table_thresholded, axis=0) == 0)
     TP = IoU_table.shape[1] - FN
