@@ -20,7 +20,7 @@ class ExperimentConfig:
 
             A unique name for the experiment.
 
-        object_size: (default = 26)
+        object_size: (default = 30.0)
 
             A rough estimate of the size of objects in the image, given in
             world units. The "patch size" of the network will be chosen based
@@ -43,7 +43,7 @@ class ExperimentConfig:
     experiment_name: str = attrs.field(
         default=datetime.today().strftime("%Y-%m-%d"), validator=instance_of(str)
     )
-    object_size: int = attrs.field(default=26, validator=instance_of(int))
+    object_size: float = attrs.field(default=30.0, validator=instance_of(float))
 
     train_config: TrainConfig = attrs.field(
         default=None, converter=to_config(TrainConfig)
