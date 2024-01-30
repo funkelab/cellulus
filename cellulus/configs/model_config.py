@@ -9,9 +9,10 @@ from .utils import to_path
 
 @attrs.define
 class ModelConfig:
-    """Model configuration.
+    """Model Configuration.
 
-    Parameters:
+    Parameters
+    ----------
 
         num_fmaps:
 
@@ -22,27 +23,27 @@ class ModelConfig:
             The factor by which to increase the number of feature maps between
             levels of the U-Net.
 
-        features_in_last_layer (optional, default = 64):
+        features_in_last_layer (default = 64):
 
             The number of feature channels in the last layer of the U-Net
 
-        downsampling_factors:
+        downsampling_factors (default = [[2,2]]):
 
             A list of downsampling factors, each given per dimension (e.g.,
             [[2,2], [3,3]] would correspond to two downsample layers, one with
             an isotropic factor of 2, and another one with 3). This parameter
             will also determine the number of levels in the U-Net.
 
-        checkpoint (optional, default ``None``):
+        checkpoint (default = None):
 
             A path to a checkpoint of the network. Needs to be set for networks
             that are used for prediction. If set during training, the
             checkpoint will be used to resume training, otherwise the network
             will be trained from scratch.
 
-        initialize (default: True)
+        initialize (default = True)
 
-            If True, initialize the model weights with Kaiming Normal
+            If True, initialize the model weights with Kaiming Normal.
 
     """
 

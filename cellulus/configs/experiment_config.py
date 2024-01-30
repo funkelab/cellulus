@@ -13,13 +13,14 @@ from .utils import to_config
 class ExperimentConfig:
     """Top-level config for an experiment (containing training and prediction).
 
-    Parameters:
+    Parameters
+    ----------
 
         experiment_name: (default = 'YYYY-MM-DD')
 
             A unique name for the experiment.
 
-        object_size: (default = 26.0)
+        object_size: (default = 26)
 
             A rough estimate of the size of objects in the image, given in
             world units. The "patch size" of the network will be chosen based
@@ -42,7 +43,7 @@ class ExperimentConfig:
     experiment_name: str = attrs.field(
         default=datetime.today().strftime("%Y-%m-%d"), validator=instance_of(str)
     )
-    object_size: float = attrs.field(default=26.0, validator=instance_of(float))
+    object_size: int = attrs.field(default=26, validator=instance_of(int))
 
     train_config: TrainConfig = attrs.field(
         default=None, converter=to_config(TrainConfig)

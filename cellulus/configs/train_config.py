@@ -11,18 +11,19 @@ from .utils import to_config
 class TrainConfig:
     """Train configuration.
 
-    Parameters:
+    Parameters
+    ----------
 
-        crop_size:
+        crop_size (default = [252, 252]):
 
             The size of the crops - specified as a list of number of pixels -
             extracted from the raw images, used during training.
 
-        batch_size:
+        batch_size (default = 8):
 
             The number of samples to use per batch.
 
-        max_iterations:
+        max_iterations (default = 100000):
 
             The maximum number of iterations to train for.
 

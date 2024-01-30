@@ -8,7 +8,8 @@ from attrs.validators import instance_of, optional
 class DatasetConfig:
     """Dataset configuration.
 
-    Parameters:
+    Parameters
+    ----------
 
         container_path:
 
@@ -16,7 +17,7 @@ class DatasetConfig:
 
         dataset_name:
 
-            The name of the dataset containing raw data in the container.
+            The name of the dataset containing the raw data in the container.
 
         secondary_dataset_name:
 
