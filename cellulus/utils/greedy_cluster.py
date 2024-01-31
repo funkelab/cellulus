@@ -80,7 +80,7 @@ class Cluster2d:
 
 
         """
-        prediction = torch.from_numpy(prediction).to(self.device)
+        prediction = torch.from_numpy(prediction).float().to(self.device)
         height, width = prediction.size(1), prediction.size(2)
         xym_s = self.xym[:, 0:height, 0:width]
         embeddings = prediction[0:2] + xym_s  # 2 x h x w
