@@ -16,6 +16,7 @@ from cellulus.configs.inference_config import InferenceConfig
 from cellulus.configs.model_config import ModelConfig
 from cellulus.infer import infer
 from cellulus.utils.misc import visualize_2d
+from IPython.utils import io
 from matplotlib.colors import ListedColormap
 
 # ## Specify config values for datasets
@@ -79,6 +80,7 @@ inference_config = InferenceConfig(
     prediction_dataset_config=asdict(prediction_dataset_config),
     segmentation_dataset_config=asdict(segmentation_dataset_config),
     post_processed_dataset_config=asdict(post_processed_dataset_config),
+    post_processing="intensity",
     device=device,
 )
 
@@ -91,9 +93,10 @@ experiment_config = ExperimentConfig(
 )
 
 # Now we are ready to start the inference!! <br>
-# (This takes around 7 minutes on a Mac Book Pro with an Apple M2 Max chip).
+# (This takes around 7 minutes on a Mac Book Pro with an Apple M2 Max chip. To see the output of the cell below, remove the first line `io.capture_output()`).
 
-infer(experiment_config)
+with io.capture_output() as captured:
+    infer(experiment_config)
 
 # ## Inspect predictions
 
@@ -123,7 +126,7 @@ visualize_2d(
     top_right=embedding[-1],
     bottom_left=embedding[0],
     bottom_right=embedding[1],
-    top_right_label="STD_DEV",
+    top_right_label="UNCERTAINTY",
     bottom_left_label="OFFSET_X",
     bottom_right_label="OFFSET_Y",
 )

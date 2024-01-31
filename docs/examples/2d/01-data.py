@@ -1,6 +1,7 @@
 # # Download Data
 
-# In this notebook, we will download data and convert it to a zarr dataset.
+# In this notebook, we will download data and convert it to a zarr dataset. <br>
+# This tutorial was written by <i>Henry Westmacott</i> and <i>Manan Lalit</i>.
 
 # For demonstration, we will use a subset of images of `Fluo-N2DL-HeLa` available on the [Cell Tracking Challenge](http://celltrackingchallenge.net/2d-datasets/) webpage.
 
