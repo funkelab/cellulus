@@ -40,7 +40,7 @@ pip install -e .
 
 ### Getting Started
 
-Try out `2D Example` available **[here](https://funkelab.github.io/cellulus)**. 
+Try out the `2D Example` available **[here](https://funkelab.github.io/cellulus)**. 
 
 ### Citation
 
