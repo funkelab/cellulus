@@ -65,7 +65,7 @@ nav:
       - 01: examples/2d/01-data.py
       - 02: examples/2d/02-train.py
       - 03: examples/2d/03-infer.py
-  - API:
+  - API Reference:
       - Configs:
           - DatasetConfig: api/dataset_config.md
           - ExperimentConfig: api/experiment_config.md
