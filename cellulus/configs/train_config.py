@@ -51,11 +51,15 @@ class TrainConfig:
 
             Neighborhood radius to extract patches from.
 
-        save_model_every (default = 1e3):
+        save_model_every (default = 1000):
 
             The model weights are saved every few iterations.
 
-        save_snapshot_every (default = 1e3):
+        save_best_model_every (default = 100):
+
+            The best loss is evaluated every few iterations.
+
+        save_snapshot_every (default = 1000):
 
             The zarr snapshot is saved every few iterations.
 
@@ -112,6 +116,7 @@ class TrainConfig:
     regularizer_weight: float = attrs.field(default=1e-5, validator=instance_of(float))
     reduce_mean: bool = attrs.field(default=True, validator=instance_of(bool))
     save_model_every: int = attrs.field(default=1_000, validator=instance_of(int))
+    save_best_model_every: int = attrs.field(default=100, validator=instance_of(int))
     save_snapshot_every: int = attrs.field(default=1_000, validator=instance_of(int))
     num_workers: int = attrs.field(default=8, validator=instance_of(int))
     elastic_deform: bool = attrs.field(default=False, validator=instance_of(bool))

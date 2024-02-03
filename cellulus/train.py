@@ -92,8 +92,9 @@ def train(experiment_config):
 
     # resume training
     start_iteration = 0
-    lowest_loss = 1e0
-
+    lowest_loss = 1.0
+    epoch_loss = 0
+    num_iterations = 0
     if model_config.checkpoint is None:
         pass
     else:
@@ -106,6 +107,7 @@ def train(experiment_config):
         logger.data = state["logger_data"]
 
     # call `train_iteration`
+
     for iteration, batch in tqdm(
         zip(
             range(start_iteration, train_config.max_iterations),
@@ -127,12 +129,29 @@ def train(experiment_config):
         logger.write()
         logger.plot()
 
+        # Check if lowest loss
+        epoch_loss += loss
+        num_iterations += 1
+        if iteration % train_config.save_best_model_every == 0:
+            is_lowest = epoch_loss / (num_iterations) < lowest_loss
+            lowest_loss = min(epoch_loss / num_iterations, lowest_loss)
+            if is_lowest:
+                state = {
+                    "iteration": iteration,
+                    "lowest_loss": lowest_loss,
+                    "model_state_dict": model.state_dict(),
+                    "optim_state_dict": optimizer.state_dict(),
+                    "logger_data": logger.data,
+                }
+                save_model(state, iteration, is_lowest)
+            epoch_loss = 0
+            num_iterations = 0
+
+        # Save model at specific intervals
         if (
             iteration % train_config.save_model_every == 0
             or iteration == train_config.max_iterations - 1
         ):
-            is_lowest = loss < lowest_loss
-            lowest_loss = min(loss, lowest_loss)
             state = {
                 "iteration": iteration,
                 "lowest_loss": lowest_loss,
@@ -140,8 +159,9 @@ def train(experiment_config):
                 "optim_state_dict": optimizer.state_dict(),
                 "logger_data": logger.data,
             }
-            save_model(state, iteration, is_lowest)
+            save_model(state, iteration)
 
+        # Save snapshots at specific intervals
         if iteration % train_config.save_snapshot_every == 0:
             save_snapshot(
                 batch,
@@ -161,12 +181,14 @@ def train_iteration(batch, model, criterion, optimizer, device):
 
 
 def save_model(state, iteration, is_lowest=False):
-    file_name = os.path.join("models", str(iteration).zfill(6) + ".pth")
-    torch.save(state, file_name)
-    print(f"Checkpoint saved at iteration {iteration}")
     if is_lowest:
         file_name = os.path.join("models", "best_loss.pth")
         torch.save(state, file_name)
+        print(f"Best model weights saved at iteration {iteration}")
+    else:
+        file_name = os.path.join("models", str(iteration).zfill(6) + ".pth")
+        torch.save(state, file_name)
+        print(f"Checkpoint saved at iteration {iteration}")
 
 
 def save_snapshot(batch, prediction, iteration):
