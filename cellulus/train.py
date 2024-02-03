@@ -27,6 +27,7 @@ def train(experiment_config):
     train_dataset = get_dataset(
         dataset_config=train_config.train_data_config,
         crop_size=tuple(train_config.crop_size),
+        elastic_deform=train_config.elastic_deform,
         control_point_spacing=train_config.control_point_spacing,
         control_point_jitter=train_config.control_point_jitter,
     )
