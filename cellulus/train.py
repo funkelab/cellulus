@@ -127,7 +127,10 @@ def train(experiment_config):
         logger.write()
         logger.plot()
 
-        if iteration % train_config.save_model_every == 0:
+        if (
+            iteration % train_config.save_model_every == 0
+            or iteration == train_config.max_iterations - 1
+        ):
             is_lowest = loss < lowest_loss
             lowest_loss = min(loss, lowest_loss)
             state = {
