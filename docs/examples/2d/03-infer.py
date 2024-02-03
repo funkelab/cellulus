@@ -71,7 +71,7 @@ model_config = ModelConfig(
 # Then, we specify inference-specific parameters such as the `device`, which indicates the actual device to run the inference on.
 # <br> The device could be set equal to `cuda:n` (where `n` is the index of the GPU, for e.g. `cuda:0`), `cpu` or `mps`.
 
-device = "mps"
+device = "cuda:0"
 
 # We initialize the `inference_config` which contains our `embeddings_dataset_config`, `segmentation_dataset_config` and `post_processed_dataset_config`.
 
@@ -93,7 +93,7 @@ experiment_config = ExperimentConfig(
 )
 
 # Now we are ready to start the inference!! <br>
-# (This takes around 7 minutes on a Mac Book Pro with an Apple M2 Max chip. To see the output of the cell below, remove the first line `io.capture_output()`).
+# (This takes around 7 minutes on a Mac Book Pro with an Apple M2 Max chip (i.e. `device = 'mps'`). To see the output of the cell below, remove the first line `io.capture_output()`).
 
 with io.capture_output() as captured:
     infer(experiment_config)
@@ -112,7 +112,7 @@ new_cmp = ListedColormap(np.load("cmap_60.npy"))
 # Change the value of `index` below to look at the raw image (left), x-offset (bottom-left), y-offset (bottom-right) and uncertainty of the embedding (top-right).
 
 # +
-index = 0
+index = 10
 
 f = zarr.open(name + ".zarr")
 ds = f["train/raw"]
@@ -135,8 +135,6 @@ visualize_2d(
 # As you can see the magnitude of the uncertainty of the embedding (top-right) is <i>low</i> for most of the foreground cells. <br> This enables extraction of the foreground, which is eventually clustered into individual instances.
 
 # +
-index = 0
-
 f = zarr.open(name + ".zarr")
 ds = f["train/raw"]
 ds2 = f["segmentation"]
@@ -145,8 +143,8 @@ ds3 = f["post_processed_segmentation"]
 visualize_2d(
     image,
     top_right=embedding[-1] < skimage.filters.threshold_otsu(embedding[-1]),
-    bottom_left=ds2[0, 0],
-    bottom_right=ds3[0, 0],
+    bottom_left=ds2[index, 0],
+    bottom_right=ds3[index, 0],
     top_right_label="THRESHOLDED F.G.",
     bottom_left_label="SEGMENTATION",
     bottom_right_label="POSTPROCESSED",
@@ -154,3 +152,4 @@ visualize_2d(
     bottom_left_cmap=new_cmp,
     bottom_right_cmap=new_cmp,
 )
+# -
