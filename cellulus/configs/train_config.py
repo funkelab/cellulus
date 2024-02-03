@@ -63,16 +63,20 @@ class TrainConfig:
 
             The number of sub-processes to use for data-loading.
 
+        elastic_deform (default = False):
+
+            If set to True, the data is elastically deformed in order to increase training samples.
+
         control_point_spacing (default = 64):
 
             The distance in pixels between control points used for elastic
-            deformation of the raw data during training.
+            deformation of the raw data during training. Only used if `elastic_deform` is set to True.
 
         control_point_jitter (default = 2.0):
 
             How much to jitter the control points for elastic deformation
             of the raw data during training, given as the standard deviation of
-            a normal distribution with zero mean.
+            a normal distribution with zero mean. Only used if `elastic_deform` is set to True.
 
         train_data_config:
 
@@ -110,7 +114,7 @@ class TrainConfig:
     save_model_every: int = attrs.field(default=1_000, validator=instance_of(int))
     save_snapshot_every: int = attrs.field(default=1_000, validator=instance_of(int))
     num_workers: int = attrs.field(default=8, validator=instance_of(int))
-
+    elastic_deform: bool = attrs.field(default=False, validator=instance_of(bool))
     control_point_spacing: int = attrs.field(default=64, validator=instance_of(int))
     control_point_jitter: float = attrs.field(default=2.0, validator=instance_of(float))
     device: str = attrs.field(default="cuda:0", validator=instance_of(str))

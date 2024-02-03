@@ -14,6 +14,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
         self,
         dataset_config: DatasetConfig,
         crop_size: Tuple[int, ...],
+        elastic_deform: bool,
         control_point_spacing: int,
         control_point_jitter: float,
     ):
@@ -39,20 +40,25 @@ class ZarrDataset(IterableDataset):  # type: ignore
                 should be equal to the input size of the model that predicts
                 the OCEs.
 
+            elastic_deform:
+
+                Whether to elastically deform data in order to augment training samples?
+
             control_point_spacing:
 
                 The distance in pixels between control points used for elastic
-                deformation of the raw data.
+                deformation of the raw data. Only used, if `elastic_deform` is set to True.
 
             control_point_jitter:
 
                 How much to jitter the control points for elastic deformation
                 of the raw data, given as the standard deviation of a normal
-                distribution with zero mean.
+                distribution with zero mean. Only used if `elastic_deform` is set to True.
         """
 
         self.dataset_config = dataset_config
         self.crop_size = crop_size
+        self.elastic_deform = elastic_deform
         self.control_point_spacing = control_point_spacing
         self.control_point_jitter = control_point_jitter
         self.__read_meta_data()
@@ -84,7 +90,9 @@ class ZarrDataset(IterableDataset):  # type: ignore
                 array_specs={self.raw: raw_spec},
             )
             + gp.RandomLocation()
-            + gp.ElasticAugment(
+        )
+        if self.elastic_deform:
+            self.pipeline += gp.ElasticAugment(
                 control_point_spacing=(self.control_point_spacing,)
                 * self.num_spatial_dims,
                 jitter_sigma=(self.control_point_jitter,) * self.num_spatial_dims,
@@ -94,7 +102,6 @@ class ZarrDataset(IterableDataset):  # type: ignore
                 spatial_dims=self.num_spatial_dims,
             )
             # + gp.SimpleAugment(mirror_only=spatial_dims, transpose_only=spatial_dims)
-        )
 
     def __yield_sample(self):
         """An infinite generator of crops."""
