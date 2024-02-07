@@ -107,13 +107,6 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
         dtype=float,
     )
 
-    ds.attrs["axis_names"] = ["s", "c"] + ["t", "z", "y", "x"][
-        -dataset_meta_data.num_spatial_dims :
-    ]
-
-    ds.attrs["resolution"] = (1,) * dataset_meta_data.num_spatial_dims
-    ds.attrs["offset"] = (0,) * dataset_meta_data.num_spatial_dims
-
     pipeline = (
         gp.ZarrSource(
             dataset_config.container_path,
@@ -135,3 +128,10 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
     # request to pipeline for ROI of whole image/volume
     with gp.build(pipeline):
         pipeline.request_batch(request)
+
+    ds.attrs["axis_names"] = ["s", "c"] + ["t", "z", "y", "x"][
+        -dataset_meta_data.num_spatial_dims :
+    ]
+
+    ds.attrs["resolution"] = (1,) * dataset_meta_data.num_spatial_dims
+    ds.attrs["offset"] = (0,) * dataset_meta_data.num_spatial_dims
