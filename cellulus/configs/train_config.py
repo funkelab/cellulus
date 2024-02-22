@@ -122,7 +122,7 @@ class TrainConfig:
     save_best_model_every: int = attrs.field(default=100, validator=instance_of(int))
     save_snapshot_every: int = attrs.field(default=1_000, validator=instance_of(int))
     num_workers: int = attrs.field(default=8, validator=instance_of(int))
-    elastic_deform: bool = attrs.field(default=False, validator=instance_of(bool))
+    elastic_deform: bool = attrs.field(default=True, validator=instance_of(bool))
     control_point_spacing: int = attrs.field(default=64, validator=instance_of(int))
     control_point_jitter: float = attrs.field(default=2.0, validator=instance_of(float))
     device: str = attrs.field(default="cuda:0", validator=instance_of(str))
