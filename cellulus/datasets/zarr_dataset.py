@@ -47,13 +47,15 @@ class ZarrDataset(IterableDataset):  # type: ignore
             control_point_spacing:
 
                 The distance in pixels between control points used for elastic
-                deformation of the raw data. Only used, if `elastic_deform` is set to True.
+                deformation of the raw data.
+                Only used, if `elastic_deform` is set to True.
 
             control_point_jitter:
 
                 How much to jitter the control points for elastic deformation
                 of the raw data, given as the standard deviation of a normal
-                distribution with zero mean. Only used if `elastic_deform` is set to True.
+                distribution with zero mean.
+                Only used if `elastic_deform` is set to True.
         """
 
         self.dataset_config = dataset_config
@@ -68,7 +70,6 @@ class ZarrDataset(IterableDataset):  # type: ignore
             f'spatial(temporal) dimensions of the "{self.dataset_config.dataset_name}" '
             f"dataset which is {self.num_spatial_dims}, but it is {crop_size}"
         )
-
         self.__setup_pipeline()
 
     def __iter__(self):
@@ -117,6 +118,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
                 )
 
                 sample = self.pipeline.request_batch(request)
+
                 yield sample[self.raw].data[0]
 
     def __read_meta_data(self):

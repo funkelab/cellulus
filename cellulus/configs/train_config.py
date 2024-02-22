@@ -67,20 +67,23 @@ class TrainConfig:
 
             The number of sub-processes to use for data-loading.
 
-        elastic_deform (default = False):
+        elastic_deform (default = True):
 
-            If set to True, the data is elastically deformed in order to increase training samples.
+            If set to True, the data is elastically deformed
+            in order to increase training samples.
 
         control_point_spacing (default = 64):
 
             The distance in pixels between control points used for elastic
-            deformation of the raw data during training. Only used if `elastic_deform` is set to True.
+            deformation of the raw data during training.
+            Only used if `elastic_deform` is set to True.
 
         control_point_jitter (default = 2.0):
 
             How much to jitter the control points for elastic deformation
             of the raw data during training, given as the standard deviation of
-            a normal distribution with zero mean. Only used if `elastic_deform` is set to True.
+            a normal distribution with zero mean.
+            Only used if `elastic_deform` is set to True.
 
         train_data_config:
 
