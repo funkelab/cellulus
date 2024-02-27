@@ -6,7 +6,11 @@ from cellulus.configs.inference_config import InferenceConfig
 from cellulus.datasets.meta_data import DatasetMetaData
 
 
-def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
+def predict(
+    model: torch.nn.Module,
+    inference_config: InferenceConfig,
+    normalization_factor: float,
+) -> None:
     # get the dataset_config data out of inference_config
     dataset_config = inference_config.dataset_config
     dataset_meta_data = DatasetMetaData.from_dataset_config(dataset_config)
@@ -113,6 +117,7 @@ def predict(model: torch.nn.Module, inference_config: InferenceConfig) -> None:
             {raw: dataset_config.dataset_name},
             {raw: gp.ArraySpec(voxel_size=voxel_size, interpolatable=True)},
         )
+        + gp.Normalize(raw, factor=normalization_factor)
         + gp.Pad(raw, context, mode="reflect")
         + predict
         + gp.ZarrWrite(
