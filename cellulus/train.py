@@ -3,7 +3,6 @@ import os
 import numpy as np
 import torch
 import zarr
-from IPython.display import clear_output
 from tqdm import tqdm
 
 from cellulus.criterions import get_loss
@@ -30,6 +29,9 @@ def train(experiment_config):
         elastic_deform=train_config.elastic_deform,
         control_point_spacing=train_config.control_point_spacing,
         control_point_jitter=train_config.control_point_jitter,
+        density=train_config.density,
+        kappa=train_config.kappa,
+        normalization_factor=experiment_config.normalization_factor,
     )
 
     # create train dataloader
@@ -69,30 +71,22 @@ def train(experiment_config):
     criterion = get_loss(
         regularizer_weight=train_config.regularizer_weight,
         temperature=train_config.temperature,
-        kappa=train_config.kappa,
         density=train_config.density,
         num_spatial_dims=train_dataset.get_num_spatial_dims(),
-        reduce_mean=train_config.reduce_mean,
         device=device,
     )
 
     # set optimizer
     optimizer = torch.optim.Adam(
-        model.parameters(),
-        lr=train_config.initial_learning_rate,
+        model.parameters(), lr=train_config.initial_learning_rate, weight_decay=0.01
     )
-
-    # set scheduler:
-
-    def lambda_(iteration):
-        return pow((1 - ((iteration) / train_config.max_iterations)), 0.9)
 
     # set logger
     logger = get_logger(keys=["loss", "oce_loss"], title="loss")
 
     # resume training
     start_iteration = 0
-    lowest_loss = 1.0
+    lowest_loss = 1e6
     epoch_loss = 0
     num_iterations = 0
     if model_config.checkpoint is None:
@@ -107,22 +101,15 @@ def train(experiment_config):
         logger.data = state["logger_data"]
 
     # call `train_iteration`
-
     for iteration, batch in tqdm(
         zip(
             range(start_iteration, train_config.max_iterations),
             train_dataloader,
         )
     ):
-        scheduler = torch.optim.lr_scheduler.LambdaLR(
-            optimizer, lr_lambda=lambda_, last_epoch=iteration - 1
-        )
-
         loss, oce_loss, prediction = train_iteration(
             batch, model=model, criterion=criterion, optimizer=optimizer, device=device
         )
-        scheduler.step()
-        clear_output(wait=True)
         print(f"===> loss: {loss:.6f}, oce loss: {oce_loss:.6f}")
         logger.add(key="loss", value=loss)
         logger.add(key="oce_loss", value=oce_loss)
@@ -171,13 +158,26 @@ def train(experiment_config):
 
 
 def train_iteration(batch, model, criterion, optimizer, device):
+    raw, anchor_coordinates, reference_coordinates = batch
+    raw, anchor_coordinates, reference_coordinates = (
+        raw.to(device),
+        anchor_coordinates.to(device),
+        reference_coordinates.to(device),
+    )
+
     model.train()
-    prediction = model(batch.to(device))
-    loss, oce_loss, regularization_loss = criterion(prediction)
+    offsets = model(raw)
+    embeddings_anchor = model.select_and_add_coordinates(offsets, anchor_coordinates)
+    embeddings_reference = model.select_and_add_coordinates(
+        offsets, reference_coordinates
+    )
+    loss, oce_loss, regularization_loss = criterion(
+        embeddings_anchor, embeddings_reference
+    )
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
-    return loss.item(), oce_loss.item(), prediction
+    return loss.item(), oce_loss.item(), offsets
 
 
 def save_model(state, iteration, is_lowest=False):
@@ -192,17 +192,18 @@ def save_model(state, iteration, is_lowest=False):
 
 
 def save_snapshot(batch, prediction, iteration):
-    num_spatial_dims = len(batch.shape) - 2
+    raw, anchor_coordinates, reference_coordinates = batch
+    num_spatial_dims = len(raw.shape) - 2
 
     axis_names = ["s", "c"] + ["t", "z", "y", "x"][-num_spatial_dims:]
     prediction_offset = tuple(
         (a - b) / 2
         for a, b in zip(
-            batch.shape[-num_spatial_dims:], prediction.shape[-num_spatial_dims:]
+            raw.shape[-num_spatial_dims:], prediction.shape[-num_spatial_dims:]
         )
     )
     f = zarr.open("snapshots.zarr", "a")
-    f[f"{iteration}/raw"] = batch.detach().cpu().numpy()
+    f[f"{iteration}/raw"] = raw.detach().cpu().numpy()
     f[f"{iteration}/raw"].attrs["axis_names"] = axis_names
     f[f"{iteration}/raw"].attrs["resolution"] = [
         1,
@@ -221,5 +222,3 @@ def save_snapshot(batch, prediction, iteration):
     f[f"{iteration}/prediction"].attrs["resolution"] = [
         1,
     ] * num_spatial_dims
-
-    print(f"Snapshot saved at iteration {iteration}")
