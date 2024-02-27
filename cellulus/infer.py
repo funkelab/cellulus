@@ -17,6 +17,7 @@ def infer(experiment_config):
     print(experiment_config)
 
     inference_config = experiment_config.inference_config
+    normalization_factor = experiment_config.normalization_factor
 
     model_config = experiment_config.model_config
 
@@ -25,7 +26,7 @@ def infer(experiment_config):
     )
 
     if inference_config.bandwidth is None:
-        inference_config.bandwidth = int(0.5 * experiment_config.object_size)
+        inference_config.bandwidth = int(0.25 * experiment_config.object_size)
 
     if inference_config.min_size is None:
         if dataset_meta_data.num_spatial_dims == 2:
@@ -67,13 +68,13 @@ def infer(experiment_config):
 
     # get predicted embeddings...
     if inference_config.prediction_dataset_config is not None:
-        predict(model, inference_config)
+        predict(model, inference_config, normalization_factor)
     # ...turn them into a segmentation...
     if inference_config.segmentation_dataset_config is not None:
         segment(inference_config)
     # ...and post-process the segmentation
     if inference_config.post_processed_dataset_config is not None:
         post_process(inference_config)
-    # ...and evaluate if groundtruth exists
+    # ...and evaluate if ground-truth exists
     if inference_config.evaluation_dataset_config is not None:
         evaluate(inference_config)
