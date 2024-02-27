@@ -11,6 +11,9 @@ def get_dataset(
     elastic_deform: bool,
     control_point_spacing: int,
     control_point_jitter: float,
+    density: float,
+    kappa: int,
+    normalization_factor: float,
 ) -> ZarrDataset:
     return ZarrDataset(
         dataset_config=dataset_config,
@@ -18,4 +21,7 @@ def get_dataset(
         elastic_deform=elastic_deform,
         control_point_spacing=control_point_spacing,
         control_point_jitter=control_point_jitter,
+        density=density,
+        kappa=kappa,
+        normalization_factor=normalization_factor,
     )

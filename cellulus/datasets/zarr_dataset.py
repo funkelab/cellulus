@@ -2,6 +2,7 @@ import math
 from typing import Tuple
 
 import gunpowder as gp
+import numpy as np
 from torch.utils.data import IterableDataset
 
 from cellulus.configs import DatasetConfig
@@ -17,6 +18,9 @@ class ZarrDataset(IterableDataset):  # type: ignore
         elastic_deform: bool,
         control_point_spacing: int,
         control_point_jitter: float,
+        density: float,
+        kappa: float,
+        normalization_factor: float,
     ):
         """A dataset that serves random samples from a zarr container.
 
@@ -56,6 +60,20 @@ class ZarrDataset(IterableDataset):  # type: ignore
                 of the raw data, given as the standard deviation of a normal
                 distribution with zero mean.
                 Only used if `elastic_deform` is set to True.
+
+            density:
+
+                Determines the fraction of patches to sample per crop, during training.
+
+            kappa:
+
+                Neighborhood radius to extract patches from.
+
+            normalization_factor:
+
+                The factor to use, for dividing the raw image pixel intensities.
+                If 'None', a factor is chosen based on the dtype of the array .
+                (e.g., np.uint8 would result in a factor of 1.0/255).
         """
 
         self.dataset_config = dataset_config
@@ -63,12 +81,20 @@ class ZarrDataset(IterableDataset):  # type: ignore
         self.elastic_deform = elastic_deform
         self.control_point_spacing = control_point_spacing
         self.control_point_jitter = control_point_jitter
+        self.normalization_factor = normalization_factor
         self.__read_meta_data()
 
         assert len(crop_size) == self.num_spatial_dims, (
             f'"crop_size" must have the same dimension as the '
             f'spatial(temporal) dimensions of the "{self.dataset_config.dataset_name}" '
             f"dataset which is {self.num_spatial_dims}, but it is {crop_size}"
+        )
+        self.density = density
+        self.kappa = kappa
+        self.output_shape = tuple(int(_ - 16) for _ in self.crop_size)
+        self.normalization_factor = normalization_factor
+        self.unbiased_shape = tuple(
+            int(_ - (2 * self.kappa)) for _ in self.output_shape
         )
         self.__setup_pipeline()
 
@@ -91,7 +117,9 @@ class ZarrDataset(IterableDataset):  # type: ignore
                 array_specs={self.raw: raw_spec},
             )
             + gp.RandomLocation()
+            + gp.Normalize(self.raw, factor=self.normalization_factor)
         )
+
         if self.elastic_deform:
             self.pipeline += gp.ElasticAugment(
                 control_point_spacing=(self.control_point_spacing,)
@@ -118,8 +146,9 @@ class ZarrDataset(IterableDataset):  # type: ignore
                 )
 
                 sample = self.pipeline.request_batch(request)
-
-                yield sample[self.raw].data[0]
+                sample_data = sample[self.raw].data[0]
+                anchor_samples, reference_samples = self.sample_coordinates()
+                yield sample_data, anchor_samples, reference_samples
 
     def __read_meta_data(self):
         meta_data = DatasetMetaData.from_dataset_config(self.dataset_config)
@@ -137,3 +166,79 @@ class ZarrDataset(IterableDataset):  # type: ignore
 
     def get_num_spatial_dims(self):
         return self.num_spatial_dims
+
+    def sample_offsets_within_radius(self, radius, number_offsets):
+        if self.num_spatial_dims == 2:
+            offsets_x = np.random.randint(-radius, radius + 1, size=2 * number_offsets)
+            offsets_y = np.random.randint(-radius, radius + 1, size=2 * number_offsets)
+            offsets_coordinates = np.stack((offsets_x, offsets_y), axis=1)
+        elif self.num_spatial_dims == 3:
+            offsets_x = np.random.randint(-radius, radius + 1, size=3 * number_offsets)
+            offsets_y = np.random.randint(-radius, radius + 1, size=3 * number_offsets)
+            offsets_z = np.random.randint(-radius, radius + 1, size=3 * number_offsets)
+            offsets_coordinates = np.stack((offsets_x, offsets_y, offsets_z), axis=1)
+
+        in_circle = (offsets_coordinates**2).sum(axis=1) < radius**2
+        offsets_coordinates = offsets_coordinates[in_circle]
+        not_zero = np.absolute(offsets_coordinates).sum(axis=1) > 0
+        offsets_coordinates = offsets_coordinates[not_zero]
+
+        if len(offsets_coordinates) < number_offsets:
+            return self.sample_offsets_within_radius(radius, number_offsets)
+
+        return offsets_coordinates[:number_offsets]
+
+    def sample_coordinates(self):
+        num_anchors = self.get_num_anchors()
+        num_references = self.get_num_references()
+
+        if self.num_spatial_dims == 2:
+            anchor_coordinates_x = np.random.randint(
+                self.kappa,
+                self.output_shape[0] - self.kappa + 1,
+                size=num_anchors,
+            )
+            anchor_coordinates_y = np.random.randint(
+                self.kappa,
+                self.output_shape[1] - self.kappa + 1,
+                size=num_anchors,
+            )
+            anchor_coordinates = np.stack(
+                (anchor_coordinates_x, anchor_coordinates_y), axis=1
+            )
+        elif self.num_spatial_dims == 3:
+            anchor_coordinates_x = np.random.randint(
+                self.kappa,
+                self.output_shape[0] - self.kappa + 1,
+                size=num_anchors,
+            )
+            anchor_coordinates_y = np.random.randint(
+                self.kappa,
+                self.output_shape[1] - self.kappa + 1,
+                size=num_anchors,
+            )
+            anchor_coordinates_z = np.random.randint(
+                self.kappa,
+                self.output_shape[2] - self.kappa + 1,
+                size=num_anchors,
+            )
+            anchor_coordinates = np.stack(
+                (anchor_coordinates_x, anchor_coordinates_y, anchor_coordinates_z),
+                axis=1,
+            )
+        anchor_samples = np.repeat(anchor_coordinates, num_references, axis=0)
+        offset_in_pos_radius = self.sample_offsets_within_radius(
+            self.kappa, len(anchor_samples)
+        )
+        reference_samples = anchor_samples + offset_in_pos_radius
+
+        return anchor_samples, reference_samples
+
+    def get_num_anchors(self):
+        return int(self.density * self.unbiased_shape[0] * self.unbiased_shape[1])
+
+    def get_num_references(self):
+        return int(self.density * self.kappa**2 * np.pi)
+
+    def get_num_samples(self):
+        return self.get_num_anchors() * self.get_num_references()
