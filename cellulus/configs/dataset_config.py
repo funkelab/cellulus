@@ -21,8 +21,16 @@ class DatasetConfig:
 
         secondary_dataset_name:
 
-            The name of the dataset containing the data which needs processing.
+            The name of the secondary dataset containing the data which needs
+            processing.
 
+        'dataset_name' and 'secondary_dataset_name' can be thought of as the
+        output and input to a certain task, respectively.
+        For example, during segmentation, 'dataset_name' would refer to the output
+        segmentation masks and 'secondary_dataset_name' would refer to the input
+        predicted embeddings.
+        During evaluation, 'dataset_name' would refer to the ground truth masks
+        and 'secondary_dataset_name' would refer to the input segmentation masks.
 
     """
 
