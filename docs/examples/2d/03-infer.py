@@ -82,7 +82,7 @@ model_config = ModelConfig(
 # <br> The device could be set equal to `cuda:n` (where `n` is the index of
 # the GPU, for e.g. `cuda:0`), `cpu` or `mps`.
 
-device = "mps"  # "cuda:0", 'mps', 'cpu'
+device = "cuda:0"  # "cuda:0", 'mps', 'cpu'
 
 # We initialize the `inference_config` which contains our
 # `embeddings_dataset_config`, `segmentation_dataset_config` and
@@ -91,7 +91,6 @@ device = "mps"  # "cuda:0", 'mps', 'cpu'
 # would like the cell membrane to be segmented or the nucleus.
 
 post_processing = "nucleus"
-bandwidth = 15.0
 
 inference_config = InferenceConfig(
     dataset_config=asdict(dataset_config),
@@ -100,7 +99,6 @@ inference_config = InferenceConfig(
     post_processed_dataset_config=asdict(post_processed_dataset_config),
     post_processing=post_processing,
     device=device,
-    bandwidth=bandwidth,
 )
 
 # ## Initialize `experiment_config`
@@ -180,4 +178,3 @@ visualize_2d(
     bottom_left_cmap=new_cmp,
     bottom_right_cmap=new_cmp,
 )
-# -
