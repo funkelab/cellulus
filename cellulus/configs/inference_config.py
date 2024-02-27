@@ -28,7 +28,7 @@ class InferenceConfig:
 
         post_processed_dataset_config:
 
-            Configuration object produced by postprocess.py.
+            Configuration object produced by post_process.py.
 
         evaluation_dataset_config:
 
@@ -49,7 +49,7 @@ class InferenceConfig:
 
         bandwidth (default = None):
 
-            Band-width used to perform mean-shift clustering on the predicted
+            Bandwidth used to perform mean-shift clustering on the predicted
             embeddings.
 
         threshold (default = None):
@@ -75,6 +75,14 @@ class InferenceConfig:
         num_bandwidths (default = 1):
 
             Number of bandwidths to obtain segmentations for.
+
+        reduction_probability (default = 0.1):
+
+            If set to less than 1.0, this fraction of available pixels are used
+            to determine the clusters (fitting stage) while performing
+            meanshift clustering.
+            Once clusters are available, they are used to predict the cluster assignment
+            of the remaining pixels (prediction stage).
 
         min_size (default = None):
 
@@ -132,15 +140,13 @@ class InferenceConfig:
         default="meanshift", validator=in_(["meanshift", "greedy"])
     )
     bandwidth = attrs.field(
-        default=None, validator=attrs.validators.optional(instance_of(int))
+        default=None, validator=attrs.validators.optional(instance_of(float))
     )
     num_bandwidths = attrs.field(default=1, validator=instance_of(int))
     reduction_probability = attrs.field(default=0.1, validator=instance_of(float))
     min_size = attrs.field(
         default=None, validator=attrs.validators.optional(instance_of(int))
     )
-    post_processing = attrs.field(
-        default="morphological", validator=in_(["morphological", "intensity"])
-    )
+    post_processing = attrs.field(default="cell", validator=in_(["cell", "nucleus"]))
     grow_distance = attrs.field(default=3, validator=instance_of(int))
     shrink_distance = attrs.field(default=6, validator=instance_of(int))
