@@ -117,7 +117,6 @@ class TrainConfig:
     kappa: float = attrs.field(default=10.0, validator=instance_of(float))
     temperature: float = attrs.field(default=10.0, validator=instance_of(float))
     regularizer_weight: float = attrs.field(default=1e-5, validator=instance_of(float))
-    reduce_mean: bool = attrs.field(default=True, validator=instance_of(bool))
     save_model_every: int = attrs.field(default=1_000, validator=instance_of(int))
     save_best_model_every: int = attrs.field(default=100, validator=instance_of(int))
     save_snapshot_every: int = attrs.field(default=1_000, validator=instance_of(int))
