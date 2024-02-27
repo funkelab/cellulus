@@ -40,7 +40,7 @@ def post_process(inference_config: InferenceConfig) -> None:
     ds_postprocessed.attrs["offset"] = (0,) * dataset_meta_data.num_spatial_dims
 
     # remove halo
-    if inference_config.post_processing == "morphological":
+    if inference_config.post_processing == "cell":
         for sample in tqdm(range(dataset_meta_data.num_samples)):
             # first instance label masks are expanded by `grow_distance`
             # next, expanded  instance label masks are shrunk by `shrink_distance`
@@ -51,7 +51,7 @@ def post_process(inference_config: InferenceConfig) -> None:
                 distance_background = dtedt(expanded_mask)
                 segmentation[distance_background < inference_config.shrink_distance] = 0
                 ds_postprocessed[sample, bandwidth_factor, ...] = segmentation
-    elif inference_config.post_processing == "intensity":
+    elif inference_config.post_processing == "nucleus":
         ds_raw = f[inference_config.dataset_config.dataset_name]
         for sample in tqdm(range(dataset_meta_data.num_samples)):
             for bandwidth_factor in range(inference_config.num_bandwidths):
