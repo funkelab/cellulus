@@ -315,7 +315,7 @@
   
     
   
-  API
+  API Reference
 
         </a>
       </li>
@@ -635,7 +635,7 @@
             
   
   <span class="md-ellipsis">
-    API
+    API Reference
   </span>
   
 
@@ -645,7 +645,7 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
-            API
+            API Reference
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -1341,7 +1341,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </style>
 <!-- End of mermaid configuration --><div class="jupyter-wrapper">
 <div class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=66615c5a">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f0c8625f">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1352,29 +1352,32 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=5e0243fb">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f0f2de9b">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>In this notebook, we will download data and convert it to a zarr dataset.</p>
+<p>In this notebook, we will download data and convert it to a zarr dataset. <br/>
+This tutorial was written by <i>Henry Westmacott</i> and <i>Manan Lalit</i>.</p>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d3399282">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=8f626494">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>For demonstration, we will use a subset of images of <code>Fluo-N2DL-HeLa</code> available on the <a href="http://celltrackingchallenge.net/2d-datasets/">Cell Tracking Challenge</a> webpage.</p>
+<p>For demonstration, we will use a subset of images of <code>Fluo-N2DL-HeLa</code> available
+on the <a href="http://celltrackingchallenge.net/2d-datasets/">Cell Tracking Challenge</a>
+webpage.</p>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=cc8019ad">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=212d94da">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1385,7 +1388,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=d8466917">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=1f67f61a">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1412,7 +1415,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=5465cd83">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=0090e9e0">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1449,7 +1452,7 @@ from tqdm import tqdm</div>
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=012a86d5">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=d5a90934">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1495,14 +1498,7 @@ extract_data(
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Created new directory ./data
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Downloaded and unzipped data to the location ./data
+<pre>Directory already exists at the location ./data/2d-data-demo
 </pre>
 </div>
 </div>
@@ -1510,18 +1506,18 @@ extract_data(
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=fc0abfa0">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2ab877e9">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Next, these raw images are intensity-normalized and appended in a list. Here, we use the percentile normalization technique.</p>
+<p>Next,  a channel dimension is added to these images and they are appended in a list.</p>
 </div>
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=da3e75d1">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=360e9fa2">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1547,10 +1543,7 @@ extract_data(
 
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">image_filenames</span><span class="p">))):</span>
     <span class="n">im</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span>
-        <span class="n">tifffile</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">image_filenames</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
-        <span class="n">pmin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">pmax</span><span class="o">=</span><span class="mf">99.8</span><span class="p">,</span>
-        <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="n">tifffile</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">image_filenames</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">99.8</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="n">image_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">im</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span>
 
@@ -1564,10 +1557,7 @@ image_list = []
 
 for i in tqdm(range(len(image_filenames))):
     im = normalize(
-        tifffile.imread(image_filenames[i]).astype(np.float32),
-        pmin=1,
-        pmax=99.8,
-        axis=(0, 1),
+        tifffile.imread(image_filenames[i]).astype(np.float32), 1, 99.8, axis=(0, 1)
     )
     image_list.append(im[np.newaxis, ...])
 
@@ -1596,13 +1586,13 @@ image_list = np.asarray(image_list)</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre> 55%|████████████████████████████████████████████████████████████████████████████████████▌                                                                      | 6/11 [00:00&lt;00:00, 55.64it/s]</pre>
+<pre> 45%|██████████████████████████████████████████████████████████████████████▍                                                                                    | 5/11 [00:00&lt;00:00, 43.43it/s]</pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 11/11 [00:00&lt;00:00, 58.42it/s]</pre>
+<pre>100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 11/11 [00:00&lt;00:00, 52.05it/s]</pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
@@ -1616,7 +1606,7 @@ image_list = np.asarray(image_list)</div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=81b17d3f">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=675a3906">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1627,7 +1617,7 @@ image_list = np.asarray(image_list)</div>
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=4bc6419d">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=562a931e">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>

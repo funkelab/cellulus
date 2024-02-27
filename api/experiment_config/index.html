@@ -317,7 +317,7 @@
   
     
   
-  API
+  API Reference
 
         </a>
       </li>
@@ -627,7 +627,7 @@
             
   
   <span class="md-ellipsis">
-    API
+    API Reference
   </span>
   
 
@@ -637,7 +637,7 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
-            API
+            API Reference
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -777,6 +777,21 @@
       ExperimentConfig
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="ExperimentConfig">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cellulus.configs.experiment_config.ExperimentConfig--parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -942,6 +957,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="ExperimentConfig">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cellulus.configs.experiment_config.ExperimentConfig--parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -977,20 +1007,26 @@
 
   
       <p>Top-level config for an experiment (containing training and prediction).</p>
-<p>Parameters:</p>
+<h3 id="cellulus.configs.experiment_config.ExperimentConfig--parameters">Parameters</h3>
 <pre><code>experiment_name: (default = 'YYYY-MM-DD')
 
     A unique name for the experiment.
 
-object_size: (default = 26.0)
+object_size: (default = 30)
 
     A rough estimate of the size of objects in the image, given in
     world units. The "patch size" of the network will be chosen based
     on this estimate.
 
+normalization_factor: (default = None)
+
+    The factor to use, for dividing the raw image pixel intensities.
+    If 'None', a factor is chosen based on the dtype of the array .
+    (e.g., np.uint8 would result in a factor of 1.0/255).
+
 model_config:
 
-    The model configuration.
+    Configuration object for the model.
 
 train_config:
 
@@ -1043,25 +1079,42 @@ inference_config:
 <span class="normal">49</span>
 <span class="normal">50</span>
 <span class="normal">51</span>
-<span class="normal">52</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@attrs</span><span class="o">.</span><span class="n">define</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@attrs</span><span class="o">.</span><span class="n">define</span>
 <span class="k">class</span> <span class="nc">ExperimentConfig</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Top-level config for an experiment (containing training and prediction).</span>
 
-<span class="sd">    Parameters:</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 
 <span class="sd">        experiment_name: (default = &#39;YYYY-MM-DD&#39;)</span>
 
 <span class="sd">            A unique name for the experiment.</span>
 
-<span class="sd">        object_size: (default = 26.0)</span>
+<span class="sd">        object_size: (default = 30)</span>
 
 <span class="sd">            A rough estimate of the size of objects in the image, given in</span>
 <span class="sd">            world units. The &quot;patch size&quot; of the network will be chosen based</span>
 <span class="sd">            on this estimate.</span>
 
+<span class="sd">        normalization_factor: (default = None)</span>
+
+<span class="sd">            The factor to use, for dividing the raw image pixel intensities.</span>
+<span class="sd">            If &#39;None&#39;, a factor is chosen based on the dtype of the array .</span>
+<span class="sd">            (e.g., np.uint8 would result in a factor of 1.0/255).</span>
+
 <span class="sd">        model_config:</span>
 
-<span class="sd">            The model configuration.</span>
+<span class="sd">            Configuration object for the model.</span>
 
 <span class="sd">        train_config:</span>
 
@@ -1076,7 +1129,10 @@ inference_config:
     <span class="n">experiment_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
         <span class="n">default</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">),</span> <span class="n">validator</span><span class="o">=</span><span class="n">instance_of</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
     <span class="p">)</span>
-    <span class="n">object_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">26.0</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">instance_of</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span>
+    <span class="n">normalization_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">attrs</span><span class="o">.</span><span class="n">validators</span><span class="o">.</span><span class="n">optional</span><span class="p">(</span><span class="n">instance_of</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="n">object_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">instance_of</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>
 
     <span class="n">train_config</span><span class="p">:</span> <span class="n">TrainConfig</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
         <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">converter</span><span class="o">=</span><span class="n">to_config</span><span class="p">(</span><span class="n">TrainConfig</span><span class="p">)</span>

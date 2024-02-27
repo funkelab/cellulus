@@ -317,7 +317,7 @@
   
     
   
-  API
+  API Reference
 
         </a>
       </li>
@@ -627,7 +627,7 @@
             
   
   <span class="md-ellipsis">
-    API
+    API Reference
   </span>
   
 
@@ -637,7 +637,7 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
-            API
+            API Reference
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -756,6 +756,21 @@
       DatasetConfig
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="DatasetConfig">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cellulus.configs.dataset_config.DatasetConfig--parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -942,6 +957,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="DatasetConfig">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cellulus.configs.dataset_config.DatasetConfig--parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -977,18 +1007,27 @@
 
   
       <p>Dataset configuration.</p>
-<p>Parameters:</p>
+<h3 id="cellulus.configs.dataset_config.DatasetConfig--parameters">Parameters</h3>
 <pre><code>container_path:
 
     A path to the zarr/N5 container.
 
 dataset_name:
 
-    The name of the dataset containing raw data in the container.
+    The name of the dataset containing the raw data in the container.
 
 secondary_dataset_name:
 
-    The name of the dataset containing the data which needs processing.
+    The name of the secondary dataset containing the data which needs
+    processing.
+
+'dataset_name' and 'secondary_dataset_name' can be thought of as the
+output and input to a certain task, respectively.
+For example, during segmentation, 'dataset_name' would refer to the output
+segmentation masks and 'secondary_dataset_name' would refer to the input
+predicted embeddings.
+During evaluation, 'dataset_name' would refer to the ground truth masks
+and 'secondary_dataset_name' would refer to the input segmentation masks.
 </code></pre>
 
             <details class="quote">
@@ -1018,11 +1057,21 @@ secondary_dataset_name:
 <span class="normal">29</span>
 <span class="normal">30</span>
 <span class="normal">31</span>
-<span class="normal">32</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@attrs</span><span class="o">.</span><span class="n">define</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@attrs</span><span class="o">.</span><span class="n">define</span>
 <span class="k">class</span> <span class="nc">DatasetConfig</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Dataset configuration.</span>
 
-<span class="sd">    Parameters:</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 
 <span class="sd">        container_path:</span>
 
@@ -1030,12 +1079,20 @@ secondary_dataset_name:
 
 <span class="sd">        dataset_name:</span>
 
-<span class="sd">            The name of the dataset containing raw data in the container.</span>
+<span class="sd">            The name of the dataset containing the raw data in the container.</span>
 
 <span class="sd">        secondary_dataset_name:</span>
 
-<span class="sd">            The name of the dataset containing the data which needs processing.</span>
+<span class="sd">            The name of the secondary dataset containing the data which needs</span>
+<span class="sd">            processing.</span>
 
+<span class="sd">        &#39;dataset_name&#39; and &#39;secondary_dataset_name&#39; can be thought of as the</span>
+<span class="sd">        output and input to a certain task, respectively.</span>
+<span class="sd">        For example, during segmentation, &#39;dataset_name&#39; would refer to the output</span>
+<span class="sd">        segmentation masks and &#39;secondary_dataset_name&#39; would refer to the input</span>
+<span class="sd">        predicted embeddings.</span>
+<span class="sd">        During evaluation, &#39;dataset_name&#39; would refer to the ground truth masks</span>
+<span class="sd">        and &#39;secondary_dataset_name&#39; would refer to the input segmentation masks.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 

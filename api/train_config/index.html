@@ -317,7 +317,7 @@
   
     
   
-  API
+  API Reference
 
         </a>
       </li>
@@ -627,7 +627,7 @@
             
   
   <span class="md-ellipsis">
-    API
+    API Reference
   </span>
   
 
@@ -637,7 +637,7 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
-            API
+            API Reference
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -841,6 +841,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="TrainConfig">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cellulus.configs.train_config.TrainConfig--parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -942,6 +957,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="TrainConfig">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cellulus.configs.train_config.TrainConfig--parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -977,17 +1007,17 @@
 
   
       <p>Train configuration.</p>
-<p>Parameters:</p>
-<pre><code>crop_size:
+<h3 id="cellulus.configs.train_config.TrainConfig--parameters">Parameters</h3>
+<pre><code>crop_size (default = [252, 252]):
 
     The size of the crops - specified as a list of number of pixels -
     extracted from the raw images, used during training.
 
-batch_size:
+batch_size (default = 8):
 
     The number of samples to use per batch.
 
-max_iterations:
+max_iterations (default = 100000):
 
     The maximum number of iterations to train for.
 
@@ -1015,11 +1045,15 @@ kappa (default = 10.0):
 
     Neighborhood radius to extract patches from.
 
-save_model_every (default = 1e3):
+save_model_every (default = 1000):
 
     The model weights are saved every few iterations.
 
-save_snapshot_every (default = 1e3):
+save_best_model_every (default = 100):
+
+    The best loss is evaluated every few iterations.
+
+save_snapshot_every (default = 1000):
 
     The zarr snapshot is saved every few iterations.
 
@@ -1027,16 +1061,23 @@ num_workers (default = 8):
 
     The number of sub-processes to use for data-loading.
 
+elastic_deform (default = True):
+
+    If set to True, the data is elastically deformed
+    in order to increase training samples.
+
 control_point_spacing (default = 64):
 
     The distance in pixels between control points used for elastic
     deformation of the raw data during training.
+    Only used if `elastic_deform` is set to True.
 
 control_point_jitter (default = 2.0):
 
     How much to jitter the control points for elastic deformation
     of the raw data during training, given as the standard deviation of
     a normal distribution with zero mean.
+    Only used if `elastic_deform` is set to True.
 
 train_data_config:
 
@@ -1159,22 +1200,35 @@ device (default = 'cuda:0'):
 <span class="normal">112</span>
 <span class="normal">113</span>
 <span class="normal">114</span>
-<span class="normal">115</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@attrs</span><span class="o">.</span><span class="n">define</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@attrs</span><span class="o">.</span><span class="n">define</span>
 <span class="k">class</span> <span class="nc">TrainConfig</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Train configuration.</span>
 
-<span class="sd">    Parameters:</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 
-<span class="sd">        crop_size:</span>
+<span class="sd">        crop_size (default = [252, 252]):</span>
 
 <span class="sd">            The size of the crops - specified as a list of number of pixels -</span>
 <span class="sd">            extracted from the raw images, used during training.</span>
 
-<span class="sd">        batch_size:</span>
+<span class="sd">        batch_size (default = 8):</span>
 
 <span class="sd">            The number of samples to use per batch.</span>
 
-<span class="sd">        max_iterations:</span>
+<span class="sd">        max_iterations (default = 100000):</span>
 
 <span class="sd">            The maximum number of iterations to train for.</span>
 
@@ -1202,11 +1256,15 @@ device (default = 'cuda:0'):
 
 <span class="sd">            Neighborhood radius to extract patches from.</span>
 
-<span class="sd">        save_model_every (default = 1e3):</span>
+<span class="sd">        save_model_every (default = 1000):</span>
 
 <span class="sd">            The model weights are saved every few iterations.</span>
 
-<span class="sd">        save_snapshot_every (default = 1e3):</span>
+<span class="sd">        save_best_model_every (default = 100):</span>
+
+<span class="sd">            The best loss is evaluated every few iterations.</span>
+
+<span class="sd">        save_snapshot_every (default = 1000):</span>
 
 <span class="sd">            The zarr snapshot is saved every few iterations.</span>
 
@@ -1214,16 +1272,23 @@ device (default = 'cuda:0'):
 
 <span class="sd">            The number of sub-processes to use for data-loading.</span>
 
+<span class="sd">        elastic_deform (default = True):</span>
+
+<span class="sd">            If set to True, the data is elastically deformed</span>
+<span class="sd">            in order to increase training samples.</span>
+
 <span class="sd">        control_point_spacing (default = 64):</span>
 
 <span class="sd">            The distance in pixels between control points used for elastic</span>
 <span class="sd">            deformation of the raw data during training.</span>
+<span class="sd">            Only used if `elastic_deform` is set to True.</span>
 
 <span class="sd">        control_point_jitter (default = 2.0):</span>
 
 <span class="sd">            How much to jitter the control points for elastic deformation</span>
 <span class="sd">            of the raw data during training, given as the standard deviation of</span>
 <span class="sd">            a normal distribution with zero mean.</span>
+<span class="sd">            Only used if `elastic_deform` is set to True.</span>
 
 <span class="sd">        train_data_config:</span>
 
@@ -1257,11 +1322,11 @@ device (default = 'cuda:0'):
     <span class="n">kappa</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">instance_of</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span>
     <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">instance_of</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span>
     <span class="n">regularizer_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">instance_of</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span>
-    <span class="n">reduce_mean</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">instance_of</span><span class="p">(</span><span class="nb">bool</span><span class="p">))</span>
     <span class="n">save_model_every</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1_000</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">instance_of</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>
+    <span class="n">save_best_model_every</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">instance_of</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>
     <span class="n">save_snapshot_every</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1_000</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">instance_of</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>
     <span class="n">num_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">instance_of</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>
-
+    <span class="n">elastic_deform</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">instance_of</span><span class="p">(</span><span class="nb">bool</span><span class="p">))</span>
     <span class="n">control_point_spacing</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">instance_of</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>
     <span class="n">control_point_jitter</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">instance_of</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span>
     <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s2">&quot;cuda:0&quot;</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">instance_of</span><span class="p">(</span><span class="nb">str</span><span class="p">))</span>

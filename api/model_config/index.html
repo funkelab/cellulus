@@ -317,7 +317,7 @@
   
     
   
-  API
+  API Reference
 
         </a>
       </li>
@@ -627,7 +627,7 @@
             
   
   <span class="md-ellipsis">
-    API
+    API Reference
   </span>
   
 
@@ -637,7 +637,7 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
-            API
+            API Reference
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -820,6 +820,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="ModelConfig">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cellulus.configs.model_config.ModelConfig--parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -942,6 +957,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="ModelConfig">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cellulus.configs.model_config.ModelConfig--parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -976,8 +1006,8 @@
   <div class="doc doc-contents first">
 
   
-      <p>Model configuration.</p>
-<p>Parameters:</p>
+      <p>Model Configuration.</p>
+<h3 id="cellulus.configs.model_config.ModelConfig--parameters">Parameters</h3>
 <pre><code>num_fmaps:
 
     The number of feature maps in the first level of the U-Net.
@@ -987,27 +1017,27 @@ fmap_inc_factor:
     The factor by which to increase the number of feature maps between
     levels of the U-Net.
 
-features_in_last_layer (optional, default = 64):
+features_in_last_layer (default = 64):
 
     The number of feature channels in the last layer of the U-Net
 
-downsampling_factors:
+downsampling_factors (default = [[2,2]]):
 
     A list of downsampling factors, each given per dimension (e.g.,
     [[2,2], [3,3]] would correspond to two downsample layers, one with
     an isotropic factor of 2, and another one with 3). This parameter
     will also determine the number of levels in the U-Net.
 
-checkpoint (optional, default ``None``):
+checkpoint (default = None):
 
     A path to a checkpoint of the network. Needs to be set for networks
     that are used for prediction. If set during training, the
     checkpoint will be used to resume training, otherwise the network
     will be trained from scratch.
 
-initialize (default: True)
+initialize (default = True)
 
-    If True, initialize the model weights with Kaiming Normal
+    If True, initialize the model weights with Kaiming Normal.
 </code></pre>
 
             <details class="quote">
@@ -1060,11 +1090,13 @@ initialize (default: True)
 <span class="normal">55</span>
 <span class="normal">56</span>
 <span class="normal">57</span>
-<span class="normal">58</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@attrs</span><span class="o">.</span><span class="n">define</span>
+<span class="normal">58</span>
+<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@attrs</span><span class="o">.</span><span class="n">define</span>
 <span class="k">class</span> <span class="nc">ModelConfig</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Model configuration.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Model Configuration.</span>
 
-<span class="sd">    Parameters:</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 
 <span class="sd">        num_fmaps:</span>
 
@@ -1075,27 +1107,27 @@ initialize (default: True)
 <span class="sd">            The factor by which to increase the number of feature maps between</span>
 <span class="sd">            levels of the U-Net.</span>
 
-<span class="sd">        features_in_last_layer (optional, default = 64):</span>
+<span class="sd">        features_in_last_layer (default = 64):</span>
 
 <span class="sd">            The number of feature channels in the last layer of the U-Net</span>
 
-<span class="sd">        downsampling_factors:</span>
+<span class="sd">        downsampling_factors (default = [[2,2]]):</span>
 
 <span class="sd">            A list of downsampling factors, each given per dimension (e.g.,</span>
 <span class="sd">            [[2,2], [3,3]] would correspond to two downsample layers, one with</span>
 <span class="sd">            an isotropic factor of 2, and another one with 3). This parameter</span>
 <span class="sd">            will also determine the number of levels in the U-Net.</span>
 
-<span class="sd">        checkpoint (optional, default ``None``):</span>
+<span class="sd">        checkpoint (default = None):</span>
 
 <span class="sd">            A path to a checkpoint of the network. Needs to be set for networks</span>
 <span class="sd">            that are used for prediction. If set during training, the</span>
 <span class="sd">            checkpoint will be used to resume training, otherwise the network</span>
 <span class="sd">            will be trained from scratch.</span>
 
-<span class="sd">        initialize (default: True)</span>
+<span class="sd">        initialize (default = True)</span>
 
-<span class="sd">            If True, initialize the model weights with Kaiming Normal</span>
+<span class="sd">            If True, initialize the model weights with Kaiming Normal.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
