@@ -62,12 +62,6 @@ class UNetModel(nn.Module):  # type: ignore
                 nn.Conv3d(self.features_in_last_layer, out_channels, 1),
             )
 
-    def set_infer(self, p_salt_pepper, num_infer_iterations, device):
-        self.mode = "infer"
-        self.p_salt_pepper = p_salt_pepper
-        self.num_infer_iterations = num_infer_iterations
-        self.device: torch.device = device
-
     def head_forward(self, backbone_output):
         out_head = self.head(backbone_output)
         return out_head
@@ -86,12 +80,12 @@ class UNetModel(nn.Module):  # type: ignore
                         noisy_input = raw_sample.detach().clone()
                         rnd = torch.rand(*noisy_input.shape).to(self.device)
                         noisy_input[rnd <= self.p_salt_pepper] = val
-                        pred = (
+                        prediction = (
                             self.head_forward(self.backbone(noisy_input))[0]
                             .detach()
                             .cpu()
                         )
-                        predictions.append(pred)
+                        predictions.append(prediction)
 
                 embedding_std, embedding_mean = torch.std_mean(
                     torch.stack(predictions, dim=0),
@@ -104,3 +98,27 @@ class UNetModel(nn.Module):  # type: ignore
                 embeddings.append(torch.cat((embedding_mean, embedding_std), dim=0))
 
             return torch.stack(embeddings, dim=0)
+
+    def set_infer(self, p_salt_pepper, num_infer_iterations, device):
+        self.mode = "infer"
+        self.p_salt_pepper = p_salt_pepper
+        self.num_infer_iterations = num_infer_iterations
+        self.device: torch.device = device
+
+    @staticmethod
+    def select_and_add_coordinates(outputs, coordinates):
+        selections = []
+        # outputs.shape = (b, c, h, w) or (b, c, d, h, w)
+        for output, coordinate in zip(outputs, coordinates):
+            if output.ndim == 3:
+                selection = output[:, coordinate[:, 1], coordinate[:, 0]]
+            elif output.ndim == 4:
+                selection = output[
+                    :, coordinate[:, 2], coordinate[:, 1], coordinate[:, 0]
+                ]
+            selection = selection.transpose(1, 0)
+            selection += coordinate
+            selections.append(selection)
+
+        # selection.shape = (b, c, p) where p is the number of selected positions
+        return torch.stack(selections, dim=0)

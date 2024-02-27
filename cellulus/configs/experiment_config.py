@@ -13,21 +13,28 @@ from .utils import to_config
 class ExperimentConfig:
     """Top-level config for an experiment (containing training and prediction).
 
-    Parameters:
+    Parameters
+    ----------
 
         experiment_name: (default = 'YYYY-MM-DD')
 
             A unique name for the experiment.
 
-        object_size: (default = 26.0)
+        object_size: (default = 30)
 
             A rough estimate of the size of objects in the image, given in
             world units. The "patch size" of the network will be chosen based
             on this estimate.
 
+        normalization_factor: (default = None)
+
+            The factor to use, for dividing the raw image pixel intensities.
+            If 'None', a factor is chosen based on the dtype of the array .
+            (e.g., np.uint8 would result in a factor of 1.0/255).
+
         model_config:
 
-            The model configuration.
+            Configuration object for the model.
 
         train_config:
 
@@ -42,7 +49,10 @@ class ExperimentConfig:
     experiment_name: str = attrs.field(
         default=datetime.today().strftime("%Y-%m-%d"), validator=instance_of(str)
     )
-    object_size: float = attrs.field(default=26.0, validator=instance_of(float))
+    normalization_factor: float = attrs.field(
+        default=None, validator=attrs.validators.optional(instance_of(float))
+    )
+    object_size: int = attrs.field(default=30, validator=instance_of(int))
 
     train_config: TrainConfig = attrs.field(
         default=None, converter=to_config(TrainConfig)

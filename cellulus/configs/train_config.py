@@ -11,18 +11,19 @@ from .utils import to_config
 class TrainConfig:
     """Train configuration.
 
-    Parameters:
+    Parameters
+    ----------
 
-        crop_size:
+        crop_size (default = [252, 252]):
 
             The size of the crops - specified as a list of number of pixels -
             extracted from the raw images, used during training.
 
-        batch_size:
+        batch_size (default = 8):
 
             The number of samples to use per batch.
 
-        max_iterations:
+        max_iterations (default = 100000):
 
             The maximum number of iterations to train for.
 
@@ -50,11 +51,15 @@ class TrainConfig:
 
             Neighborhood radius to extract patches from.
 
-        save_model_every (default = 1e3):
+        save_model_every (default = 1000):
 
             The model weights are saved every few iterations.
 
-        save_snapshot_every (default = 1e3):
+        save_best_model_every (default = 100):
+
+            The best loss is evaluated every few iterations.
+
+        save_snapshot_every (default = 1000):
 
             The zarr snapshot is saved every few iterations.
 
@@ -62,16 +67,23 @@ class TrainConfig:
 
             The number of sub-processes to use for data-loading.
 
+        elastic_deform (default = True):
+
+            If set to True, the data is elastically deformed
+            in order to increase training samples.
+
         control_point_spacing (default = 64):
 
             The distance in pixels between control points used for elastic
             deformation of the raw data during training.
+            Only used if `elastic_deform` is set to True.
 
         control_point_jitter (default = 2.0):
 
             How much to jitter the control points for elastic deformation
             of the raw data during training, given as the standard deviation of
             a normal distribution with zero mean.
+            Only used if `elastic_deform` is set to True.
 
         train_data_config:
 
@@ -105,11 +117,11 @@ class TrainConfig:
     kappa: float = attrs.field(default=10.0, validator=instance_of(float))
     temperature: float = attrs.field(default=10.0, validator=instance_of(float))
     regularizer_weight: float = attrs.field(default=1e-5, validator=instance_of(float))
-    reduce_mean: bool = attrs.field(default=True, validator=instance_of(bool))
     save_model_every: int = attrs.field(default=1_000, validator=instance_of(int))
+    save_best_model_every: int = attrs.field(default=100, validator=instance_of(int))
     save_snapshot_every: int = attrs.field(default=1_000, validator=instance_of(int))
     num_workers: int = attrs.field(default=8, validator=instance_of(int))
-
+    elastic_deform: bool = attrs.field(default=True, validator=instance_of(bool))
     control_point_spacing: int = attrs.field(default=64, validator=instance_of(int))
     control_point_jitter: float = attrs.field(default=2.0, validator=instance_of(float))
     device: str = attrs.field(default="cuda:0", validator=instance_of(str))

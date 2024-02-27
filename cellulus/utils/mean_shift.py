@@ -1,6 +1,5 @@
 import numpy as np
 import torch
-from skimage import measure
 from sklearn.cluster import MeanShift
 
 
@@ -36,7 +35,6 @@ def mean_shift_segmentation(
         reduction_probability=reduction_probability,
         cluster_all=False,
     )[0]
-    segmentation = sizefilter(segmentation, min_size)
     return segmentation
 
 
@@ -47,22 +45,6 @@ def segment_with_meanshift(
         bandwidth, reduction_probability=reduction_probability, cluster_all=cluster_all
     )
     return anchor_mean_shift(embedding, mask=mask) + 1
-
-
-def sizefilter(segmentation, min_size, filter_non_connected=True):
-    if min_size == 0:
-        return segmentation
-
-    if filter_non_connected:
-        filter_labels = measure.label(segmentation, background=0)
-    else:
-        filter_labels = segmentation
-    ids, sizes = np.unique(filter_labels, return_counts=True)
-    filter_ids = ids[sizes < min_size]
-    mask = np.in1d(filter_labels, filter_ids).reshape(filter_labels.shape)
-    segmentation[mask] = 0
-
-    return segmentation
 
 
 class AnchorMeanshift:
