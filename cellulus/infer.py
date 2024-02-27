@@ -26,7 +26,7 @@ def infer(experiment_config):
     )
 
     if inference_config.bandwidth is None:
-        inference_config.bandwidth = int(0.25 * experiment_config.object_size)
+        inference_config.bandwidth = 0.5 * experiment_config.object_size
 
     if inference_config.min_size is None:
         if dataset_meta_data.num_spatial_dims == 2:
