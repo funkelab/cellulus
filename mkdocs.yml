@@ -72,5 +72,7 @@ nav:
           - InferenceConfig: api/inference_config.md
           - ModelConfig: api/model_config.md
           - TrainConfig: api/train_config.md
-      - ZarrDataset: api/zarr_dataset.md
+      - Datasets:
+          - ZarrDataset: api/zarr_dataset.md
+          - DatasetMetaData: api/meta_data.md
       - OCELoss: api/oce_loss.md
