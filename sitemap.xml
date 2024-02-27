@@ -2,62 +2,62 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://funkelab.github.io/cellulus/</loc>
-         <lastmod>2024-01-09</lastmod>
+         <lastmod>2024-02-27</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://funkelab.github.io/cellulus/getting-started/</loc>
-         <lastmod>2024-01-09</lastmod>
+         <lastmod>2024-02-27</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://funkelab.github.io/cellulus/api/dataset_config/</loc>
-         <lastmod>2024-01-09</lastmod>
+         <lastmod>2024-02-27</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://funkelab.github.io/cellulus/api/experiment_config/</loc>
-         <lastmod>2024-01-09</lastmod>
+         <lastmod>2024-02-27</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://funkelab.github.io/cellulus/api/inference_config/</loc>
-         <lastmod>2024-01-09</lastmod>
+         <lastmod>2024-02-27</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://funkelab.github.io/cellulus/api/model_config/</loc>
-         <lastmod>2024-01-09</lastmod>
+         <lastmod>2024-02-27</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://funkelab.github.io/cellulus/api/oce_loss/</loc>
-         <lastmod>2024-01-09</lastmod>
+         <lastmod>2024-02-27</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://funkelab.github.io/cellulus/api/train_config/</loc>
-         <lastmod>2024-01-09</lastmod>
+         <lastmod>2024-02-27</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://funkelab.github.io/cellulus/api/zarr_dataset/</loc>
-         <lastmod>2024-01-09</lastmod>
+         <lastmod>2024-02-27</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://funkelab.github.io/cellulus/examples/2d/01-data/</loc>
-         <lastmod>2024-01-09</lastmod>
+         <lastmod>2024-02-27</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://funkelab.github.io/cellulus/examples/2d/02-train/</loc>
-         <lastmod>2024-01-09</lastmod>
+         <lastmod>2024-02-27</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://funkelab.github.io/cellulus/examples/2d/03-infer/</loc>
-         <lastmod>2024-01-09</lastmod>
+         <lastmod>2024-02-27</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
