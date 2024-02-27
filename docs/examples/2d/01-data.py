@@ -3,7 +3,9 @@
 # In this notebook, we will download data and convert it to a zarr dataset. <br>
 # This tutorial was written by <i>Henry Westmacott</i> and <i>Manan Lalit</i>.
 
-# For demonstration, we will use a subset of images of `Fluo-N2DL-HeLa` available on the [Cell Tracking Challenge](http://celltrackingchallenge.net/2d-datasets/) webpage.
+# For demonstration, we will use a subset of images of `Fluo-N2DL-HeLa` available
+# on the [Cell Tracking Challenge](http://celltrackingchallenge.net/2d-datasets/)
+# webpage.
 
 # Firstly, the `tif` raw images are downloaded to a directory indicated by `data_dir`.
 
@@ -27,7 +29,7 @@ extract_data(
 )
 # -
 
-# Next, these raw images are intensity-normalized and appended in a list. Here, we use the percentile normalization technique.
+# Next,  a channel dimension is added to these images and they are appended in a list.
 
 # +
 container_path = zarr.open(name + ".zarr")
@@ -38,10 +40,7 @@ image_list = []
 
 for i in tqdm(range(len(image_filenames))):
     im = normalize(
-        tifffile.imread(image_filenames[i]).astype(np.float32),
-        pmin=1,
-        pmax=99.8,
-        axis=(0, 1),
+        tifffile.imread(image_filenames[i]).astype(np.float32), 1, 99.8, axis=(0, 1)
     )
     image_list.append(im[np.newaxis, ...])
 
