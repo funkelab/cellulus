@@ -42,9 +42,7 @@ def evaluate(inference_config: InferenceConfig) -> None:
                 FP_list.append(FP_image)
                 FN_list.append(FN_image)
                 sample_list.append(sample)
-                print(
-                    f"{sample}:, F1={F1_image:.3f}, SEG={SEG_image/n_GTids_image:.3f}"
-                )
+                print(f"{sample}: F1={F1_image:.3f}, SEG={SEG_image/n_GTids_image:.3f}")
 
         F1_dataset = 2 * sum(TP_list) / (2 * sum(TP_list) + sum(FP_list) + sum(FN_list))
 
