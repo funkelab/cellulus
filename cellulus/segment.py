@@ -135,7 +135,7 @@ def segment(inference_config: InferenceConfig) -> None:
                 embeddings_mean = embeddings[
                     np.newaxis, : dataset_meta_data.num_spatial_dims, ...
                 ].copy()
-
+                ds_segmentation[sample, bandwidth_factor, ...] = segmentation
         elif inference_config.clustering == "greedy":
             if dataset_meta_data.num_spatial_dims == 3:
                 cluster3d = Cluster3d(
@@ -151,6 +151,7 @@ def segment(inference_config: InferenceConfig) -> None:
                         bandwidth=inference_config.bandwidth / (2**bandwidth_factor),
                         min_object_size=inference_config.min_size,
                     )
+                    ds_segmentation[sample, bandwidth_factor, ...] = segmentation
             elif dataset_meta_data.num_spatial_dims == 2:
                 cluster2d = Cluster2d(
                     width=embeddings.shape[-1],
@@ -165,4 +166,4 @@ def segment(inference_config: InferenceConfig) -> None:
                         min_object_size=inference_config.min_size,
                     )
 
-        ds_segmentation[sample, bandwidth_factor, ...] = segmentation
+                    ds_segmentation[sample, bandwidth_factor, ...] = segmentation
