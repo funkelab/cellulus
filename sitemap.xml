@@ -26,6 +26,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://funkelab.github.io/cellulus/api/meta_data/</loc>
+         <lastmod>2024-02-27</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://funkelab.github.io/cellulus/api/model_config/</loc>
          <lastmod>2024-02-27</lastmod>
          <changefreq>daily</changefreq>
