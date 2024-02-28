@@ -72,6 +72,12 @@ class InferenceConfig:
             How to cluster the embeddings?
             Can be one of 'meanshift' or 'greedy'.
 
+        use_seeds (default = False):
+
+            If set to True, the local optima of the distance map from the
+            predicted object centers is used.
+            Else, seeds are determined by sklearn.cluster.MeanShift.
+
         num_bandwidths (default = 1):
 
             Number of bandwidths to obtain segmentations for.
@@ -139,6 +145,7 @@ class InferenceConfig:
     clustering = attrs.field(
         default="meanshift", validator=in_(["meanshift", "greedy"])
     )
+    use_seeds = attrs.field(default=False, validator=instance_of(bool))
     bandwidth = attrs.field(
         default=None, validator=attrs.validators.optional(instance_of(float))
     )
