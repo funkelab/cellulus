@@ -1,5 +1,7 @@
 import numpy as np
 import zarr
+from scipy.ndimage import gaussian_filter
+from skimage.feature import peak_local_max
 from skimage.filters import threshold_otsu
 from tqdm import tqdm
 
@@ -119,22 +121,46 @@ def segment(inference_config: InferenceConfig) -> None:
             embeddings_centered[2] -= c_z
         ds_object_centered_embeddings[sample] = embeddings_centered
 
+        embeddings_centered_mean = embeddings_centered[
+            np.newaxis, : dataset_meta_data.num_spatial_dims
+        ]
+        embeddings_centered_std = embeddings_centered[-1]
+
         if inference_config.clustering == "meanshift":
             for bandwidth_factor in range(inference_config.num_bandwidths):
-                segmentation = mean_shift_segmentation(
-                    embeddings_mean,
-                    embeddings_std,
-                    bandwidth=inference_config.bandwidth / (2**bandwidth_factor),
-                    min_size=inference_config.min_size,
-                    reduction_probability=inference_config.reduction_probability,
-                    threshold=threshold,
-                )
-                # Note that the line below is needed
-                # because the embeddings_mean is modified
-                # by mean_shift_segmentation
-                embeddings_mean = embeddings[
-                    np.newaxis, : dataset_meta_data.num_spatial_dims, ...
-                ].copy()
+                if inference_config.use_seeds:
+                    offset_magnitude = np.linalg.norm(embeddings_centered[:-1], axis=0)
+                    offset_magnitude_smooth = gaussian_filter(offset_magnitude, sigma=2)
+                    coordinates = peak_local_max(-offset_magnitude_smooth)
+                    seeds = np.flip(coordinates, 1)
+                    segmentation = mean_shift_segmentation(
+                        embeddings_centered_mean,
+                        embeddings_centered_std,
+                        bandwidth=inference_config.bandwidth / (2**bandwidth_factor),
+                        min_size=inference_config.min_size,
+                        reduction_probability=inference_config.reduction_probability,
+                        threshold=threshold,
+                        seeds=seeds,
+                    )
+                    embeddings_centered_mean = embeddings_centered[
+                        np.newaxis, : dataset_meta_data.num_spatial_dims, ...
+                    ].copy()
+                else:
+                    segmentation = mean_shift_segmentation(
+                        embeddings_mean,
+                        embeddings_std,
+                        bandwidth=inference_config.bandwidth / (2**bandwidth_factor),
+                        min_size=inference_config.min_size,
+                        reduction_probability=inference_config.reduction_probability,
+                        threshold=threshold,
+                        seeds=None,
+                    )
+                    # Note that the line below is needed
+                    # because the embeddings_mean is modified
+                    # by mean_shift_segmentation
+                    embeddings_mean = embeddings[
+                        np.newaxis, : dataset_meta_data.num_spatial_dims, ...
+                    ].copy()
                 ds_segmentation[sample, bandwidth_factor, ...] = segmentation
         elif inference_config.clustering == "greedy":
             if dataset_meta_data.num_spatial_dims == 3:
