@@ -281,16 +281,25 @@
   
     
     
+      
+  
+  
+  
+    
+    
       <li class="md-tabs__item">
         <a href="../../examples/2d/01-data/" class="md-tabs__link">
           
   
     
   
-  2D Example
+  Examples
 
         </a>
       </li>
+    
+  
+
     
   
 
@@ -483,8 +492,6 @@
       
         
       
-        
-      
     
     
       
@@ -504,7 +511,7 @@
             
   
   <span class="md-ellipsis">
-    2D Example
+    Examples
   </span>
   
 
@@ -514,7 +521,55 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
-            2D Example
+            Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    2D
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            2D
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -576,6 +631,133 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    3D
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            3D
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/3d/01-data/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Download Data
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/3d/02-train/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Train Model
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/3d/03-infer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Infer using Trained Model
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1325,7 +1507,14 @@
 <span class="normal">241</span>
 <span class="normal">242</span>
 <span class="normal">243</span>
-<span class="normal">244</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ZarrDataset</span><span class="p">(</span><span class="n">IterableDataset</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ZarrDataset</span><span class="p">(</span><span class="n">IterableDataset</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dataset_config</span><span class="p">:</span> <span class="n">DatasetConfig</span><span class="p">,</span>
@@ -1452,17 +1641,24 @@
 
         <span class="k">with</span> <span class="n">gp</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="p">):</span>
             <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">array_is_zero</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="c1"># request one sample, all channels, plus crop dimensions</span>
-                <span class="n">request</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">BatchRequest</span><span class="p">()</span>
-                <span class="n">request</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">]</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">ArraySpec</span><span class="p">(</span>
-                    <span class="n">roi</span><span class="o">=</span><span class="n">gp</span><span class="o">.</span><span class="n">Roi</span><span class="p">(</span>
-                        <span class="p">(</span><span class="mi">0</span><span class="p">,)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_dims</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_channels</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">crop_size</span><span class="p">)</span>
+                <span class="k">while</span> <span class="n">array_is_zero</span><span class="p">:</span>
+                    <span class="n">request</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">BatchRequest</span><span class="p">()</span>
+                    <span class="n">request</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">]</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">ArraySpec</span><span class="p">(</span>
+                        <span class="n">roi</span><span class="o">=</span><span class="n">gp</span><span class="o">.</span><span class="n">Roi</span><span class="p">(</span>
+                            <span class="p">(</span><span class="mi">0</span><span class="p">,)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_dims</span><span class="p">,</span>
+                            <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_channels</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">crop_size</span><span class="p">),</span>
+                        <span class="p">)</span>
                     <span class="p">)</span>
-                <span class="p">)</span>
 
-                <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">request_batch</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-                <span class="n">sample_data</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">anchor_samples</span><span class="p">,</span> <span class="n">reference_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_coordinates</span><span class="p">()</span>
+                    <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">request_batch</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+                    <span class="n">sample_data</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">sample_data</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">array_is_zero</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">anchor_samples</span><span class="p">,</span> <span class="n">reference_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_coordinates</span><span class="p">()</span>
                 <span class="k">yield</span> <span class="n">sample_data</span><span class="p">,</span> <span class="n">anchor_samples</span><span class="p">,</span> <span class="n">reference_samples</span>
 
     <span class="k">def</span> <span class="nf">__read_meta_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1849,22 +2045,36 @@ normalization_factor:
 <span class="normal">148</span>
 <span class="normal">149</span>
 <span class="normal">150</span>
-<span class="normal">151</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">__yield_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">__yield_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;An infinite generator of crops.&quot;&quot;&quot;</span>
 
     <span class="k">with</span> <span class="n">gp</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="p">):</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">array_is_zero</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="c1"># request one sample, all channels, plus crop dimensions</span>
-            <span class="n">request</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">BatchRequest</span><span class="p">()</span>
-            <span class="n">request</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">]</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">ArraySpec</span><span class="p">(</span>
-                <span class="n">roi</span><span class="o">=</span><span class="n">gp</span><span class="o">.</span><span class="n">Roi</span><span class="p">(</span>
-                    <span class="p">(</span><span class="mi">0</span><span class="p">,)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_dims</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_channels</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">crop_size</span><span class="p">)</span>
+            <span class="k">while</span> <span class="n">array_is_zero</span><span class="p">:</span>
+                <span class="n">request</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">BatchRequest</span><span class="p">()</span>
+                <span class="n">request</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">]</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">ArraySpec</span><span class="p">(</span>
+                    <span class="n">roi</span><span class="o">=</span><span class="n">gp</span><span class="o">.</span><span class="n">Roi</span><span class="p">(</span>
+                        <span class="p">(</span><span class="mi">0</span><span class="p">,)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_dims</span><span class="p">,</span>
+                        <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_channels</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">crop_size</span><span class="p">),</span>
+                    <span class="p">)</span>
                 <span class="p">)</span>
-            <span class="p">)</span>
 
-            <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">request_batch</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-            <span class="n">sample_data</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">anchor_samples</span><span class="p">,</span> <span class="n">reference_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_coordinates</span><span class="p">()</span>
+                <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">request_batch</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+                <span class="n">sample_data</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">sample_data</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">array_is_zero</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">anchor_samples</span><span class="p">,</span> <span class="n">reference_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_coordinates</span><span class="p">()</span>
             <span class="k">yield</span> <span class="n">sample_data</span><span class="p">,</span> <span class="n">anchor_samples</span><span class="p">,</span> <span class="n">reference_samples</span>
 </code></pre></div></td></tr></table></div>
           </details>

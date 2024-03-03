@@ -281,16 +281,25 @@
   
     
     
+      
+  
+  
+  
+    
+    
       <li class="md-tabs__item">
         <a href="../../examples/2d/01-data/" class="md-tabs__link">
           
   
     
   
-  2D Example
+  Examples
 
         </a>
       </li>
+    
+  
+
     
   
 
@@ -483,8 +492,6 @@
       
         
       
-        
-      
     
     
       
@@ -504,7 +511,7 @@
             
   
   <span class="md-ellipsis">
-    2D Example
+    Examples
   </span>
   
 
@@ -514,7 +521,55 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
-            2D Example
+            Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    2D
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            2D
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -576,6 +631,133 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    3D
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            3D
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/3d/01-data/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Download Data
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/3d/02-train/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Train Model
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/3d/03-infer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Infer using Trained Model
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1094,13 +1276,13 @@ prediction_dataset_config:
 
     Configuration object produced by predict.py.
 
+detection_dataset_config:
+
+    Configuration object produced by detect.py.
+
 segmentation_dataset_config:
 
     Configuration object produced by segment.py.
-
-post_processed_dataset_config:
-
-    Configuration object produced by post_process.py.
 
 evaluation_dataset_config:
 
@@ -1143,6 +1325,12 @@ clustering (default = 'meanshift'):
 
     How to cluster the embeddings?
     Can be one of 'meanshift' or 'greedy'.
+
+use_seeds (default = False):
+
+    If set to True, the local optima of the distance map from the
+    predicted object centers is used.
+    Else, seeds are determined by sklearn.cluster.MeanShift.
 
 num_bandwidths (default = 1):
 
@@ -1325,7 +1513,14 @@ shrink_distance (default = 6):
 <span class="normal">149</span>
 <span class="normal">150</span>
 <span class="normal">151</span>
-<span class="normal">152</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@attrs</span><span class="o">.</span><span class="n">define</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@attrs</span><span class="o">.</span><span class="n">define</span>
 <span class="k">class</span> <span class="nc">InferenceConfig</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Inference configuration.</span>
 
@@ -1340,13 +1535,13 @@ shrink_distance (default = 6):
 
 <span class="sd">            Configuration object produced by predict.py.</span>
 
+<span class="sd">        detection_dataset_config:</span>
+
+<span class="sd">            Configuration object produced by detect.py.</span>
+
 <span class="sd">        segmentation_dataset_config:</span>
 
 <span class="sd">            Configuration object produced by segment.py.</span>
-
-<span class="sd">        post_processed_dataset_config:</span>
-
-<span class="sd">            Configuration object produced by post_process.py.</span>
 
 <span class="sd">        evaluation_dataset_config:</span>
 
@@ -1389,6 +1584,12 @@ shrink_distance (default = 6):
 
 <span class="sd">            How to cluster the embeddings?</span>
 <span class="sd">            Can be one of &#39;meanshift&#39; or &#39;greedy&#39;.</span>
+
+<span class="sd">        use_seeds (default = False):</span>
+
+<span class="sd">            If set to True, the local optima of the distance map from the</span>
+<span class="sd">            predicted object centers is used.</span>
+<span class="sd">            Else, seeds are determined by sklearn.cluster.MeanShift.</span>
 
 <span class="sd">        num_bandwidths (default = 1):</span>
 
@@ -1436,11 +1637,11 @@ shrink_distance (default = 6):
         <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">converter</span><span class="o">=</span><span class="n">to_config</span><span class="p">(</span><span class="n">DatasetConfig</span><span class="p">)</span>
     <span class="p">)</span>
 
-    <span class="n">segmentation_dataset_config</span><span class="p">:</span> <span class="n">DatasetConfig</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
+    <span class="n">detection_dataset_config</span><span class="p">:</span> <span class="n">DatasetConfig</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
         <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">converter</span><span class="o">=</span><span class="n">to_config</span><span class="p">(</span><span class="n">DatasetConfig</span><span class="p">)</span>
     <span class="p">)</span>
 
-    <span class="n">post_processed_dataset_config</span><span class="p">:</span> <span class="n">DatasetConfig</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
+    <span class="n">segmentation_dataset_config</span><span class="p">:</span> <span class="n">DatasetConfig</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
         <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">converter</span><span class="o">=</span><span class="n">to_config</span><span class="p">(</span><span class="n">DatasetConfig</span><span class="p">)</span>
     <span class="p">)</span>
 
@@ -1457,6 +1658,7 @@ shrink_distance (default = 6):
     <span class="n">clustering</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
         <span class="n">default</span><span class="o">=</span><span class="s2">&quot;meanshift&quot;</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">in_</span><span class="p">([</span><span class="s2">&quot;meanshift&quot;</span><span class="p">,</span> <span class="s2">&quot;greedy&quot;</span><span class="p">])</span>
     <span class="p">)</span>
+    <span class="n">use_seeds</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">instance_of</span><span class="p">(</span><span class="nb">bool</span><span class="p">))</span>
     <span class="n">bandwidth</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
         <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">attrs</span><span class="o">.</span><span class="n">validators</span><span class="o">.</span><span class="n">optional</span><span class="p">(</span><span class="n">instance_of</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span>
     <span class="p">)</span>
