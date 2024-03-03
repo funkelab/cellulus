@@ -35,7 +35,7 @@ def infer(experiment_config):
             )
         elif dataset_meta_data.num_spatial_dims == 3:
             inference_config.min_size = int(
-                0.1 * 4.0 / 3.0 * np.pi * (experiment_config.object_size**3)
+                0.1 * 4.0 / 3.0 * np.pi * (experiment_config.object_size**3) / 8
             )
     # set model
     model = get_model(
