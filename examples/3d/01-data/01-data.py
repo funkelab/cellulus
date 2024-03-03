@@ -43,7 +43,7 @@ extract_data(
 anisotropy = 2.031 / 0.406
 
 container_path = zarr.open(name + ".zarr")
-subsets = ["train", "test"]
+subsets = ["train"]
 for subset in subsets:
     dataset_name = subset + "/raw"
     image_filenames = sorted((Path(data_dir) / name / subset).glob("*.tif"))
