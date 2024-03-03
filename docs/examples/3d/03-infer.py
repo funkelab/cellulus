@@ -17,6 +17,7 @@ from cellulus.configs.inference_config import InferenceConfig
 from cellulus.configs.model_config import ModelConfig
 from cellulus.infer import infer
 from cellulus.utils.misc import visualize_2d
+from IPython.utils import io
 from matplotlib.colors import ListedColormap
 
 # ## Specify config values for datasets
@@ -117,8 +118,8 @@ experiment_config = ExperimentConfig(
 # Now we are ready to start the inference!! <br>
 # (To see the output of the cell below, remove the first line `io.capture_output()`).
 
-# with io.capture_output() as captured:
-infer(experiment_config)
+with io.capture_output() as captured:
+    infer(experiment_config)
 
 # ## Inspect predictions
 
