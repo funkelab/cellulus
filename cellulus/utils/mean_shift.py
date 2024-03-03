@@ -4,7 +4,13 @@ from sklearn.cluster import MeanShift
 
 
 def mean_shift_segmentation(
-    embedding_mean, embedding_std, bandwidth, min_size, reduction_probability, threshold
+    embedding_mean,
+    embedding_std,
+    bandwidth,
+    min_size,
+    reduction_probability,
+    threshold,
+    seeds,
 ):
     embedding_mean = torch.from_numpy(embedding_mean)
     if embedding_mean.ndim == 4:
@@ -34,22 +40,28 @@ def mean_shift_segmentation(
         mask=mask,
         reduction_probability=reduction_probability,
         cluster_all=False,
+        seeds=seeds,
     )[0]
     return segmentation
 
 
 def segment_with_meanshift(
-    embedding, bandwidth, mask, reduction_probability, cluster_all
+    embedding, bandwidth, mask, reduction_probability, cluster_all, seeds
 ):
     anchor_mean_shift = AnchorMeanshift(
-        bandwidth, reduction_probability=reduction_probability, cluster_all=cluster_all
+        bandwidth,
+        reduction_probability=reduction_probability,
+        cluster_all=cluster_all,
+        seeds=seeds,
     )
     return anchor_mean_shift(embedding, mask=mask) + 1
 
 
 class AnchorMeanshift:
-    def __init__(self, bandwidth, reduction_probability, cluster_all):
-        self.mean_shift = MeanShift(bandwidth=bandwidth, cluster_all=cluster_all)
+    def __init__(self, bandwidth, reduction_probability, cluster_all, seeds):
+        self.mean_shift = MeanShift(
+            bandwidth=bandwidth, cluster_all=cluster_all, seeds=seeds
+        )
         self.reduction_probability = reduction_probability
 
     def compute_mean_shift(self, X):

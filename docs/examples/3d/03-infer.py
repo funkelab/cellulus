@@ -17,7 +17,6 @@ from cellulus.configs.inference_config import InferenceConfig
 from cellulus.configs.model_config import ModelConfig
 from cellulus.infer import infer
 from cellulus.utils.misc import visualize_2d
-from IPython.utils import io
 from matplotlib.colors import ListedColormap
 
 # ## Specify config values for datasets
@@ -25,14 +24,14 @@ from matplotlib.colors import ListedColormap
 # We again specify `name` of the zarr container, and `dataset_name` which
 # identifies the path to the raw image data, which needs to be segmented.
 
-name = "2d-data-demo"
-dataset_name = "train/raw"
+name = "3d-data-demo"
+dataset_name = "test/raw"
 
 # We initialize the `dataset_config` which relates to the raw image data,
 # `prediction_dataset_config` which relates to the per-pixel embeddings and the
-# uncertainty, the `segmentation_dataset_config` which relates to the
-# segmentations post the mean-shift clustering and the `post_processed_config`
-# which relates to the segmentations after some post-processing.
+# uncertainty, the `segmentation_dataset_config` which relates to the segmentations
+# post the mean-shift clustering and the `post_processed_config` which relates
+# to the segmentations after some post-processing.
 
 dataset_config = DatasetConfig(container_path=name + ".zarr", dataset_name=dataset_name)
 prediction_dataset_config = DatasetConfig(
@@ -69,54 +68,57 @@ with zipfile.ZipFile("pretrained_model", "r") as zip_ref:
 
 num_fmaps = 24
 fmap_inc_factor = 3
+downsampling_factors = [
+    [2, 2, 2],
+]
 checkpoint = "models/best_loss.pth"
 
 model_config = ModelConfig(
-    num_fmaps=num_fmaps, fmap_inc_factor=fmap_inc_factor, checkpoint=checkpoint
+    num_fmaps=num_fmaps,
+    fmap_inc_factor=fmap_inc_factor,
+    downsampling_factors=downsampling_factors,
+    checkpoint=checkpoint,
 )
 
 # ## Initialize `inference_config`
 
 # Then, we specify inference-specific parameters such as the `device`, which
 # indicates the actual device to run the inference on.
-# <br> The device could be set equal to `cuda:n` (where `n` is the index of
-# the GPU, for e.g. `cuda:0`), `cpu` or `mps`.
+# <br> The device could be set equal to `cuda:n` (where `n` is the index of the
+# GPU, for e.g. `cuda:0`), `cpu` or `mps`.
 
-device = "cuda:0"  # "cuda:0", 'mps', 'cpu'
+device = "cuda:0"
 
-# We initialize the `inference_config` which contains our
-# `embeddings_dataset_config`, `segmentation_dataset_config` and
-# `post_processed_dataset_config`.<br>
-# We set post_processing to one of `cell` or `nucleus`, depending on if we
-# would like the cell membrane to be segmented or the nucleus.
-
-post_processing = "nucleus"
+# We initialize the `inference_config` which contains our `embeddings_dataset_config`,
+# `segmentation_dataset_config` and `post_processed_dataset_config`.
 
 inference_config = InferenceConfig(
     dataset_config=asdict(dataset_config),
-    prediction_dataset_config=asdict(prediction_dataset_config),
-    detection_dataset_config=asdict(detection_dataset_config),
+    # prediction_dataset_config=asdict(prediction_dataset_config),
+    # detection_dataset_config=asdict(detection_dataset_config),
     segmentation_dataset_config=asdict(segmentation_dataset_config),
-    post_processing=post_processing,
+    crop_size=[120, 120, 120],
+    post_processing="nucleus",
     device=device,
+    use_seeds=True,
 )
 
 # ## Initialize `experiment_config`
 
-# Lastly we initialize the `experiment_config` which contains the
-# `inference_config` and `model_config` initialized above.
+# Lastly we initialize the `experiment_config` which contains the `inference_config`
+# and `model_config` initialized above.
 
 experiment_config = ExperimentConfig(
     inference_config=asdict(inference_config),
     model_config=asdict(model_config),
-    normalization_factor=1.0,  # since the data was already normalized.
+    normalization_factor=1.0,  # since the test image is already normalized
 )
 
 # Now we are ready to start the inference!! <br>
-# To see the output of the cell below, remove the first line `io.capture_output()`).
+# (To see the output of the cell below, remove the first line `io.capture_output()`).
 
-with io.capture_output() as captured:
-    infer(experiment_config)
+# with io.capture_output() as captured:
+infer(experiment_config)
 
 # ## Inspect predictions
 
@@ -135,14 +137,17 @@ new_cmp = ListedColormap(np.load("cmap_60.npy"))
 # embedding (top-right).
 
 # +
-index = 10
+index = 0
 
 f = zarr.open(name + ".zarr")
-ds = f["train/raw"]
-ds2 = f["centered-embeddings"]
+ds = f["test/raw"]
+ds2 = f["centered_embeddings"]
 
-image = ds[index, 0]
-embedding = ds2[index]
+slice = ds.shape[2] // 2
+
+image = ds[index, 0, slice]
+embedding = ds2[index, :, slice]
+
 
 visualize_2d(
     image,
@@ -156,21 +161,21 @@ visualize_2d(
 # -
 
 # As you can see the magnitude of the uncertainty of the embedding (top-right)
-# is <i>low</i> for most of the foreground cells. <br>
-# This enables extraction of the foreground, which is eventually clustered
-# into individual instances.
+# is <i>low</i> for most of the foreground cells. <br> This enables extraction
+# of the foreground, which is eventually clustered into individual instances. <br>
+# See bottom right figure for the final result.
 
 # +
 f = zarr.open(name + ".zarr")
-ds = f["train/raw"]
+ds = f["test/raw"]
 ds2 = f["detection"]
 ds3 = f["segmentation"]
 
 visualize_2d(
     image,
     top_right=embedding[-1] < skimage.filters.threshold_otsu(embedding[-1]),
-    bottom_left=ds2[index, 0],
-    bottom_right=ds3[index, 0],
+    bottom_left=ds2[index, index, slice],
+    bottom_right=ds3[index, index, slice],
     top_right_label="THRESHOLDED F.G.",
     bottom_left_label="DETECTION",
     bottom_right_label="SEGMENTATION",

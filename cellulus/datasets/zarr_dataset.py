@@ -137,17 +137,24 @@ class ZarrDataset(IterableDataset):  # type: ignore
 
         with gp.build(self.pipeline):
             while True:
+                array_is_zero = True
                 # request one sample, all channels, plus crop dimensions
-                request = gp.BatchRequest()
-                request[self.raw] = gp.ArraySpec(
-                    roi=gp.Roi(
-                        (0,) * self.num_dims, (1, self.num_channels, *self.crop_size)
+                while array_is_zero:
+                    request = gp.BatchRequest()
+                    request[self.raw] = gp.ArraySpec(
+                        roi=gp.Roi(
+                            (0,) * self.num_dims,
+                            (1, self.num_channels, *self.crop_size),
+                        )
                     )
-                )
 
-                sample = self.pipeline.request_batch(request)
-                sample_data = sample[self.raw].data[0]
-                anchor_samples, reference_samples = self.sample_coordinates()
+                    sample = self.pipeline.request_batch(request)
+                    sample_data = sample[self.raw].data[0]
+                    if np.max(sample_data) <= 0.0:
+                        pass
+                    else:
+                        array_is_zero = False
+                        anchor_samples, reference_samples = self.sample_coordinates()
                 yield sample_data, anchor_samples, reference_samples
 
     def __read_meta_data(self):

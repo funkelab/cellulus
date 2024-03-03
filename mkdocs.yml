@@ -61,10 +61,15 @@ nav:
   - Home: index.md
   - Getting Started:
     - Installation: getting-started.md
-  - 2D Example:
-      - 01: examples/2d/01-data.py
-      - 02: examples/2d/02-train.py
-      - 03: examples/2d/03-infer.py
+  - Examples:
+      - 2D:
+        - 01: examples/2d/01-data.py
+        - 02: examples/2d/02-train.py
+        - 03: examples/2d/03-infer.py
+      - 3D:
+        - 01: examples/3d/01-data.py
+        - 02: examples/3d/02-train.py
+        - 03: examples/3d/03-infer.py
   - API Reference:
       - Configs:
           - DatasetConfig: api/dataset_config.md

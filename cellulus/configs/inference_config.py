@@ -22,13 +22,13 @@ class InferenceConfig:
 
             Configuration object produced by predict.py.
 
+        detection_dataset_config:
+
+            Configuration object produced by detect.py.
+
         segmentation_dataset_config:
 
             Configuration object produced by segment.py.
-
-        post_processed_dataset_config:
-
-            Configuration object produced by post_process.py.
 
         evaluation_dataset_config:
 
@@ -71,6 +71,12 @@ class InferenceConfig:
 
             How to cluster the embeddings?
             Can be one of 'meanshift' or 'greedy'.
+
+        use_seeds (default = False):
+
+            If set to True, the local optima of the distance map from the
+            predicted object centers is used.
+            Else, seeds are determined by sklearn.cluster.MeanShift.
 
         num_bandwidths (default = 1):
 
@@ -118,11 +124,11 @@ class InferenceConfig:
         default=None, converter=to_config(DatasetConfig)
     )
 
-    segmentation_dataset_config: DatasetConfig = attrs.field(
+    detection_dataset_config: DatasetConfig = attrs.field(
         default=None, converter=to_config(DatasetConfig)
     )
 
-    post_processed_dataset_config: DatasetConfig = attrs.field(
+    segmentation_dataset_config: DatasetConfig = attrs.field(
         default=None, converter=to_config(DatasetConfig)
     )
 
@@ -139,6 +145,7 @@ class InferenceConfig:
     clustering = attrs.field(
         default="meanshift", validator=in_(["meanshift", "greedy"])
     )
+    use_seeds = attrs.field(default=False, validator=instance_of(bool))
     bandwidth = attrs.field(
         default=None, validator=attrs.validators.optional(instance_of(float))
     )

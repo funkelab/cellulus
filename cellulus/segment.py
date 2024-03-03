@@ -1,26 +1,27 @@
 import numpy as np
 import zarr
+from scipy.ndimage import binary_fill_holes
+from scipy.ndimage import distance_transform_edt as dtedt
 from skimage.filters import threshold_otsu
 from tqdm import tqdm
 
 from cellulus.configs.inference_config import InferenceConfig
 from cellulus.datasets.meta_data import DatasetMetaData
-from cellulus.utils.greedy_cluster import Cluster2d, Cluster3d
-from cellulus.utils.mean_shift import mean_shift_segmentation
+from cellulus.utils.misc import size_filter
 
 
 def segment(inference_config: InferenceConfig) -> None:
+    # filter small objects, erosion, etc.
+
     dataset_config = inference_config.dataset_config
     dataset_meta_data = DatasetMetaData.from_dataset_config(dataset_config)
 
     f = zarr.open(inference_config.segmentation_dataset_config.container_path)
     ds = f[inference_config.segmentation_dataset_config.secondary_dataset_name]
 
-    # prepare the instance segmentation zarr dataset to write to
-    f_segmentation = zarr.open(
-        inference_config.segmentation_dataset_config.container_path
-    )
-    ds_segmentation = f_segmentation.create_dataset(
+    # prepare the zarr dataset to write to
+    f_segmented = zarr.open(inference_config.segmentation_dataset_config.container_path)
+    ds_segmented = f_segmented.create_dataset(
         inference_config.segmentation_dataset_config.dataset_name,
         shape=(
             dataset_meta_data.num_samples,
@@ -30,140 +31,78 @@ def segment(inference_config: InferenceConfig) -> None:
         dtype=np.uint16,
     )
 
-    ds_segmentation.attrs["axis_names"] = ["s", "c"] + ["t", "z", "y", "x"][
+    ds_segmented.attrs["axis_names"] = ["s", "c"] + ["t", "z", "y", "x"][
         -dataset_meta_data.num_spatial_dims :
     ]
-    ds_segmentation.attrs["resolution"] = (1,) * dataset_meta_data.num_spatial_dims
-    ds_segmentation.attrs["offset"] = (0,) * dataset_meta_data.num_spatial_dims
+    ds_segmented.attrs["resolution"] = (1,) * dataset_meta_data.num_spatial_dims
+    ds_segmented.attrs["offset"] = (0,) * dataset_meta_data.num_spatial_dims
 
-    # prepare the binary segmentation zarr dataset to write to
-    ds_binary_segmentation = f_segmentation.create_dataset(
-        "binary_" + inference_config.segmentation_dataset_config.dataset_name,
-        shape=(
-            dataset_meta_data.num_samples,
-            1,
-            *dataset_meta_data.spatial_array,
-        ),
-        dtype=np.uint16,
-    )
-
-    ds_binary_segmentation.attrs["axis_names"] = ["s", "c"] + ["t", "z", "y", "x"][
-        -dataset_meta_data.num_spatial_dims :
-    ]
-    ds_binary_segmentation.attrs["resolution"] = (
-        1,
-    ) * dataset_meta_data.num_spatial_dims
-    ds_binary_segmentation.attrs["offset"] = (0,) * dataset_meta_data.num_spatial_dims
-
-    # prepare the object centered embeddings zarr dataset to write to
-    ds_object_centered_embeddings = f_segmentation.create_dataset(
-        "centered_"
-        + inference_config.segmentation_dataset_config.secondary_dataset_name,
-        shape=(
-            dataset_meta_data.num_samples,
-            dataset_meta_data.num_spatial_dims + 1,
-            *dataset_meta_data.spatial_array,
-        ),
-        dtype=float,
-    )
-
-    ds_object_centered_embeddings.attrs["axis_names"] = ["s", "c"] + [
-        "t",
-        "z",
-        "y",
-        "x",
-    ][-dataset_meta_data.num_spatial_dims :]
-    ds_object_centered_embeddings.attrs["resolution"] = (
-        1,
-    ) * dataset_meta_data.num_spatial_dims
-    ds_object_centered_embeddings.attrs["offset"] = (
-        0,
-    ) * dataset_meta_data.num_spatial_dims
-
-    for sample in tqdm(range(dataset_meta_data.num_samples)):
-        embeddings = ds[sample]
-        embeddings_std = embeddings[-1, ...]
-        embeddings_mean = embeddings[
-            np.newaxis, : dataset_meta_data.num_spatial_dims, ...
-        ].copy()
-        if inference_config.threshold is None:
-            threshold = threshold_otsu(embeddings_std)
-        else:
-            threshold = inference_config.threshold
-
-        print(f"For sample {sample}, binary threshold {threshold} was used.")
-        binary_mask = embeddings_std < threshold
-        ds_binary_segmentation[sample, 0, ...] = binary_mask
-
-        # find mean of embeddings
-        embeddings_centered = embeddings.copy()
-        embeddings_mean_masked = (
-            binary_mask[np.newaxis, np.newaxis, ...] * embeddings_mean
-        )
-        if embeddings_centered.shape[0] == 3:
-            c_x = embeddings_mean_masked[0, 0]
-            c_y = embeddings_mean_masked[0, 1]
-            c_x = c_x[c_x != 0].mean()
-            c_y = c_y[c_y != 0].mean()
-            embeddings_centered[0] -= c_x
-            embeddings_centered[1] -= c_y
-        elif embeddings_centered.shape[0] == 4:
-            c_x = embeddings_mean_masked[0, 0]
-            c_y = embeddings_mean_masked[0, 1]
-            c_z = embeddings_mean_masked[0, 2]
-            c_x = c_x[c_x != 0].mean()
-            c_y = c_y[c_y != 0].mean()
-            c_z = c_z[c_z != 0].mean()
-            embeddings_centered[0] -= c_x
-            embeddings_centered[1] -= c_y
-            embeddings_centered[2] -= c_z
-        ds_object_centered_embeddings[sample] = embeddings_centered
-
-        if inference_config.clustering == "meanshift":
+    # remove halo
+    if inference_config.post_processing == "cell":
+        for sample in tqdm(range(dataset_meta_data.num_samples)):
+            # first instance label masks are expanded by `grow_distance`
+            # next, expanded  instance label masks are shrunk by `shrink_distance`
             for bandwidth_factor in range(inference_config.num_bandwidths):
-                segmentation = mean_shift_segmentation(
-                    embeddings_mean,
-                    embeddings_std,
-                    bandwidth=inference_config.bandwidth / (2**bandwidth_factor),
-                    min_size=inference_config.min_size,
-                    reduction_probability=inference_config.reduction_probability,
-                    threshold=threshold,
-                )
-                # Note that the line below is needed
-                # because the embeddings_mean is modified
-                # by mean_shift_segmentation
-                embeddings_mean = embeddings[
-                    np.newaxis, : dataset_meta_data.num_spatial_dims, ...
-                ].copy()
-                ds_segmentation[sample, bandwidth_factor, ...] = segmentation
-        elif inference_config.clustering == "greedy":
-            if dataset_meta_data.num_spatial_dims == 3:
-                cluster3d = Cluster3d(
-                    width=embeddings.shape[-1],
-                    height=embeddings.shape[-2],
-                    depth=embeddings.shape[-3],
-                    fg_mask=binary_mask,
-                    device=inference_config.device,
-                )
-                for bandwidth_factor in range(inference_config.num_bandwidths):
-                    segmentation = cluster3d.cluster(
-                        prediction=embeddings,
-                        bandwidth=inference_config.bandwidth / (2**bandwidth_factor),
-                        min_object_size=inference_config.min_size,
-                    )
-                    ds_segmentation[sample, bandwidth_factor, ...] = segmentation
-            elif dataset_meta_data.num_spatial_dims == 2:
-                cluster2d = Cluster2d(
-                    width=embeddings.shape[-1],
-                    height=embeddings.shape[-2],
-                    fg_mask=binary_mask,
-                    device=inference_config.device,
-                )
-                for bandwidth_factor in range(inference_config.num_bandwidths):
-                    segmentation = cluster2d.cluster(
-                        prediction=embeddings,
-                        bandwidth=inference_config.bandwidth / (2**bandwidth_factor),
-                        min_object_size=inference_config.min_size,
-                    )
+                segmentation = ds[sample, bandwidth_factor]
+                distance_foreground = dtedt(segmentation == 0)
+                expanded_mask = distance_foreground < inference_config.grow_distance
+                distance_background = dtedt(expanded_mask)
+                segmentation[distance_background < inference_config.shrink_distance] = 0
+                ds_segmented[sample, bandwidth_factor, ...] = segmentation
+    elif inference_config.post_processing == "nucleus":
+        ds_raw = f[inference_config.dataset_config.dataset_name]
+        for sample in tqdm(range(dataset_meta_data.num_samples)):
+            for bandwidth_factor in range(inference_config.num_bandwidths):
+                segmentation = ds[sample, bandwidth_factor]
+                raw_image = ds_raw[sample, 0]
+                ids = np.unique(segmentation)
+                ids = ids[ids != 0]
+                for id_ in ids:
+                    segmentation_id_mask = segmentation == id_
+                    if dataset_meta_data.num_spatial_dims == 2:
+                        y, x = np.where(segmentation_id_mask)
+                        y_min, y_max, x_min, x_max = (
+                            np.min(y),
+                            np.max(y),
+                            np.min(x),
+                            np.max(x),
+                        )
+                    elif dataset_meta_data.num_spatial_dims == 3:
+                        z, y, x = np.where(segmentation_id_mask)
+                        z_min, z_max, y_min, y_max, x_min, x_max = (
+                            np.min(z),
+                            np.max(z),
+                            np.min(y),
+                            np.max(y),
+                            np.min(x),
+                            np.max(x),
+                        )
+                    raw_image_masked = raw_image[segmentation_id_mask]
+                    threshold = threshold_otsu(raw_image_masked)
+                    mask = segmentation_id_mask & (raw_image > threshold)
 
-                    ds_segmentation[sample, bandwidth_factor, ...] = segmentation
+                    if dataset_meta_data.num_spatial_dims == 2:
+                        mask_small = binary_fill_holes(
+                            mask[y_min : y_max + 1, x_min : x_max + 1]
+                        )
+                        mask[y_min : y_max + 1, x_min : x_max + 1] = mask_small
+                        y, x = np.where(mask)
+                        ds_segmented[sample, bandwidth_factor, y, x] = id_
+                    elif dataset_meta_data.num_spatial_dims == 3:
+                        mask_small = binary_fill_holes(
+                            mask[
+                                z_min : z_max + 1, y_min : y_max + 1, x_min : x_max + 1
+                            ]
+                        )
+                        mask[
+                            z_min : z_max + 1, y_min : y_max + 1, x_min : x_max + 1
+                        ] = mask_small
+                        z, y, x = np.where(mask)
+                        ds_segmented[sample, bandwidth_factor, z, y, x] = id_
+
+    # size filter - remove small objects
+    for sample in tqdm(range(dataset_meta_data.num_samples)):
+        for bandwidth_factor in range(inference_config.num_bandwidths):
+            ds_segmented[sample, bandwidth_factor, ...] = size_filter(
+                ds_segmented[sample, bandwidth_factor], inference_config.min_size
+            )
