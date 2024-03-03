@@ -19,10 +19,8 @@ def detect(inference_config: InferenceConfig) -> None:
     ds = f[inference_config.detection_dataset_config.secondary_dataset_name]
 
     # prepare the zarr dataset to write to
-    f_segmentation = zarr.open(
-        inference_config.detection_dataset_config.container_path
-    )
-    ds_segmentation = f_segmentation.create_dataset(
+    f_detection = zarr.open(inference_config.detection_dataset_config.container_path)
+    ds_detection = f_detection.create_dataset(
         inference_config.detection_dataset_config.dataset_name,
         shape=(
             dataset_meta_data.num_samples,
@@ -32,14 +30,14 @@ def detect(inference_config: InferenceConfig) -> None:
         dtype=np.uint16,
     )
 
-    ds_segmentation.attrs["axis_names"] = ["s", "c"] + ["t", "z", "y", "x"][
+    ds_detection.attrs["axis_names"] = ["s", "c"] + ["t", "z", "y", "x"][
         -dataset_meta_data.num_spatial_dims :
     ]
-    ds_segmentation.attrs["resolution"] = (1,) * dataset_meta_data.num_spatial_dims
-    ds_segmentation.attrs["offset"] = (0,) * dataset_meta_data.num_spatial_dims
+    ds_detection.attrs["resolution"] = (1,) * dataset_meta_data.num_spatial_dims
+    ds_detection.attrs["offset"] = (0,) * dataset_meta_data.num_spatial_dims
 
     # prepare the binary segmentation zarr dataset to write to
-    ds_binary_segmentation = f_segmentation.create_dataset(
+    ds_binary_segmentation = f_detection.create_dataset(
         "binary-segmentation",
         shape=(
             dataset_meta_data.num_samples,
@@ -58,7 +56,7 @@ def detect(inference_config: InferenceConfig) -> None:
     ds_binary_segmentation.attrs["offset"] = (0,) * dataset_meta_data.num_spatial_dims
 
     # prepare the object centered embeddings zarr dataset to write to
-    ds_object_centered_embeddings = f_segmentation.create_dataset(
+    ds_object_centered_embeddings = f_detection.create_dataset(
         "centered-embeddings",
         shape=(
             dataset_meta_data.num_samples,
@@ -160,7 +158,7 @@ def detect(inference_config: InferenceConfig) -> None:
                     embeddings_mean = embeddings[
                         np.newaxis, : dataset_meta_data.num_spatial_dims, ...
                     ].copy()
-                ds_segmentation[sample, bandwidth_factor, ...] = segmentation
+                ds_detection[sample, bandwidth_factor, ...] = segmentation
         elif inference_config.clustering == "greedy":
             if dataset_meta_data.num_spatial_dims == 3:
                 cluster3d = Cluster3d(
@@ -176,7 +174,7 @@ def detect(inference_config: InferenceConfig) -> None:
                         bandwidth=inference_config.bandwidth / (2**bandwidth_factor),
                         min_object_size=inference_config.min_size,
                     )
-                    ds_segmentation[sample, bandwidth_factor, ...] = segmentation
+                    ds_detection[sample, bandwidth_factor, ...] = segmentation
             elif dataset_meta_data.num_spatial_dims == 2:
                 cluster2d = Cluster2d(
                     width=embeddings.shape[-1],
@@ -191,4 +189,4 @@ def detect(inference_config: InferenceConfig) -> None:
                         min_object_size=inference_config.min_size,
                     )
 
-                    ds_segmentation[sample, bandwidth_factor, ...] = segmentation
+                    ds_detection[sample, bandwidth_factor, ...] = segmentation

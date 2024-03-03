@@ -20,10 +20,8 @@ def segment(inference_config: InferenceConfig) -> None:
     ds = f[inference_config.segmentation_dataset_config.secondary_dataset_name]
 
     # prepare the zarr dataset to write to
-    f_postprocessed = zarr.open(
-        inference_config.segmentation_dataset_config.container_path
-    )
-    ds_postprocessed = f_postprocessed.create_dataset(
+    f_segmented = zarr.open(inference_config.segmentation_dataset_config.container_path)
+    ds_segmented = f_segmented.create_dataset(
         inference_config.segmentation_dataset_config.dataset_name,
         shape=(
             dataset_meta_data.num_samples,
@@ -33,11 +31,11 @@ def segment(inference_config: InferenceConfig) -> None:
         dtype=np.uint16,
     )
 
-    ds_postprocessed.attrs["axis_names"] = ["s", "c"] + ["t", "z", "y", "x"][
+    ds_segmented.attrs["axis_names"] = ["s", "c"] + ["t", "z", "y", "x"][
         -dataset_meta_data.num_spatial_dims :
     ]
-    ds_postprocessed.attrs["resolution"] = (1,) * dataset_meta_data.num_spatial_dims
-    ds_postprocessed.attrs["offset"] = (0,) * dataset_meta_data.num_spatial_dims
+    ds_segmented.attrs["resolution"] = (1,) * dataset_meta_data.num_spatial_dims
+    ds_segmented.attrs["offset"] = (0,) * dataset_meta_data.num_spatial_dims
 
     # remove halo
     if inference_config.post_processing == "cell":
@@ -50,7 +48,7 @@ def segment(inference_config: InferenceConfig) -> None:
                 expanded_mask = distance_foreground < inference_config.grow_distance
                 distance_background = dtedt(expanded_mask)
                 segmentation[distance_background < inference_config.shrink_distance] = 0
-                ds_postprocessed[sample, bandwidth_factor, ...] = segmentation
+                ds_segmented[sample, bandwidth_factor, ...] = segmentation
     elif inference_config.post_processing == "nucleus":
         ds_raw = f[inference_config.dataset_config.dataset_name]
         for sample in tqdm(range(dataset_meta_data.num_samples)):
@@ -89,7 +87,7 @@ def segment(inference_config: InferenceConfig) -> None:
                         )
                         mask[y_min : y_max + 1, x_min : x_max + 1] = mask_small
                         y, x = np.where(mask)
-                        ds_postprocessed[sample, bandwidth_factor, y, x] = id_
+                        ds_segmented[sample, bandwidth_factor, y, x] = id_
                     elif dataset_meta_data.num_spatial_dims == 3:
                         mask_small = binary_fill_holes(
                             mask[
@@ -100,11 +98,11 @@ def segment(inference_config: InferenceConfig) -> None:
                             z_min : z_max + 1, y_min : y_max + 1, x_min : x_max + 1
                         ] = mask_small
                         z, y, x = np.where(mask)
-                        ds_postprocessed[sample, bandwidth_factor, z, y, x] = id_
+                        ds_segmented[sample, bandwidth_factor, z, y, x] = id_
 
     # size filter - remove small objects
     for sample in tqdm(range(dataset_meta_data.num_samples)):
         for bandwidth_factor in range(inference_config.num_bandwidths):
-            ds_postprocessed[sample, bandwidth_factor, ...] = size_filter(
-                ds_postprocessed[sample, bandwidth_factor], inference_config.min_size
+            ds_segmented[sample, bandwidth_factor, ...] = size_filter(
+                ds_segmented[sample, bandwidth_factor], inference_config.min_size
             )
