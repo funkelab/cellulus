@@ -60,7 +60,7 @@ segmentation_dataset_config = DatasetConfig(
 # should be available in the `models` directory.
 
 torch.hub.download_url_to_file(
-    url="https://github.com/funkelab/cellulus/releases/download/v0.0.1-tag/2d-demo-model.zip",
+    url="https://github.com/funkelab/cellulus/releases/download/v0.0.1-tag/3d-demo-model.zip",
     dst="pretrained_model",
     progress=True,
 )
