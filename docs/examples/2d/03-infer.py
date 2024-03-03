@@ -38,15 +38,15 @@ dataset_config = DatasetConfig(container_path=name + ".zarr", dataset_name=datas
 prediction_dataset_config = DatasetConfig(
     container_path=name + ".zarr", dataset_name="embeddings"
 )
+detection_dataset_config = DatasetConfig(
+    container_path=name + ".zarr",
+    dataset_name="detection",
+    secondary_dataset_name="embeddings",
+)
 segmentation_dataset_config = DatasetConfig(
     container_path=name + ".zarr",
     dataset_name="segmentation",
-    secondary_dataset_name="embeddings",
-)
-post_processed_dataset_config = DatasetConfig(
-    container_path=name + ".zarr",
-    dataset_name="post_processed_segmentation",
-    secondary_dataset_name="segmentation",
+    secondary_dataset_name="detection",
 )
 
 # ## Specify config values for the model
@@ -86,7 +86,7 @@ device = "cuda:0"  # "cuda:0", 'mps', 'cpu'
 
 # We initialize the `inference_config` which contains our
 # `embeddings_dataset_config`, `segmentation_dataset_config` and
-# `post_processed_dataset_config`.
+# `post_processed_dataset_config`.<br>
 # We set post_processing to one of `cell` or `nucleus`, depending on if we
 # would like the cell membrane to be segmented or the nucleus.
 
@@ -95,8 +95,8 @@ post_processing = "nucleus"
 inference_config = InferenceConfig(
     dataset_config=asdict(dataset_config),
     prediction_dataset_config=asdict(prediction_dataset_config),
+    detection_dataset_config=asdict(detection_dataset_config),
     segmentation_dataset_config=asdict(segmentation_dataset_config),
-    post_processed_dataset_config=asdict(post_processed_dataset_config),
     post_processing=post_processing,
     device=device,
 )
@@ -109,7 +109,7 @@ inference_config = InferenceConfig(
 experiment_config = ExperimentConfig(
     inference_config=asdict(inference_config),
     model_config=asdict(model_config),
-    normalization_factor=1.0,
+    normalization_factor=1.0, # since the data was already normalized.
 )
 
 # Now we are ready to start the inference!! <br>
@@ -139,7 +139,7 @@ index = 10
 
 f = zarr.open(name + ".zarr")
 ds = f["train/raw"]
-ds2 = f["centered_embeddings"]
+ds2 = f["centered-embeddings"]
 
 image = ds[index, 0]
 embedding = ds2[index]
@@ -163,8 +163,8 @@ visualize_2d(
 # +
 f = zarr.open(name + ".zarr")
 ds = f["train/raw"]
-ds2 = f["segmentation"]
-ds3 = f["post_processed_segmentation"]
+ds2 = f["detection"]
+ds3 = f["segmentation"]
 
 visualize_2d(
     image,
@@ -172,9 +172,12 @@ visualize_2d(
     bottom_left=ds2[index, 0],
     bottom_right=ds3[index, 0],
     top_right_label="THRESHOLDED F.G.",
-    bottom_left_label="SEGMENTATION",
-    bottom_right_label="POSTPROCESSED",
+    bottom_left_label="DETECTION",
+    bottom_right_label="SEGMENTATION",
     top_right_cmap="gray",
     bottom_left_cmap=new_cmp,
     bottom_right_cmap=new_cmp,
 )
+# -
+
+
