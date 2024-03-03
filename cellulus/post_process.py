@@ -1,6 +1,6 @@
 import numpy as np
 import zarr
-from scipy.ndimage import binary_fill_holes, label
+from scipy.ndimage import binary_fill_holes
 from scipy.ndimage import distance_transform_edt as dtedt
 from skimage.filters import threshold_otsu
 from tqdm import tqdm
@@ -60,40 +60,47 @@ def post_process(inference_config: InferenceConfig) -> None:
                 ids = np.unique(segmentation)
                 ids = ids[ids != 0]
                 for id_ in ids:
-                    raw_image_masked = raw_image[segmentation == id_]
-                    threshold = threshold_otsu(raw_image_masked)
-                    mask = (segmentation == id_) & (raw_image > threshold)
-                    mask = binary_fill_holes(mask)
+                    segmentation_id_mask = segmentation == id_
                     if dataset_meta_data.num_spatial_dims == 2:
+                        y, x = np.where(segmentation_id_mask)
+                        y_min, y_max, x_min, x_max = (
+                            np.min(y),
+                            np.max(y),
+                            np.min(x),
+                            np.max(x),
+                        )
+                    elif dataset_meta_data.num_spatial_dims == 3:
+                        z, y, x = np.where(segmentation_id_mask)
+                        z_min, z_max, y_min, y_max, x_min, x_max = (
+                            np.min(z),
+                            np.max(z),
+                            np.min(y),
+                            np.max(y),
+                            np.min(x),
+                            np.max(x),
+                        )
+                    raw_image_masked = raw_image[segmentation_id_mask]
+                    threshold = threshold_otsu(raw_image_masked)
+                    mask = segmentation_id_mask & (raw_image > threshold)
+
+                    if dataset_meta_data.num_spatial_dims == 2:
+                        mask_small = binary_fill_holes(
+                            mask[y_min : y_max + 1, x_min : x_max + 1]
+                        )
+                        mask[y_min : y_max + 1, x_min : x_max + 1] = mask_small
                         y, x = np.where(mask)
                         ds_postprocessed[sample, bandwidth_factor, y, x] = id_
                     elif dataset_meta_data.num_spatial_dims == 3:
+                        mask_small = binary_fill_holes(
+                            mask[
+                                z_min : z_max + 1, y_min : y_max + 1, x_min : x_max + 1
+                            ]
+                        )
+                        mask[
+                            z_min : z_max + 1, y_min : y_max + 1, x_min : x_max + 1
+                        ] = mask_small
                         z, y, x = np.where(mask)
                         ds_postprocessed[sample, bandwidth_factor, z, y, x] = id_
-
-            # remove non-connected components
-            for bandwidth_factor in range(inference_config.num_bandwidths):
-                ids = np.unique(ds_postprocessed[sample, bandwidth_factor])
-                ids = ids[ids != 0]
-                counter = np.max(ids) + 1
-                for id_ in ids:
-                    ma_id = ds_postprocessed[sample, bandwidth_factor] == id_
-                    array, num_features = label(ma_id)
-                    if num_features > 1:
-                        ids_array = np.unique(array)
-                        ids_array = ids_array[ids_array != 0]
-                        for id_array in ids_array:
-                            if dataset_meta_data.num_spatial_dims == 2:
-                                y, x = np.where(array == id_array)
-                                ds_postprocessed[
-                                    sample, bandwidth_factor, y, x
-                                ] = counter
-                            elif dataset_meta_data.num_spatial_dims == 3:
-                                z, y, x = np.where(array == id_array)
-                                ds_postprocessed[
-                                    sample, bandwidth_factor, z, y, x
-                                ] = counter
-                            counter += 1
 
     # size filter - remove small objects
     for sample in tqdm(range(dataset_meta_data.num_samples)):
