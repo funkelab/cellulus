@@ -15,15 +15,15 @@ def detect(inference_config: InferenceConfig) -> None:
     dataset_config = inference_config.dataset_config
     dataset_meta_data = DatasetMetaData.from_dataset_config(dataset_config)
 
-    f = zarr.open(inference_config.segmentation_dataset_config.container_path)
-    ds = f[inference_config.segmentation_dataset_config.secondary_dataset_name]
+    f = zarr.open(inference_config.detection_dataset_config.container_path)
+    ds = f[inference_config.detection_dataset_config.secondary_dataset_name]
 
-    # prepare the instance segmentation zarr dataset to write to
+    # prepare the zarr dataset to write to
     f_segmentation = zarr.open(
-        inference_config.segmentation_dataset_config.container_path
+        inference_config.detection_dataset_config.container_path
     )
     ds_segmentation = f_segmentation.create_dataset(
-        inference_config.segmentation_dataset_config.dataset_name,
+        inference_config.detection_dataset_config.dataset_name,
         shape=(
             dataset_meta_data.num_samples,
             inference_config.num_bandwidths,
@@ -40,7 +40,7 @@ def detect(inference_config: InferenceConfig) -> None:
 
     # prepare the binary segmentation zarr dataset to write to
     ds_binary_segmentation = f_segmentation.create_dataset(
-        "binary_" + inference_config.segmentation_dataset_config.dataset_name,
+        "binary-segmentation",
         shape=(
             dataset_meta_data.num_samples,
             1,
@@ -59,8 +59,7 @@ def detect(inference_config: InferenceConfig) -> None:
 
     # prepare the object centered embeddings zarr dataset to write to
     ds_object_centered_embeddings = f_segmentation.create_dataset(
-        "centered_"
-        + inference_config.segmentation_dataset_config.secondary_dataset_name,
+        "centered-embeddings",
         shape=(
             dataset_meta_data.num_samples,
             dataset_meta_data.num_spatial_dims + 1,
