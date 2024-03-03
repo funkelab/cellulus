@@ -40,8 +40,11 @@ def extract_data(zip_url, data_dir, project_name):
 
     """
     if not os.path.exists(os.path.join(data_dir, project_name)):
-        os.makedirs(data_dir)
-        print(f"Created new directory {data_dir}")
+        if os.path.isdir(data_dir):
+            pass
+        else:
+            os.makedirs(data_dir)
+            print(f"Created new directory {data_dir}")
 
         with urlopen(zip_url) as zipresp:
             with ZipFile(BytesIO(zipresp.read())) as zfile:
