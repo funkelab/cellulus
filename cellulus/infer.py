@@ -70,10 +70,10 @@ def infer(experiment_config):
     if inference_config.prediction_dataset_config is not None:
         predict(model, inference_config, normalization_factor)
     # ...turn them into a detection ...
-    if inference_config.segmentation_dataset_config is not None:
+    if inference_config.detection_dataset_config is not None:
         detect(inference_config)
     # ...and post-process the detection to obtain an instance segmentation
-    if inference_config.post_processed_dataset_config is not None:
+    if inference_config.segmentation_dataset_config is not None:
         segment(inference_config)
     # ...and evaluate if ground-truth exists
     if inference_config.evaluation_dataset_config is not None:

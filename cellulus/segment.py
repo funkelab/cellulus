@@ -16,15 +16,15 @@ def segment(inference_config: InferenceConfig) -> None:
     dataset_config = inference_config.dataset_config
     dataset_meta_data = DatasetMetaData.from_dataset_config(dataset_config)
 
-    f = zarr.open(inference_config.post_processed_dataset_config.container_path)
-    ds = f[inference_config.post_processed_dataset_config.secondary_dataset_name]
+    f = zarr.open(inference_config.segmentation_dataset_config.container_path)
+    ds = f[inference_config.segmentation_dataset_config.secondary_dataset_name]
 
     # prepare the zarr dataset to write to
     f_postprocessed = zarr.open(
-        inference_config.post_processed_dataset_config.container_path
+        inference_config.segmentation_dataset_config.container_path
     )
     ds_postprocessed = f_postprocessed.create_dataset(
-        inference_config.post_processed_dataset_config.dataset_name,
+        inference_config.segmentation_dataset_config.dataset_name,
         shape=(
             dataset_meta_data.num_samples,
             inference_config.num_bandwidths,
