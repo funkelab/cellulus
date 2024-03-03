@@ -109,7 +109,7 @@ inference_config = InferenceConfig(
 experiment_config = ExperimentConfig(
     inference_config=asdict(inference_config),
     model_config=asdict(model_config),
-    normalization_factor=1.0, # since the data was already normalized.
+    normalization_factor=1.0,  # since the data was already normalized.
 )
 
 # Now we are ready to start the inference!! <br>
@@ -179,5 +179,3 @@ visualize_2d(
     bottom_right_cmap=new_cmp,
 )
 # -
-
-

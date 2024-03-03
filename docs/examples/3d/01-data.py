@@ -3,7 +3,8 @@
 # In this notebook, we will download data and convert it to a zarr dataset. <br>
 
 # For demonstration, we will use one image from the `Platynereis-Nuclei-CBG` dataset
-# provided with [this](https://www.sciencedirect.com/science/article/pii/S1361841522001700)
+# provided
+# with [this](https://www.sciencedirect.com/science/article/pii/S1361841522001700)
 # publication.
 
 # Firstly, the `tif` raw images are downloaded to a directory indicated by `data_dir`.
