@@ -4,9 +4,9 @@ import numpy as np
 import torch
 
 from cellulus.datasets.meta_data import DatasetMetaData
+from cellulus.detect import detect
 from cellulus.evaluate import evaluate
 from cellulus.models import get_model
-from cellulus.post_process import post_process
 from cellulus.predict import predict
 from cellulus.segment import segment
 
@@ -69,12 +69,12 @@ def infer(experiment_config):
     # get predicted embeddings...
     if inference_config.prediction_dataset_config is not None:
         predict(model, inference_config, normalization_factor)
-    # ...turn them into a segmentation...
+    # ...turn them into a detection ...
     if inference_config.segmentation_dataset_config is not None:
-        segment(inference_config)
-    # ...and post-process the segmentation
+        detect(inference_config)
+    # ...and post-process the detection to obtain an instance segmentation
     if inference_config.post_processed_dataset_config is not None:
-        post_process(inference_config)
+        segment(inference_config)
     # ...and evaluate if ground-truth exists
     if inference_config.evaluation_dataset_config is not None:
         evaluate(inference_config)
