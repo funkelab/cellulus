@@ -13,15 +13,16 @@ def size_filter(segmentation, min_size, filter_non_connected=True):
         return segmentation
 
     if filter_non_connected:
-        filter_labels = measure.label(segmentation, background=0)
+        filter_labels = measure.label(segmentation)
     else:
         filter_labels = segmentation
+
     ids, sizes = np.unique(filter_labels, return_counts=True)
     filter_ids = ids[sizes < min_size]
     mask = np.in1d(filter_labels, filter_ids).reshape(filter_labels.shape)
     segmentation[mask] = 0
 
-    return segmentation
+    return measure.label(segmentation)
 
 
 def extract_data(zip_url, data_dir, project_name):
