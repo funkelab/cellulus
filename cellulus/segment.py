@@ -10,7 +10,7 @@ from cellulus.datasets.meta_data import DatasetMetaData
 from cellulus.utils.misc import size_filter
 
 
-def post_process(inference_config: InferenceConfig) -> None:
+def segment(inference_config: InferenceConfig) -> None:
     # filter small objects, erosion, etc.
 
     dataset_config = inference_config.dataset_config
