@@ -25,7 +25,7 @@ from matplotlib.colors import ListedColormap
 # identifies the path to the raw image data, which needs to be segmented.
 
 name = "3d-data-demo"
-dataset_name = "test/raw"
+dataset_name = "train/raw"
 
 # We initialize the `dataset_config` which relates to the raw image data,
 # `prediction_dataset_config` which relates to the per-pixel embeddings and the
@@ -94,8 +94,8 @@ device = "cuda:0"
 
 inference_config = InferenceConfig(
     dataset_config=asdict(dataset_config),
-    # prediction_dataset_config=asdict(prediction_dataset_config),
-    # detection_dataset_config=asdict(detection_dataset_config),
+    prediction_dataset_config=asdict(prediction_dataset_config),
+    detection_dataset_config=asdict(detection_dataset_config),
     segmentation_dataset_config=asdict(segmentation_dataset_config),
     crop_size=[120, 120, 120],
     post_processing="nucleus",
@@ -111,7 +111,7 @@ inference_config = InferenceConfig(
 experiment_config = ExperimentConfig(
     inference_config=asdict(inference_config),
     model_config=asdict(model_config),
-    normalization_factor=1.0,  # since the test image is already normalized
+    normalization_factor=1.0,  # since the image is already normalized
 )
 
 # Now we are ready to start the inference!! <br>
@@ -140,8 +140,8 @@ new_cmp = ListedColormap(np.load("cmap_60.npy"))
 index = 0
 
 f = zarr.open(name + ".zarr")
-ds = f["test/raw"]
-ds2 = f["centered_embeddings"]
+ds = f["train/raw"]
+ds2 = f["centered-embeddings"]
 
 slice = ds.shape[2] // 2
 
@@ -167,7 +167,7 @@ visualize_2d(
 
 # +
 f = zarr.open(name + ".zarr")
-ds = f["test/raw"]
+ds = f["train/raw"]
 ds2 = f["detection"]
 ds3 = f["segmentation"]
 
