@@ -58,7 +58,7 @@ Try out a `2D example` or a `3D example` available under the examples tab **[her
 Using `cellulus` from the terminal window requires specifying a `train.toml` config file and an `infer.toml` config file. <br>
 These files indicate how the training and inference should be performed respectively.
 
-For example, a minimal `train.toml` config file could look as follows:
+For example, a minimal `train.toml` config file would look as follows:
 
 ```toml
 [model_config]
@@ -70,7 +70,7 @@ downsampling_factors = [[2,2],]
 [train_config.train_data_config]
 
 container_path = "skin.zarr" # specify path to zarr dataset containing raw image dataset
-dataset_name="train/raw"
+dataset_name = "train/raw"
 ```
 
 The `train.toml` recipe file can then be used to initiate the model training by running the following line in the terminal window:
@@ -78,7 +78,7 @@ The `train.toml` recipe file can then be used to initiate the model training by 
 train train.toml
 ```
 
-Similarly, a minimal `infer.toml` file could look as follows:
+Similarly, a minimal `infer.toml` file would look as follows:
 
 ```toml
 [model_config]
@@ -90,7 +90,7 @@ checkpoint = "models/best_loss.pth" # path to model weights
 [inference_config.dataset_config]
 
 container_path = "skin.zarr" # path to zarr dataset containing raw image data
-dataset_name="test/raw"
+dataset_name = "test/raw"
 
 [inference_config.prediction_dataset_config]
 
