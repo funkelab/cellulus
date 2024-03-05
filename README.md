@@ -1,7 +1,7 @@
 <h2 align="center">Cellulus</h2>
 
 - **[Introduction](#introduction)**
-- **[Dependencies](#dependencies)**
+- **[Installation](#installation)**
 - **[Getting Started](#getting-started)**
 - **[Citation](#citation)**
 - **[Issues](#issues)**
@@ -12,7 +12,7 @@ This repository hosts the version of the code used for the **[preprint](https://
 
 We refer to the proposed techniques described in the preprint as **Cellulus** - Cellulus is a deep learning based method which can be used to obtain instance-segmentation of objects in 2D or 3D microscopy images in an unsupervised fashion i.e. requiring no ground truth labels during training.
 
-### Dependencies
+### Installation
 
 One could execute these lines of code below to create a new environment and install dependencies.
 
@@ -49,11 +49,11 @@ pip install git+https://github.com/funkelab/cellulus.git
 
 ### Getting Started
 
-#### Jupyter Notebooks
+#### With Jupyter Notebooks
 
 Try out a `2D example` or a `3D example` available under the examples tab **[here](https://funkelab.github.io/cellulus)**.
 
-#### Terminal
+#### From the terminal
 
 Using `cellulus` from the terminal window requires specifying a `train.toml` config file and an `infer.toml` config file. <br>
 These files indicate how the training and inference should be performed respectively.
@@ -69,7 +69,7 @@ downsampling_factors = [[2,2],]
 
 [train_config.train_data_config]
 
-container_path = "skin.zarr" # specify path to zarr dataset containing raw image dataset
+container_path = "skin.zarr" # specify path to zarr container, containing raw image dataset
 dataset_name = "train/raw"
 ```
 
@@ -89,7 +89,7 @@ checkpoint = "models/best_loss.pth" # path to model weights
 
 [inference_config.dataset_config]
 
-container_path = "skin.zarr" # path to zarr dataset containing raw image data
+container_path = "skin.zarr" # specify path to zarr container, containing raw image dataset
 dataset_name = "test/raw"
 
 [inference_config.prediction_dataset_config]
