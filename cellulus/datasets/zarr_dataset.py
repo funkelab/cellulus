@@ -185,8 +185,11 @@ class ZarrDataset(IterableDataset):  # type: ignore
             offsets_z = np.random.randint(-radius, radius + 1, size=3 * number_offsets)
             offsets_coordinates = np.stack((offsets_x, offsets_y, offsets_z), axis=1)
 
-        in_circle = (offsets_coordinates**2).sum(axis=1) < radius**2
-        offsets_coordinates = offsets_coordinates[in_circle]
+        in_circle = (offsets_coordinates**2).sum(axis=1) < radius**2  #
+        offsets_coordinates = offsets_coordinates[
+            in_circle
+        ]  # subset of original offsets
+        # ignore any offsets which are exactly array([0]*d)
         not_zero = np.absolute(offsets_coordinates).sum(axis=1) > 0
         offsets_coordinates = offsets_coordinates[not_zero]
 
@@ -197,7 +200,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
 
     def sample_coordinates(self):
         num_anchors = self.get_num_anchors()
-        num_references = self.get_num_references()
+        num_references_per_anchor = self.get_num_references_per_anchor()
 
         if self.num_spatial_dims == 2:
             anchor_coordinates_x = np.random.randint(
@@ -233,19 +236,29 @@ class ZarrDataset(IterableDataset):  # type: ignore
                 (anchor_coordinates_x, anchor_coordinates_y, anchor_coordinates_z),
                 axis=1,
             )
-        anchor_samples = np.repeat(anchor_coordinates, num_references, axis=0)
-        offset_in_pos_radius = self.sample_offsets_within_radius(
-            self.kappa, len(anchor_samples)
+        anchor_coordinates = np.repeat(
+            anchor_coordinates, num_references_per_anchor, axis=0
         )
-        reference_samples = anchor_samples + offset_in_pos_radius
+        offsets = self.sample_offsets_within_radius(
+            radius=self.kappa, number_offsets=len(anchor_coordinates)
+        )
+        reference_coordinates = anchor_coordinates + offsets
 
-        return anchor_samples, reference_samples
+        return anchor_coordinates, reference_coordinates
 
     def get_num_anchors(self):
-        return int(self.density * self.unbiased_shape[0] * self.unbiased_shape[1])
+        if self.num_spatial_dims == 2:
+            return int(self.density * self.unbiased_shape[0] * self.unbiased_shape[1])
+        elif self.num_spatial_dims == 3:
+            return int(
+                self.density
+                * self.unbiased_shape[0]
+                * self.unbiased_shape[1]
+                * self.unbiased_shape[2]
+            )
 
-    def get_num_references(self):
-        return int(self.density * self.kappa**2 * np.pi)
-
-    def get_num_samples(self):
-        return self.get_num_anchors() * self.get_num_references()
+    def get_num_references_per_anchor(self):
+        if self.num_spatial_dims == 2:
+            return int(self.density * np.pi * self.kappa**2)
+        elif self.num_spatial_dims == 3:
+            return int(self.density * 4 / 3 * np.pi * self.kappa**3)
