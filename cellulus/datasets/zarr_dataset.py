@@ -21,6 +21,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
         density: float,
         kappa: float,
         normalization_factor: float,
+        z_anisotropy_factor: float,
     ):
         """A dataset that serves random samples from a zarr container.
 
@@ -74,16 +75,32 @@ class ZarrDataset(IterableDataset):  # type: ignore
                 The factor to use, for dividing the raw image pixel intensities.
                 If 'None', a factor is chosen based on the dtype of the array .
                 (e.g., np.uint8 would result in a factor of 1.0/255).
+
+            z_anisotropy_factor:
+
+                In case, the raw image dataset is 3D, the `z_anisotropy_factor`
+                equals the ratio of voxel size in world units along the z
+                dimension to the voxel size in world units along the x or y
+                dimension.
+                For example, if the voxel sizes (z,y,x) are (2.031 microns, 0.406
+                microns, 0.406 microns), then the z_anisotropy_factor equals
+                `2.031/0.406`.
         """
 
         self.dataset_config = dataset_config
-        self.crop_size = crop_size
         self.elastic_deform = elastic_deform
         self.control_point_spacing = control_point_spacing
         self.control_point_jitter = control_point_jitter
         self.normalization_factor = normalization_factor
+        self.z_anisotropy_factor = z_anisotropy_factor
         self.__read_meta_data()
-
+        self.crop_size = crop_size
+        if self.num_spatial_dims == 3 and self.z_anisotropy_factor is not None:
+            self.crop_size = (
+                crop_size[0] * int(self.z_anisotropy_factor),
+                crop_size[1],
+                crop_size[2],
+            )
         assert len(crop_size) == self.num_spatial_dims, (
             f'"crop_size" must have the same dimension as the '
             f'spatial(temporal) dimensions of the "{self.dataset_config.dataset_name}" '
@@ -103,9 +120,18 @@ class ZarrDataset(IterableDataset):  # type: ignore
 
     def __setup_pipeline(self):
         self.raw = gp.ArrayKey("RAW")
+        self.raw_upsampled = gp.ArrayKey("RAW_UPSAMPLED")
 
         # treat all dimensions as spatial, with a voxel size of 1
-        raw_spec = gp.ArraySpec(voxel_size=(1,) * self.num_dims, interpolatable=True)
+        if self.num_spatial_dims == 3 and self.z_anisotropy_factor is not None:
+            raw_spec = gp.ArraySpec(
+                voxel_size=(1,) * 2 + (int(self.z_anisotropy_factor),) + (1,) * 2,
+                interpolatable=True,
+            )
+        else:
+            raw_spec = gp.ArraySpec(
+                voxel_size=(1,) * self.num_dims, interpolatable=True
+            )
 
         # spatial_dims = tuple(range(self.num_dims - self.num_spatial_dims,
         # self.num_dims))
@@ -118,6 +144,13 @@ class ZarrDataset(IterableDataset):  # type: ignore
             )
             + gp.RandomLocation()
             + gp.Normalize(self.raw, factor=self.normalization_factor)
+            + gp.UpSample(
+                self.raw,
+                factor=gp.Coordinate(
+                    (1,) * 2 + (int(self.z_anisotropy_factor),) + (1,) * 2
+                ),
+                target=self.raw_upsampled,
+            )
         )
 
         if self.elastic_deform:
@@ -141,7 +174,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
                 # request one sample, all channels, plus crop dimensions
                 while array_is_zero:
                     request = gp.BatchRequest()
-                    request[self.raw] = gp.ArraySpec(
+                    request[self.raw_upsampled] = gp.ArraySpec(
                         roi=gp.Roi(
                             (0,) * self.num_dims,
                             (1, self.num_channels, *self.crop_size),
@@ -149,7 +182,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
                     )
 
                     sample = self.pipeline.request_batch(request)
-                    sample_data = sample[self.raw].data[0]
+                    sample_data = sample[self.raw_upsampled].data[0]
                     if np.max(sample_data) <= 0.0:
                         pass
                     else:
