@@ -70,7 +70,7 @@ class InferenceConfig:
         clustering (default = 'meanshift'):
 
             How to cluster the embeddings?
-            Can be one of 'meanshift' or 'greedy'.
+            Can be one of 'meanshift', 'watershed' or 'greedy'.
 
         use_seeds (default = False):
 
@@ -143,7 +143,7 @@ class InferenceConfig:
         default=None, validator=attrs.validators.optional(instance_of(float))
     )
     clustering = attrs.field(
-        default="meanshift", validator=in_(["meanshift", "greedy"])
+        default="meanshift", validator=in_(["meanshift", "watershed", "greedy"])
     )
     use_seeds = attrs.field(default=False, validator=instance_of(bool))
     bandwidth = attrs.field(
