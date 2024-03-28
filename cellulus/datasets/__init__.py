@@ -14,6 +14,7 @@ def get_dataset(
     density: float,
     kappa: int,
     normalization_factor: float,
+    z_anisotropy_factor: float,
 ) -> ZarrDataset:
     return ZarrDataset(
         dataset_config=dataset_config,
@@ -24,4 +25,5 @@ def get_dataset(
         density=density,
         kappa=kappa,
         normalization_factor=normalization_factor,
+        z_anisotropy_factor=z_anisotropy_factor,
     )

@@ -32,6 +32,7 @@ def train(experiment_config):
         density=train_config.density,
         kappa=train_config.kappa,
         normalization_factor=experiment_config.normalization_factor,
+        z_anisotropy_factor=experiment_config.z_anisotropy_factor,
     )
 
     # create train dataloader

@@ -32,6 +32,14 @@ class ExperimentConfig:
             If 'None', a factor is chosen based on the dtype of the array .
             (e.g., np.uint8 would result in a factor of 1.0/255).
 
+        z_anisotropy_factor: (default = None)
+
+            In case, the raw image dataset is 3D, the `z_anisotropy_factor`
+            equals the ratio of voxel size in world units along the z dimension to the
+            voxel size in world units along the x or y dimension.
+            For example, if the voxel sizes (z,y,x) are (2.031 microns, 0.406 microns,
+            0.406 microns), then the z_anisotropy_factor equals `2.031/0.406`.
+
         model_config:
 
             Configuration object for the model.
@@ -50,6 +58,9 @@ class ExperimentConfig:
         default=datetime.today().strftime("%Y-%m-%d"), validator=instance_of(str)
     )
     normalization_factor: float = attrs.field(
+        default=None, validator=attrs.validators.optional(instance_of(float))
+    )
+    z_anisotropy_factor: float = attrs.field(
         default=None, validator=attrs.validators.optional(instance_of(float))
     )
     object_size: int = attrs.field(default=30, validator=instance_of(int))
