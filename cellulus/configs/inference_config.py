@@ -94,13 +94,13 @@ class InferenceConfig:
 
             Objects below `min_size` pixels will be removed.
 
-        post_processing (default= 'morphological'):
+        post_processing (default= 'cell'):
 
-            Can be one of 'morphological' or 'intensity' operations.
-            If 'morphological', the individual detections grow and shrink by
+            Can be one of 'cell' or 'nucleus' operations.
+            If 'cell', the individual detections grow and shrink by
             'grow_distance' and 'shrink_distance' number of pixels.
 
-            If 'intensity', each detection is partitioned based on a binary intensity
+            If 'nucleus', each detection is partitioned based on a binary intensity
             threshold calculated automatically from the raw image data.
             By default, the channel `0` in the raw image is used for
             intensity thresholding.
@@ -112,7 +112,7 @@ class InferenceConfig:
         shrink_distance (default = 6):
 
             Only used if post_processing (see above) is equal to
-            'morphological'.
+            'cell'.
 
     """
 
