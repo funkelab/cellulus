@@ -63,7 +63,7 @@ def detect(inference_config: InferenceConfig) -> None:
             dataset_meta_data.num_spatial_dims + 1,
             *dataset_meta_data.spatial_array,
         ),
-        dtype=float,
+        dtype=np.float32,
     )
 
     ds_object_centered_embeddings.attrs["axis_names"] = ["s", "c"] + [
