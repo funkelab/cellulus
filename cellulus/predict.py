@@ -11,6 +11,7 @@ def predict(
     model: torch.nn.Module,
     inference_config: InferenceConfig,
     normalization_factor: float,
+    z_anisotropy_factor: float,
 ) -> None:
     # get the dataset_config data out of inference_config
     dataset_config = inference_config.dataset_config
@@ -41,6 +42,10 @@ def predict(
 
     # treat all dimensions as spatial, with a voxel size of 1
     voxel_size = (1,) * dataset_meta_data.num_dims
+    upsample_factor = gp.Coordinate(voxel_size)
+    if dataset_meta_data.num_spatial_dims == 3 and z_anisotropy_factor is not None:
+        voxel_size = (1,) * 2 + (int(z_anisotropy_factor),) + (1,) * 2
+        upsample_factor = gp.Coordinate(voxel_size)
     raw_spec = gp.ArraySpec(voxel_size=voxel_size, interpolatable=True)
 
     input_size = gp.Coordinate(input_shape) * gp.Coordinate(voxel_size)
@@ -59,6 +64,7 @@ def predict(
         )  # type: ignore
 
     raw = gp.ArrayKey("RAW")
+    raw_upsampled = gp.ArraySpec("RAW_UPSAMPLED")
     prediction = gp.ArrayKey("PREDICT")
 
     scan_request = gp.BatchRequest()
@@ -95,19 +101,27 @@ def predict(
 
     predict = gp.torch.Predict(
         model,
-        inputs={"raw": raw},
+        inputs={"raw": raw_upsampled},
         outputs={0: prediction},
         array_specs={prediction: raw_spec},
     )
 
     # prepare the zarr dataset to write to
     f = zarr.open(inference_config.prediction_dataset_config.container_path)
+
+    spatial_array_shape = dataset_meta_data.spatial_array
+    if dataset_meta_data.num_spatial_dims == 3 and z_anisotropy_factor is not None:
+        spatial_array_shape = (
+            int(z_anisotropy_factor) * dataset_meta_data.spatial_array[0],
+            dataset_meta_data.spatial_array[1],
+            dataset_meta_data.spatial_array[2],
+        )
     ds = f.create_dataset(
         inference_config.prediction_dataset_config.dataset_name,
         shape=(
             dataset_meta_data.num_samples,
             dataset_meta_data.num_spatial_dims + 1,
-            *dataset_meta_data.spatial_array,
+            *spatial_array_shape,
         ),
         dtype=np.float32,
     )
@@ -120,6 +134,7 @@ def predict(
         )
         + gp.Normalize(raw, factor=normalization_factor)
         + gp.Pad(raw, context, mode="reflect")
+        + gp.Upsample(raw, upsample_factor, raw_upsampled)
         + predict
         + gp.ZarrWrite(
             dataset_names={
