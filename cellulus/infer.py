@@ -68,7 +68,12 @@ def infer(experiment_config):
 
     # get predicted embeddings...
     if inference_config.prediction_dataset_config is not None:
-        predict(model, inference_config, normalization_factor)
+        predict(
+            model,
+            inference_config,
+            normalization_factor,
+            experiment_config.z_anisotropy_factor,
+        )
     # ...turn them into a detection ...
     if inference_config.detection_dataset_config is not None:
         detect(inference_config)
