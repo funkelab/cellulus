@@ -87,7 +87,6 @@ def train(experiment_config):
 
     # resume training
     start_iteration = 0
-    lowest_loss = 1e6
     epoch_loss = 0
     num_iterations = 0
     if model_config.checkpoint is None:
@@ -120,6 +119,8 @@ def train(experiment_config):
         # Check if lowest loss
         epoch_loss += loss
         num_iterations += 1
+        if iteration == 0:
+            lowest_loss = epoch_loss / (num_iterations)
         if iteration % train_config.save_best_model_every == 0:
             is_lowest = epoch_loss / (num_iterations) < lowest_loss
             lowest_loss = min(epoch_loss / num_iterations, lowest_loss)
