@@ -128,11 +128,14 @@ class ZarrDataset(IterableDataset):  # type: ignore
                 voxel_size=(1,) * 2 + (int(self.z_anisotropy_factor),) + (1,) * 2,
                 interpolatable=True,
             )
+            upsample_factor = gp.Coordinate(
+                (1,) * 2 + (int(self.z_anisotropy_factor),) + (1,) * 2
+            )
         else:
             raw_spec = gp.ArraySpec(
                 voxel_size=(1,) * self.num_dims, interpolatable=True
             )
-
+            upsample_factor = gp.Coordinate((1,) * self.num_dims)
         # spatial_dims = tuple(range(self.num_dims - self.num_spatial_dims,
         # self.num_dims))
 
@@ -146,9 +149,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
             + gp.Normalize(self.raw, factor=self.normalization_factor)
             + gp.UpSample(
                 self.raw,
-                factor=gp.Coordinate(
-                    (1,) * 2 + (int(self.z_anisotropy_factor),) + (1,) * 2
-                ),
+                factor=upsample_factor,
                 target=self.raw_upsampled,
             )
         )
