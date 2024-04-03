@@ -42,10 +42,10 @@ def predict(
 
     # treat all dimensions as spatial, with a voxel size of 1
     voxel_size = (1,) * dataset_meta_data.num_dims
-    upsample_factor = gp.Coordinate(voxel_size)
+    gp.Coordinate(voxel_size)
     if dataset_meta_data.num_spatial_dims == 3 and z_anisotropy_factor is not None:
         voxel_size = (1,) * 2 + (int(z_anisotropy_factor),) + (1,) * 2
-        upsample_factor = gp.Coordinate(voxel_size)
+        gp.Coordinate(voxel_size)
     raw_spec = gp.ArraySpec(voxel_size=voxel_size, interpolatable=True)
 
     input_size = gp.Coordinate(input_shape) * gp.Coordinate(voxel_size)
@@ -64,7 +64,7 @@ def predict(
         )  # type: ignore
 
     raw = gp.ArrayKey("RAW")
-    raw_upsampled = gp.ArraySpec("RAW_UPSAMPLED")
+    # raw_upsampled = gp.ArrayKey("RAW_UPSAMPLED")
     prediction = gp.ArrayKey("PREDICT")
 
     scan_request = gp.BatchRequest()
@@ -101,7 +101,7 @@ def predict(
 
     predict = gp.torch.Predict(
         model,
-        inputs={"raw": raw_upsampled},
+        inputs={"raw": raw},
         outputs={0: prediction},
         array_specs={prediction: raw_spec},
     )
@@ -134,7 +134,7 @@ def predict(
         )
         + gp.Normalize(raw, factor=normalization_factor)
         + gp.Pad(raw, context, mode="reflect")
-        + gp.Upsample(raw, upsample_factor, raw_upsampled)
+        # + gp.UpSample(raw, upsample_factor, raw_upsampled)
         + predict
         + gp.ZarrWrite(
             dataset_names={
